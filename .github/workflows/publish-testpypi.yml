@@ -1,0 +1,151 @@
+# Build graphics-cmod wheels (Linux + Windows + Android) with cibuildwheel and upload to TestPyPI.
+#
+# Release trigger: push an annotated semver tag vX.Y.Z (see scripts/publish_release_tag.sh),
+# or workflow_dispatch.
+#
+# Required repository secret (PyDevices org or repo):
+#   TESTPYPI_API_TOKEN — TestPyPI API token (same as PyDevices/pydisplay)
+#
+# Install from TestPyPI (wheels are platform-specific):
+#   pip install -i https://test.pypi.org/simple/ graphics-cmod
+
+name: Publish TestPyPI
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver X.Y.Z (required unless the checked-out ref is a vX.Y.Z tag)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/graphics'
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          normalize() {
+            local v="${1#v}"
+            v="$(echo "$v" | tr -d '[:space:]')"
+            if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid semver: $1 (expected X.Y.Z)" >&2
+              exit 1
+            fi
+            echo "$v"
+          }
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION="$(normalize "${GITHUB_REF_NAME}")"
+          elif [[ -n "${INPUT_VERSION:-}" ]]; then
+            VERSION="$(normalize "$INPUT_VERSION")"
+          else
+            TAG="$(git describe --tags --exact-match 2>/dev/null || true)"
+            if [[ -z "$TAG" ]]; then
+              echo "Set the version input or run this workflow from a vX.Y.Z tag." >&2
+              exit 1
+            fi
+            VERSION="$(normalize "$TAG")"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing graphics-cmod release $VERSION"
+
+  build-wheels:
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    if: github.repository == 'PyDevices/graphics'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write VERSION file
+        shell: bash
+        run: echo "${{ needs.prepare.outputs.version }}" > VERSION
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v4.1.0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+
+  build-android-wheels:
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/graphics'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Write VERSION file
+        shell: bash
+        run: echo "${{ needs.prepare.outputs.version }}" > VERSION
+
+      - name: Build Android wheels
+        uses: pypa/cibuildwheel@v4.1.0
+        env:
+          CIBW_PLATFORM: android
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-android
+          path: wheelhouse/*.whl
+
+  publish:
+    needs: [prepare, build-wheels, build-android-wheels]
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/graphics'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-wheels-*
+          merge-multiple: true
+          path: dist
+
+      - name: List wheels
+        run: ls -la dist/
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Upload to TestPyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TESTPYPI_API_TOKEN }}
+        run: |
+          python -m pip install twine
+          twine upload --repository testpypi --verbose dist/*
