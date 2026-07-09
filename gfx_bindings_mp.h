@@ -6,6 +6,7 @@
 #define GFX_BINDINGS_MP_H
 
 #include "py/obj.h"
+#include "gfx_bmp565.h"
 
 typedef struct _mp_obj_framebuf_t {
     mp_obj_base_t base;
@@ -20,5 +21,11 @@ extern const mp_obj_type_t mp_type_framebuf;
 extern const mp_obj_type_t mp_type_draw;
 extern const mp_obj_type_t mp_type_font;
 extern const mp_obj_type_t mp_type_bmp565;
+
+typedef struct _mp_obj_bmp565_t {
+    mp_obj_base_t base;
+    gfx_bmp565_t bmp;
+    mp_obj_t buf_obj;
+} mp_obj_bmp565_t;
 
 #endif

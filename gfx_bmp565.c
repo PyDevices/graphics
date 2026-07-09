@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "gfx_bmp565.h"
 
 #include <stdio.h>
@@ -122,6 +125,10 @@ int gfx_bmp565_load_from_file(const char *path, gfx_bmp565_t *out) {
     out->width = width;
     out->height = height;
     out->owns_buffer = 1;
+    out->streamed = 0;
+    out->mirrored = 0;
+    out->data_offset = 0;
+    out->file = NULL;
     return 0;
 }
 
@@ -131,16 +138,102 @@ int gfx_bmp565_init_from_buffer(gfx_bmp565_t *out, const uint8_t *buf, size_t le
     out->width = width;
     out->height = height;
     out->owns_buffer = 0;
+    out->streamed = 0;
+    out->mirrored = 0;
+    out->data_offset = 0;
+    out->file = NULL;
     return 0;
 }
 
 void gfx_bmp565_deinit(gfx_bmp565_t *bmp) {
+    if (bmp->file) {
+        fclose(bmp->file);
+        bmp->file = NULL;
+    }
     if (bmp->owns_buffer && bmp->buffer) {
         free(bmp->buffer);
     }
     bmp->buffer = NULL;
     bmp->buffer_len = 0;
     bmp->owns_buffer = 0;
+    bmp->streamed = 0;
+    bmp->mirrored = 0;
+    bmp->data_offset = 0;
+}
+
+static int bmp565_read_range_stream(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out) {
+    int length = stop - start;
+    int start_row = start / bmp->width;
+    int start_col = start % bmp->width;
+    int begin = (bmp->height - start_row - 1) * bmp->width + start_col;
+    if (fseek(bmp->file, (long)bmp->data_offset + (long)begin * GFX_BMP565_BYTES_PER_PIXEL, SEEK_SET) != 0) {
+        return -1;
+    }
+    if (!bmp->mirrored) {
+        return fread(out, 1, (size_t)length * GFX_BMP565_BYTES_PER_PIXEL, bmp->file)
+            == (size_t)length * GFX_BMP565_BYTES_PER_PIXEL ? 0 : -1;
+    }
+    for (int i = 0; i < length; i++) {
+        if (fread(out + (size_t)i * GFX_BMP565_BYTES_PER_PIXEL, 1, GFX_BMP565_BYTES_PER_PIXEL, bmp->file)
+            != GFX_BMP565_BYTES_PER_PIXEL) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+int gfx_bmp565_read_bytes(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out, size_t out_cap, size_t *out_len) {
+    size_t need = (size_t)(stop - start) * GFX_BMP565_BYTES_PER_PIXEL;
+    if (need > out_cap) {
+        return -1;
+    }
+    if (!bmp->streamed) {
+        if (!bmp->buffer || (size_t)stop * GFX_BMP565_BYTES_PER_PIXEL > bmp->buffer_len) {
+            return -1;
+        }
+        memcpy(out, bmp->buffer + (size_t)start * GFX_BMP565_BYTES_PER_PIXEL, need);
+        *out_len = need;
+        return 0;
+    }
+    if (bmp565_read_range_stream(bmp, start, stop, out) < 0) {
+        return -1;
+    }
+    *out_len = need;
+    return 0;
+}
+
+int gfx_bmp565_read_region(const gfx_bmp565_t *bmp, int x0, int x1, int y0, int y1, uint8_t *out, size_t out_cap, size_t *out_len) {
+    size_t total = 0;
+    for (int row = y0; row < y1; row++) {
+        int start = row * bmp->width + x0;
+        int stop = row * bmp->width + x1;
+        size_t chunk = 0;
+        if (gfx_bmp565_read_bytes(bmp, start, stop, out + total, out_cap - total, &chunk) < 0) {
+            return -1;
+        }
+        total += chunk;
+    }
+    *out_len = total;
+    return 0;
+}
+
+int gfx_bmp565_open_stream(const char *path, gfx_bmp565_t *out) {
+    memset(out, 0, sizeof(*out));
+    int width, height;
+    unsigned int data_offset;
+    if (gfx_bmp565_read_header_from_file(path, &width, &height, &data_offset) < 0) {
+        return -1;
+    }
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        return -1;
+    }
+    out->width = width;
+    out->height = height;
+    out->data_offset = data_offset;
+    out->streamed = 1;
+    out->file = f;
+    return 0;
 }
 
 int gfx_bmp565_save(const gfx_bmp565_t *bmp, const char *path) {
