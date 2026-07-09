@@ -15,17 +15,11 @@
 #include "gfx_font.h"
 #include "gfx_capabilities.h"
 #include "gfx_area_mp.h"
+#include "gfx_bindings_mp.h"
 
-typedef struct _mp_obj_framebuf_t {
-    mp_obj_base_t base;
-    mp_obj_t buf_obj;
-    gfx_fb_t fb;
-    gfx_canvas_t canvas;
-} mp_obj_framebuf_t;
+const mp_obj_type_t mp_type_framebuf;
 
-static const mp_obj_type_t mp_type_framebuf;
-
-static mp_obj_t framebuf_make_new_helper(size_t n_args, const mp_obj_t *args_in, unsigned int buf_flags, mp_obj_framebuf_t *o) {
+mp_obj_t framebuf_make_new_helper(size_t n_args, const mp_obj_t *args_in, unsigned int buf_flags, mp_obj_framebuf_t *o) {
     mp_int_t width = mp_obj_get_int(args_in[1]);
     mp_int_t height = mp_obj_get_int(args_in[2]);
     mp_int_t format = mp_obj_get_int(args_in[3]);
@@ -212,29 +206,38 @@ static mp_obj_t framebuf_text(size_t n_args, const mp_obj_t *args_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_text_obj, 4, 5, framebuf_text);
 
-static mp_obj_t mod_framebuf_backend(void) {
-    return mp_obj_new_str(gfx_framebuf_backend(), strlen(gfx_framebuf_backend()));
+static mp_obj_t framebuf_scroll(mp_obj_t self_in, mp_obj_t xstep_in, mp_obj_t ystep_in) {
+    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(self_in);
+    gfx_fb_scroll(&self->fb, mp_obj_get_int(xstep_in), mp_obj_get_int(ystep_in));
+    return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_0(mod_framebuf_backend_obj, mod_framebuf_backend);
+static MP_DEFINE_CONST_FUN_OBJ_3(framebuf_scroll_obj, framebuf_scroll);
 
-static mp_obj_t mod_implementation(void) {
-    return mp_obj_new_str(gfx_implementation(), strlen(gfx_implementation()));
-}
-static MP_DEFINE_CONST_FUN_OBJ_0(mod_implementation_obj, mod_implementation);
-
-static mp_obj_t mod_capabilities(void) {
-    mp_obj_t caps = mp_obj_new_dict(0);
-    mp_obj_dict_store(caps, MP_OBJ_NEW_QSTR(MP_QSTR_implementation), mod_implementation());
-    mp_obj_dict_store(caps, MP_OBJ_NEW_QSTR(MP_QSTR_framebuf), mod_framebuf_backend());
-    mp_obj_t formats = mp_obj_new_list(0, NULL);
-    const char *names[] = {"MONO_VLSB", "MONO_HLSB", "MONO_HMSB", "RGB565", "GS2_HMSB", "GS4_HMSB", "GS8", "RGB888"};
-    for (int i = 0; i < 8; i++) {
-        mp_obj_list_append(formats, mp_obj_new_str(names[i], strlen(names[i])));
+static void framebuf_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(self_in);
+    if (dest[0] == MP_OBJ_NULL) {
+        switch (attr) {
+            case MP_QSTR_buffer:
+                dest[0] = self->buf_obj;
+                break;
+            case MP_QSTR_width:
+                dest[0] = mp_obj_new_int(self->fb.width);
+                break;
+            case MP_QSTR_height:
+                dest[0] = mp_obj_new_int(self->fb.height);
+                break;
+            case MP_QSTR_format:
+                dest[0] = mp_obj_new_int(self->fb.format);
+                break;
+            case MP_QSTR_color_depth:
+                dest[0] = mp_obj_new_int(gfx_fb_color_depth(self->fb.format));
+                break;
+            default:
+                dest[1] = MP_OBJ_SENTINEL;
+                break;
+        }
     }
-    mp_obj_dict_store(caps, MP_OBJ_NEW_QSTR(MP_QSTR_formats), formats);
-    return caps;
 }
-static MP_DEFINE_CONST_FUN_OBJ_0(mod_capabilities_obj, mod_capabilities);
 
 static const mp_rom_map_elem_t framebuf_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&framebuf_fill_obj) },
@@ -250,42 +253,16 @@ static const mp_rom_map_elem_t framebuf_locals_dict_table[] = {
 #endif
     { MP_ROM_QSTR(MP_QSTR_blit), MP_ROM_PTR(&framebuf_blit_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&framebuf_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_scroll), MP_ROM_PTR(&framebuf_scroll_obj) },
 };
 static MP_DEFINE_CONST_DICT(framebuf_locals_dict, framebuf_locals_dict_table);
 
-static MP_DEFINE_CONST_OBJ_TYPE(
+MP_DEFINE_CONST_OBJ_TYPE(
     mp_type_framebuf,
     MP_QSTR_FrameBuffer,
     MP_TYPE_FLAG_NONE,
     make_new, framebuf_make_new,
+    attr, framebuf_attr,
     buffer, framebuf_get_buffer,
     locals_dict, &framebuf_locals_dict
 );
-
-static const mp_rom_map_elem_t graphics_module_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_graphics) },
-    { MP_ROM_QSTR(MP_QSTR_FrameBuffer), MP_ROM_PTR(&mp_type_framebuf) },
-    { MP_ROM_QSTR(MP_QSTR_Area), MP_ROM_PTR(&mp_type_area) },
-    { MP_ROM_QSTR(MP_QSTR_MONO_VLSB), MP_ROM_INT(GFX_MVLSB) },
-    { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_INT(GFX_RGB565) },
-    { MP_ROM_QSTR(MP_QSTR_GS2_HMSB), MP_ROM_INT(GFX_GS2_HMSB) },
-    { MP_ROM_QSTR(MP_QSTR_GS4_HMSB), MP_ROM_INT(GFX_GS4_HMSB) },
-    { MP_ROM_QSTR(MP_QSTR_GS8), MP_ROM_INT(GFX_GS8) },
-    { MP_ROM_QSTR(MP_QSTR_MONO_HLSB), MP_ROM_INT(GFX_MHLSB) },
-    { MP_ROM_QSTR(MP_QSTR_MONO_HMSB), MP_ROM_INT(GFX_MHMSB) },
-    { MP_ROM_QSTR(MP_QSTR_RGB888), MP_ROM_INT(GFX_RGB888) },
-    { MP_ROM_QSTR(MP_QSTR_framebuf_backend), MP_ROM_PTR(&mod_framebuf_backend_obj) },
-    { MP_ROM_QSTR(MP_QSTR_implementation), MP_ROM_PTR(&mod_implementation_obj) },
-    { MP_ROM_QSTR(MP_QSTR_capabilities), MP_ROM_PTR(&mod_capabilities_obj) },
-};
-
-static MP_DEFINE_CONST_DICT(graphics_module_globals, graphics_module_globals_table);
-
-const mp_obj_module_t mp_module_graphics = {
-    .base = { &mp_type_module },
-    .globals = (mp_obj_dict_t *)&graphics_module_globals,
-};
-
-#if !CIRCUITPY
-MP_REGISTER_MODULE(MP_QSTR_graphics, mp_module_graphics);
-#endif

@@ -5,32 +5,125 @@
 
 #include "gfx_font.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "font_petme128_8x8.h"
+#include "font_8x14.h"
+#include "font_8x16.h"
 
-gfx_area_t gfx_font_text8(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col) {
-    int start_x = x0;
-    int max_x = x0;
-    int max_y = y0 + 7;
+static gfx_font_t default_font8;
+static gfx_font_t default_font14;
+static gfx_font_t default_font16;
+static int defaults_ready;
 
-    for (; *str; ++str) {
-        int chr = (unsigned char)*str;
-        if (chr < 32 || chr > 127) {
-            chr = 127;
+static void ensure_defaults(void) {
+    if (defaults_ready) {
+        return;
+    }
+    gfx_font_init_from_data(&default_font8, font_petme128_8x8, sizeof(font_petme128_8x8), 8);
+    gfx_font_init_from_data(&default_font14, font_8x14, FONT_8X14_LEN, 14);
+    gfx_font_init_from_data(&default_font16, font_8x16, FONT_8X16_LEN, 16);
+    defaults_ready = 1;
+}
+
+void gfx_font_init_default(gfx_font_t *font, int height) {
+    ensure_defaults();
+    if (height == 14) {
+        *font = default_font14;
+    } else if (height == 16) {
+        *font = default_font16;
+    } else {
+        *font = default_font8;
+    }
+}
+
+void gfx_font_init_from_data(gfx_font_t *font, const uint8_t *data, size_t len, int height) {
+    font->data = data;
+    font->data_len = len;
+    font->height = height;
+    font->width = 8;
+    font->owns_data = 0;
+}
+
+void gfx_font_deinit(gfx_font_t *font) {
+    if (font->owns_data && font->data) {
+        free((void *)font->data);
+    }
+    font->data = NULL;
+    font->data_len = 0;
+    font->owns_data = 0;
+}
+
+static uint8_t font_read_line(const gfx_font_t *font, unsigned char ch, int line) {
+    if (!font->data || line < 0 || line >= font->height) {
+        return 0;
+    }
+    size_t offset = (size_t)ch * (size_t)font->height + (size_t)line;
+    if (offset >= font->data_len) {
+        return 0;
+    }
+    return font->data[offset];
+}
+
+static gfx_area_t draw_char(const gfx_canvas_t *canvas, const gfx_font_t *font, unsigned char ch, int x, int y, int color, int scale, int inverted) {
+    if (scale < 1) {
+        scale = 1;
+    }
+    for (int char_y = 0; char_y < font->height; char_y++) {
+        uint8_t line = font_read_line(font, ch, char_y);
+        if (!line) {
+            continue;
         }
-        const uint8_t *chr_data = &font_petme128_8x8[(chr - 32) * 8];
-        for (int j = 0; j < 8; j++, x0++) {
-            if (0 <= x0 && x0 < canvas->width) {
-                unsigned int vline_data = chr_data[j];
-                for (int yy = y0; vline_data; vline_data >>= 1, yy++) {
-                    if (vline_data & 1) {
-                        if (0 <= yy && yy < canvas->height) {
-                            canvas->pixel(canvas->ctx, x0, yy, col, 1);
-                        }
-                    }
-                }
+        for (int char_x = 0; char_x < font->width; char_x++) {
+            if ((line >> (font->width - char_x - 1)) & 0x1) {
+                int px = x + (inverted ? (font->width - char_x - 1) : char_x) * scale;
+                int py = y + (inverted ? (font->height - char_y - 1) : char_y) * scale;
+                gfx_shapes_fill_rect(canvas, px, py, scale, scale, color);
             }
         }
-        max_x = x0;
     }
-    return gfx_area_from_rect(start_x, y0, max_x - start_x, max_y - y0 + 1);
+    return gfx_area_from_rect(x, y, font->width * scale, font->height * scale);
+}
+
+gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, const char *str, int x0, int y0, int col, int scale, int inverted) {
+    int start_x = x0;
+    int char_y = y0;
+    int largest_x = 0;
+    const char *line_start = str;
+    for (const char *p = str; ; p++) {
+        if (*p == '\n' || *p == '\0') {
+            int last_x = x0;
+            int i = 0;
+            for (const char *c = line_start; c < p; c++, i++) {
+                int char_x = x0 + i * font->width * scale;
+                draw_char(canvas, font, (unsigned char)*c, char_x, char_y, col, scale, inverted);
+                last_x = char_x + font->width * scale;
+            }
+            if (last_x > largest_x) {
+                largest_x = last_x;
+            }
+            if (*p == '\0') {
+                break;
+            }
+            line_start = p + 1;
+            char_y += font->height * scale;
+        }
+    }
+    return gfx_area_from_rect(start_x, y0, largest_x - start_x, char_y + font->height * scale - y0);
+}
+
+gfx_area_t gfx_font_text8(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col) {
+    ensure_defaults();
+    return gfx_font_text(canvas, &default_font8, str, x0, y0, col, 1, 0);
+}
+
+gfx_area_t gfx_font_text14(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col) {
+    ensure_defaults();
+    return gfx_font_text(canvas, &default_font14, str, x0, y0, col, 1, 0);
+}
+
+gfx_area_t gfx_font_text16(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col) {
+    ensure_defaults();
+    return gfx_font_text(canvas, &default_font16, str, x0, y0, col, 1, 0);
 }

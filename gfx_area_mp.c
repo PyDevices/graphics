@@ -6,6 +6,7 @@
 #include "py/runtime.h"
 #include "py/obj.h"
 #include "gfx_core.h"
+#include "gfx_area_mp.h"
 
 typedef struct _mp_obj_area_t {
     mp_obj_base_t base;

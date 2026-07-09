@@ -29,5 +29,6 @@ gfx_area_t gfx_fb_fill_rect(const gfx_fb_t *fb, int x, int y, int w, int h, uint
 gfx_area_t gfx_fb_fill(const gfx_fb_t *fb, uint32_t col);
 
 void gfx_fb_canvas_init(gfx_canvas_t *canvas, const gfx_fb_t *fb);
+void gfx_fb_scroll(gfx_fb_t *fb, int xstep, int ystep);
 
 #endif

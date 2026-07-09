@@ -346,3 +346,44 @@ void gfx_fb_canvas_init(gfx_canvas_t *canvas, const gfx_fb_t *fb) {
     canvas->vline = fb_canvas_vline;
     canvas->fill_rect = fb_canvas_fill_rect;
 }
+
+void gfx_fb_scroll(gfx_fb_t *fb, int xstep, int ystep) {
+    unsigned int sx, y, xend, yend;
+    int dx, dy;
+    if (xstep < 0) {
+        if (-xstep >= fb->width) {
+            return;
+        }
+        sx = 0;
+        xend = fb->width + xstep;
+        dx = 1;
+    } else {
+        if (xstep >= fb->width) {
+            return;
+        }
+        sx = fb->width - 1;
+        xend = xstep - 1;
+        dx = -1;
+    }
+    if (ystep < 0) {
+        if (-ystep >= fb->height) {
+            return;
+        }
+        y = 0;
+        yend = fb->height + ystep;
+        dy = 1;
+    } else {
+        if (ystep >= fb->height) {
+            return;
+        }
+        y = fb->height - 1;
+        yend = ystep - 1;
+        dy = -1;
+    }
+    for (; (int)y != yend; y += dy) {
+        for (unsigned int x = sx; (int)x != xend; x += dx) {
+            uint32_t col = gfx_fb_getpixel(fb, x - xstep, y - ystep);
+            gfx_fb_setpixel(fb, x, y, col);
+        }
+    }
+}

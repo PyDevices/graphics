@@ -15,6 +15,8 @@
 #include "gfx_draw.h"
 #include "gfx_font.h"
 #include "gfx_capabilities.h"
+#include "gfx_bmp565.h"
+#include "gfx_files.h"
 
 /* ------------------------------------------------------------------------- */
 /* Area                                                                      */
@@ -666,12 +668,346 @@ static PyObject *mod_text8(PyObject *self, PyObject *args) {
     return area_from_gfx(&result);
 }
 
+#define MOD_SHAPE5(name, fn) \
+static PyObject *mod_##name(PyObject *self, PyObject *args) { \
+    (void)self; \
+    PyObject *target; int x, y, a, b, c; \
+    if (!PyArg_ParseTuple(args, "Oiiiii", &target, &x, &y, &a, &b, &c)) return NULL; \
+    gfx_canvas_t canvas; gfx_fb_t fs; PyObject *fk = NULL; \
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) return NULL; \
+    gfx_area_t area = fn(&canvas, x, y, a, b, c); \
+    return area_from_gfx(&area); \
+}
+
+static PyObject *mod_fill(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int col;
+    if (!PyArg_ParseTuple(args, "Oi", &target, &col)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_fill(&canvas, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_pixel(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, c;
+    if (!PyArg_ParseTuple(args, "Oiii", &target, &x, &y, &c)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_pixel(&canvas, x, y, c);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_hline(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, w, c;
+    if (!PyArg_ParseTuple(args, "Oiiii", &target, &x, &y, &w, &c)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_hline(&canvas, x, y, w, c);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_vline(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, h, c;
+    if (!PyArg_ParseTuple(args, "Oiiii", &target, &x, &y, &h, &c)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_vline(&canvas, x, y, h, c);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_line(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x1, y1, x2, y2, col;
+    if (!PyArg_ParseTuple(args, "Oiiiii", &target, &x1, &y1, &x2, &y2, &col)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_line(&canvas, x1, y1, x2, y2, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_rect(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, w, h, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "Oiiiii|p", &target, &x, &y, &w, &h, &col, &fill)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_rect(&canvas, x, y, w, h, col, fill);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_round_rect(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, w, h, r, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "Oiiiiii|p", &target, &x, &y, &w, &h, &r, &col, &fill)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_round_rect(&canvas, x, y, w, h, r, col, fill);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_circle(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, r, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "Oiiii|p", &target, &x, &y, &r, &col, &fill)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_circle(&canvas, x, y, r, col, fill);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_text14(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    const char *str;
+    int x, y, col;
+    if (!PyArg_ParseTuple(args, "Osiii", &target, &str, &x, &y, &col)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_font_text14(&canvas, str, x, y, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_text16(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    const char *str;
+    int x, y, col;
+    if (!PyArg_ParseTuple(args, "Osiii", &target, &str, &x, &y, &col)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_font_text16(&canvas, str, x, y, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_text(PyObject *self, PyObject *args, PyObject *kwds) {
+    static char *kwlist[] = {"canvas", "s", "x", "y", "c", "height", NULL};
+    PyObject *target;
+    const char *str;
+    int x, y, col = 1;
+    int height = 8;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Osii|ii", kwlist, &target, &str, &x, &y, &col, &height)) {
+        return NULL;
+    }
+    if (height == 14) {
+        return mod_text14(self, Py_BuildValue("Osiii", target, str, x, y, col));
+    }
+    if (height == 16) {
+        return mod_text16(self, Py_BuildValue("Osiii", target, str, x, y, col));
+    }
+    return mod_text8(self, Py_BuildValue("Osiii", target, str, x, y, col));
+}
+
+typedef struct {
+    PyObject_HEAD
+    PyObject *canvas_obj;
+    gfx_draw_t draw;
+} GfxDrawObject;
+
+static PyObject *draw_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    (void)kwds;
+    PyObject *canvas;
+    if (!PyArg_ParseTuple(args, "O", &canvas)) {
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(canvas, &GfxFrameBufferType)) {
+        PyErr_SetString(PyExc_TypeError, "FrameBuffer required");
+        return NULL;
+    }
+    GfxDrawObject *o = (GfxDrawObject *)type->tp_alloc(type, 0);
+    if (!o) {
+        return NULL;
+    }
+    o->canvas_obj = canvas;
+    Py_INCREF(canvas);
+    GfxFrameBufferObject *fb = (GfxFrameBufferObject *)canvas;
+    gfx_draw_init(&o->draw, &fb->canvas);
+    return (PyObject *)o;
+}
+
+static void draw_dealloc(GfxDrawObject *self) {
+    Py_XDECREF(self->canvas_obj);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+static const gfx_canvas_t *draw_target(GfxDrawObject *self) {
+    GfxFrameBufferObject *fb = (GfxFrameBufferObject *)self->canvas_obj;
+    self->draw.canvas = fb->canvas;
+    return gfx_draw_target(&self->draw);
+}
+
+static PyObject *draw_fill_rect(GfxDrawObject *self, PyObject *args) {
+    int x, y, w, h, c;
+    if (!PyArg_ParseTuple(args, "iiiii", &x, &y, &w, &h, &c)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_fill_rect(draw_target(self), x, y, w, h, c);
+    return area_from_gfx(&area);
+}
+
+static PyMethodDef draw_methods[] = {
+    {"fill_rect", (PyCFunction)draw_fill_rect, METH_VARARGS, NULL},
+    {NULL},
+};
+
+static PyTypeObject GfxDrawType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "graphics.Draw",
+    .tp_basicsize = sizeof(GfxDrawObject),
+    .tp_dealloc = (destructor)draw_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_methods = draw_methods,
+    .tp_new = draw_new,
+};
+
+typedef struct {
+    PyObject_HEAD
+    gfx_font_t font;
+} GfxFontObject;
+
+static PyObject *font_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    (void)kwds;
+    PyObject *font_data = Py_None;
+    int height = 8;
+    if (!PyArg_ParseTuple(args, "|Oi", &font_data, &height)) {
+        return NULL;
+    }
+    GfxFontObject *o = (GfxFontObject *)type->tp_alloc(type, 0);
+    if (!o) {
+        return NULL;
+    }
+    if (font_data == Py_None) {
+        gfx_font_init_default(&o->font, height);
+    } else if (PyUnicode_Check(font_data)) {
+        const char *path = PyUnicode_AsUTF8(font_data);
+        FILE *f = fopen(path, "rb");
+        if (!f) {
+            Py_DECREF(o);
+            PyErr_SetString(PyExc_OSError, "Font not found");
+            return NULL;
+        }
+        fseek(f, 0, SEEK_END);
+        long flen = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        uint8_t *data = (uint8_t *)malloc((size_t)flen);
+        fread(data, 1, (size_t)flen, f);
+        fclose(f);
+        o->font.data = data;
+        o->font.data_len = (size_t)flen;
+        o->font.height = height;
+        o->font.width = 8;
+        o->font.owns_data = 1;
+    } else {
+        Py_buffer view;
+        if (PyObject_GetBuffer(font_data, &view, PyBUF_READ) < 0) {
+            Py_DECREF(o);
+            return NULL;
+        }
+        gfx_font_init_from_data(&o->font, view.buf, (size_t)view.len, height);
+        PyBuffer_Release(&view);
+    }
+    return (PyObject *)o;
+}
+
+static PyTypeObject GfxFontType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "graphics.Font",
+    .tp_basicsize = sizeof(GfxFontObject),
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_new = font_new,
+};
+
 static PyMethodDef module_methods[] = {
     {"framebuf_backend", mod_framebuf_backend, METH_NOARGS, NULL},
     {"implementation", mod_implementation, METH_NOARGS, NULL},
     {"capabilities", mod_capabilities, METH_NOARGS, NULL},
+    {"fill", mod_fill, METH_VARARGS, NULL},
     {"fill_rect", mod_fill_rect, METH_VARARGS, NULL},
+    {"pixel", mod_pixel, METH_VARARGS, NULL},
+    {"hline", mod_hline, METH_VARARGS, NULL},
+    {"vline", mod_vline, METH_VARARGS, NULL},
+    {"line", mod_line, METH_VARARGS, NULL},
+    {"rect", mod_rect, METH_VARARGS, NULL},
+    {"round_rect", mod_round_rect, METH_VARARGS, NULL},
+    {"circle", mod_circle, METH_VARARGS, NULL},
+    {"text", (PyCFunction)mod_text, METH_VARARGS | METH_KEYWORDS, NULL},
     {"text8", mod_text8, METH_VARARGS, NULL},
+    {"text14", mod_text14, METH_VARARGS, NULL},
+    {"text16", mod_text16, METH_VARARGS, NULL},
     {NULL},
 };
 
@@ -688,14 +1024,19 @@ PyMODINIT_FUNC PyInit_graphics(void) {
     if (!m) {
         return NULL;
     }
-    if (PyType_Ready(&GfxAreaType) < 0 || PyType_Ready(&GfxFrameBufferType) < 0) {
+    if (PyType_Ready(&GfxAreaType) < 0 || PyType_Ready(&GfxFrameBufferType) < 0
+        || PyType_Ready(&GfxDrawType) < 0 || PyType_Ready(&GfxFontType) < 0) {
         Py_DECREF(m);
         return NULL;
     }
     Py_INCREF(&GfxAreaType);
     Py_INCREF(&GfxFrameBufferType);
+    Py_INCREF(&GfxDrawType);
+    Py_INCREF(&GfxFontType);
     if (PyModule_AddObject(m, "Area", (PyObject *)&GfxAreaType) < 0
-        || PyModule_AddObject(m, "FrameBuffer", (PyObject *)&GfxFrameBufferType) < 0) {
+        || PyModule_AddObject(m, "FrameBuffer", (PyObject *)&GfxFrameBufferType) < 0
+        || PyModule_AddObject(m, "Draw", (PyObject *)&GfxDrawType) < 0
+        || PyModule_AddObject(m, "Font", (PyObject *)&GfxFontType) < 0) {
         Py_DECREF(m);
         return NULL;
     }

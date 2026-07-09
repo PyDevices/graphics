@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include <limits.h>
+#include <math.h>
 #include <string.h>
 
 #include "gfx_shapes.h"
@@ -411,4 +416,329 @@ gfx_area_t gfx_shapes_blit(const gfx_canvas_t *canvas, const gfx_fb_t *source, i
         ++y1;
     }
     return gfx_area_from_rect(x0, y0, x0end - x0, y0end - y0);
+}
+
+static void circle_helper(const gfx_canvas_t *canvas, int x0, int y0, int r, int c, int x_offset, int y_offset) {
+    int f = 1 - r;
+    int ddF_x = 1;
+    int ddF_y = -2 * r;
+    int x = 0;
+    int y = r;
+    while (x < y) {
+        if (f >= 0) {
+            y -= 1;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x += 1;
+        ddF_x += 2;
+        f += ddF_x;
+        int offset_x = x + x_offset;
+        int offset_y = y + y_offset;
+        gfx_shapes_pixel(canvas, x0 + offset_x - 1, y0 - offset_y, c);
+        gfx_shapes_pixel(canvas, x0 - offset_x, y0 - offset_y, c);
+        gfx_shapes_pixel(canvas, x0 + offset_x - 1, y0 + offset_y - 1, c);
+        gfx_shapes_pixel(canvas, x0 - offset_x, y0 + offset_y - 1, c);
+        offset_x = y + x_offset;
+        offset_y = x + y_offset;
+        gfx_shapes_pixel(canvas, x0 + offset_x - 1, y0 + offset_y - 1, c);
+        gfx_shapes_pixel(canvas, x0 - offset_x, y0 + offset_y - 1, c);
+        gfx_shapes_pixel(canvas, x0 + offset_x - 1, y0 - offset_y, c);
+        gfx_shapes_pixel(canvas, x0 - offset_x, y0 - offset_y, c);
+    }
+}
+
+static gfx_area_t fill_circle_helper(const gfx_canvas_t *canvas, int x0, int y0, int r, int c, int x_offset, int y_offset) {
+    int f = 1 - r;
+    int ddF_x = 1;
+    int ddF_y = -2 * r;
+    int x = 0;
+    int y = r;
+    while (x < y) {
+        if (f >= 0) {
+            y -= 1;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x += 1;
+        ddF_x += 2;
+        f += ddF_x;
+        int offset_x = x + x_offset;
+        int offset_y = y + y_offset;
+        gfx_shapes_vline(canvas, x0 - offset_x, y0 - offset_y, 2 * offset_y, c);
+        gfx_shapes_vline(canvas, x0 + offset_x - 1, y0 - offset_y, 2 * offset_y, c);
+        offset_x = y + x_offset;
+        offset_y = x + y_offset;
+        gfx_shapes_vline(canvas, x0 - offset_x, y0 - offset_y, 2 * offset_y, c);
+        gfx_shapes_vline(canvas, x0 + offset_x - 1, y0 - offset_y, 2 * offset_y, c);
+    }
+    return gfx_area_from_rect(x0 - r, y0 - r, 2 * r, 2 * r);
+}
+
+gfx_area_t gfx_shapes_circle(const gfx_canvas_t *canvas, int x0, int y0, int r, int c, int fill) {
+    if (fill) {
+        return fill_circle_helper(canvas, x0, y0, r, c, 0, 0);
+    }
+    circle_helper(canvas, x0, y0, r, c, 0, 0);
+    return gfx_area_from_rect(x0 - r, y0 - r, 2 * r, 2 * r);
+}
+
+static gfx_area_t fill_round_rect(const gfx_canvas_t *canvas, int x0, int y0, int w, int h, int r, int c) {
+    if (r > w / 2) {
+        r = w / 2;
+    }
+    if (r > h / 2) {
+        r = h / 2;
+    }
+    gfx_shapes_fill_rect(canvas, x0 + r, y0, w - 2 * r, h, c);
+    fill_circle_helper(canvas, x0 + w / 2, y0 + h / 2, r, c, w / 2 - r, h / 2 - r);
+    return gfx_area_from_rect(x0, y0, w, h);
+}
+
+gfx_area_t gfx_shapes_round_rect(const gfx_canvas_t *canvas, int x0, int y0, int w, int h, int r, int c, int fill) {
+    if (r == 0) {
+        return gfx_shapes_rect(canvas, x0, y0, w, h, c, fill);
+    }
+    if (fill) {
+        return fill_round_rect(canvas, x0, y0, w, h, r, c);
+    }
+    if (r > w / 2) {
+        r = w / 2;
+    }
+    if (r > h / 2) {
+        r = h / 2;
+    }
+    gfx_shapes_hline(canvas, x0 + r, y0, w - 2 * r, c);
+    gfx_shapes_hline(canvas, x0 + r, y0 + h - 1, w - 2 * r, c);
+    gfx_shapes_vline(canvas, x0, y0 + r, h - 2 * r, c);
+    gfx_shapes_vline(canvas, x0 + w - 1, y0 + r, h - 2 * r, c);
+    circle_helper(canvas, x0 + w / 2, y0 + h / 2, r, c, w / 2 - r, h / 2 - r);
+    return gfx_area_from_rect(x0, y0, w, h);
+}
+
+static gfx_area_t fill_triangle(const gfx_canvas_t *canvas, int x0, int y0, int x1, int y1, int x2, int y2, int c) {
+    if (y0 > y1) {
+        int t;
+        t = y0; y0 = y1; y1 = t;
+        t = x0; x0 = x1; x1 = t;
+    }
+    if (y1 > y2) {
+        int t;
+        t = y2; y2 = y1; y1 = t;
+        t = x2; x2 = x1; x1 = t;
+    }
+    if (y0 > y1) {
+        int t;
+        t = y0; y0 = y1; y1 = t;
+        t = x0; x0 = x1; x1 = t;
+    }
+    int a, b, last;
+    if (y0 == y2) {
+        a = b = x0;
+        if (x1 < a) a = x1; else if (x1 > b) b = x1;
+        if (x2 < a) a = x2; else if (x2 > b) b = x2;
+        gfx_shapes_hline(canvas, a, y0, b - a + 1, c);
+        return gfx_area_from_rect(MIN(x0, MIN(x1, x2)), MIN(y0, MIN(y1, y2)),
+            MAX(x0, MAX(x1, x2)) - MIN(x0, MIN(x1, x2)) + 1,
+            MAX(y0, MAX(y1, y2)) - MIN(y0, MIN(y1, y2)) + 1);
+    }
+    int dx01 = x1 - x0, dy01 = y1 - y0;
+    int dx02 = x2 - x0, dy02 = y2 - y0;
+    int dx12 = x2 - x1, dy12 = y2 - y1;
+    if (dy01 == 0) dy01 = 1;
+    if (dy02 == 0) dy02 = 1;
+    if (dy12 == 0) dy12 = 1;
+    int sa = 0, sb = 0;
+    int y = y0;
+    last = (y0 == y1) ? y1 - 1 : y1;
+    while (y <= last) {
+        a = x0 + sa / dy01;
+        b = x0 + sb / dy02;
+        sa += dx01;
+        sb += dx02;
+        if (a > b) { int t = a; a = b; b = t; }
+        gfx_shapes_hline(canvas, a, y, b - a + 1, c);
+        y += 1;
+    }
+    sa = dx12 * (y - y1);
+    sb = dx02 * (y - y0);
+    while (y <= y2) {
+        a = x1 + sa / dy12;
+        b = x0 + sb / dy02;
+        sa += dx12;
+        sb += dx02;
+        if (a > b) { int t = a; a = b; b = t; }
+        gfx_shapes_hline(canvas, a, y, b - a + 1, c);
+        y += 1;
+    }
+    return gfx_area_from_rect(MIN(x0, MIN(x1, x2)), MIN(y0, MIN(y1, y2)),
+        MAX(x0, MAX(x1, x2)) - MIN(x0, MIN(x1, x2)) + 1,
+        MAX(y0, MAX(y1, y2)) - MIN(y0, MIN(y1, y2)) + 1);
+}
+
+gfx_area_t gfx_shapes_triangle(const gfx_canvas_t *canvas, int x0, int y0, int x1, int y1, int x2, int y2, int c, int fill) {
+    if (fill) {
+        return fill_triangle(canvas, x0, y0, x1, y1, x2, y2, c);
+    }
+    gfx_shapes_line(canvas, x0, y0, x1, y1, c);
+    gfx_shapes_line(canvas, x1, y1, x2, y2, c);
+    gfx_shapes_line(canvas, x2, y2, x0, y0, c);
+    int left = MIN(x0, MIN(x1, x2));
+    int top = MIN(y0, MIN(y1, y2));
+    int right = MAX(x0, MAX(x1, x2));
+    int bottom = MAX(y0, MAX(y1, y2));
+    return gfx_area_from_rect(left, top, right - left, bottom - top);
+}
+
+gfx_area_t gfx_shapes_arc(const gfx_canvas_t *canvas, int x, int y, int r, float a0, float a1, int c) {
+    const int resolution = 60;
+    float ra0 = a0 * (float)M_PI / 180.0f;
+    float ra1 = a1 * (float)M_PI / 180.0f;
+    int x0 = x + (int)(r * cosf(ra0));
+    int y0 = y + (int)(r * sinf(ra0));
+    int x_min = x0, x_max = x0;
+    int y_min = y0, y_max = y0;
+    int start = (int)(ra0 * resolution);
+    int end = (int)(ra1 * resolution);
+    int step = (a1 > a0) ? 1 : -1;
+    for (int a = start; step > 0 ? a < end : a > end; a += step) {
+        float ar = (float)a / resolution;
+        int x1 = x + (int)(r * cosf(ar));
+        int y1 = y + (int)(r * sinf(ar));
+        gfx_shapes_line(canvas, x0, y0, x1, y1, c);
+        x_min = MIN(x0, MIN(x1, x_min));
+        x_max = MAX(x0, MAX(x1, x_max));
+        y_min = MIN(y0, MIN(y1, y_min));
+        y_max = MAX(y0, MAX(y1, y_max));
+        x0 = x1;
+        y0 = y1;
+    }
+    return gfx_area_from_rect(x_min, y_min, x_max - x_min, y_max - y_min);
+}
+
+static int rgb565_from_rgb(int r, int g, int b) {
+    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
+}
+
+static void rgb565_unpack(int c, int *r, int *g, int *b) {
+    *r = (c >> 8) & 0xF8;
+    *g = (c >> 3) & 0xFC;
+    *b = (c << 3) & 0xF8;
+}
+
+gfx_area_t gfx_shapes_gradient_rect(const gfx_canvas_t *canvas, int x, int y, int w, int h, int c1, int c2, int vertical) {
+    if (c1 == c2) {
+        return gfx_shapes_fill_rect(canvas, x, y, w, h, c1);
+    }
+    int r1, g1, b1, r2, g2, b2;
+    rgb565_unpack(c1, &r1, &g1, &b1);
+    rgb565_unpack(c2, &r2, &g2, &b2);
+    if (vertical) {
+        for (int j = 0; j < h; j++) {
+            int r = r1 + (r2 - r1) * j / h;
+            int g = g1 + (g2 - g1) * j / h;
+            int b = b1 + (b2 - b1) * j / h;
+            gfx_shapes_fill_rect(canvas, x, y + j, w, 1, rgb565_from_rgb(r, g, b));
+        }
+    } else {
+        for (int i = 0; i < w; i++) {
+            int r = r1 + (r2 - r1) * i / w;
+            int g = g1 + (g2 - g1) * i / w;
+            int b = b1 + (b2 - b1) * i / w;
+            gfx_shapes_fill_rect(canvas, x + i, y, 1, h, rgb565_from_rgb(r, g, b));
+        }
+    }
+    return gfx_area_from_rect(x, y, w, h);
+}
+
+gfx_area_t gfx_shapes_blit_rect(const gfx_canvas_t *canvas, const void *buf, int x, int y, int w, int h, int bpp) {
+    const uint8_t *src = (const uint8_t *)buf;
+    for (int row = 0; row < h; row++) {
+        for (int col = 0; col < w; col++) {
+            int col_val;
+            if (bpp == 2) {
+                col_val = (int)(src[(row * w + col) * 2] | (src[(row * w + col) * 2 + 1] << 8));
+            } else {
+                col_val = src[row * w + col];
+            }
+            gfx_shapes_pixel(canvas, x + col, y + row, col_val);
+        }
+    }
+    return gfx_area_from_rect(x, y, w, h);
+}
+
+gfx_area_t gfx_shapes_blit_transparent(const gfx_canvas_t *canvas, const void *buf, int x, int y, int w, int h, int key, int bpp) {
+    const uint8_t *src = (const uint8_t *)buf;
+    int stride = w * bpp;
+    uint8_t key_bytes[2];
+    key_bytes[0] = (uint8_t)(key & 0xFF);
+    key_bytes[1] = (uint8_t)((key >> 8) & 0xFF);
+    for (int j = 0; j < h; j++) {
+        int rowstart = j * stride;
+        int colstart = 0;
+        while (colstart < stride) {
+            int startoffset = rowstart + colstart;
+            int match = 1;
+            for (int b = 0; b < bpp; b++) {
+                if (src[startoffset + b] != key_bytes[b]) {
+                    match = 0;
+                    break;
+                }
+            }
+            if (!match) {
+                int colend = colstart;
+                while (colend < stride) {
+                    int endoffset = rowstart + colend;
+                    int km = 1;
+                    for (int b = 0; b < bpp; b++) {
+                        if (src[endoffset + b] != key_bytes[b]) {
+                            km = 0;
+                            break;
+                        }
+                    }
+                    if (km) {
+                        break;
+                    }
+                    colend += bpp;
+                }
+                gfx_shapes_blit_rect(canvas, src + rowstart + colstart, x + colstart / bpp, y + j, (colend - colstart) / bpp, 1, bpp);
+                colstart = colend;
+            } else {
+                colstart += bpp;
+            }
+        }
+    }
+    return gfx_area_from_rect(x, y, w, h);
+}
+
+gfx_area_t gfx_shapes_polygon(const gfx_canvas_t *canvas, const int *points, size_t n_points, int x, int y, int color, float angle, int center_x, int center_y) {
+    if (n_points < 3) {
+        return gfx_area_from_rect(0, 0, 0, 0);
+    }
+    int rx[64], ry[64];
+    if (n_points > 64) {
+        return gfx_area_from_rect(0, 0, 0, 0);
+    }
+    float cos_a = cosf(angle);
+    float sin_a = sinf(angle);
+    for (size_t i = 0; i < n_points; i++) {
+        int px = points[i * 2];
+        int py = points[i * 2 + 1];
+        if (angle != 0.0f) {
+            rx[i] = x + center_x + (int)((px - center_x) * cos_a - (py - center_y) * sin_a);
+            ry[i] = y + center_y + (int)((px - center_x) * sin_a + (py - center_y) * cos_a);
+        } else {
+            rx[i] = x + px;
+            ry[i] = y + py;
+        }
+    }
+    int left = rx[0], right = rx[0], top = ry[0], bottom = ry[0];
+    for (size_t i = 1; i < n_points; i++) {
+        left = MIN(left, rx[i]);
+        right = MAX(right, rx[i]);
+        top = MIN(top, ry[i]);
+        bottom = MAX(bottom, ry[i]);
+        gfx_shapes_line(canvas, rx[i - 1], ry[i - 1], rx[i], ry[i], color);
+    }
+    return gfx_area_from_rect(left, top, right - left, bottom - top);
 }

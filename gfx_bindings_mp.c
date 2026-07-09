@@ -1,0 +1,797 @@
+/*
+ * Extended MicroPython bindings: Draw, Font, BMP565, module-level API.
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "py/runtime.h"
+#include "py/binary.h"
+
+#include "gfx_core.h"
+#include "gfx_framebuffer.h"
+#include "gfx_shapes.h"
+#include "gfx_draw.h"
+#include "gfx_font.h"
+#include "gfx_bmp565.h"
+#include "gfx_files.h"
+#include "gfx_capabilities.h"
+#include "gfx_area_mp.h"
+#include "gfx_bindings_mp.h"
+
+extern const mp_obj_type_t mp_type_framebuf;
+extern const mp_obj_type_t mp_type_area;
+
+static bool mp_get_framebuf(mp_obj_t obj, mp_obj_framebuf_t *out) {
+    mp_obj_t native = mp_obj_cast_to_native_base(obj, MP_OBJ_FROM_PTR(&mp_type_framebuf));
+    if (native == MP_OBJ_NULL) {
+        return false;
+    }
+    *out = *(mp_obj_framebuf_t *)MP_OBJ_TO_PTR(native);
+    return true;
+}
+
+static bool mp_get_canvas(mp_obj_t target, gfx_canvas_t *canvas_out) {
+    mp_obj_framebuf_t fb;
+    if (!mp_get_framebuf(target, &fb)) {
+        return false;
+    }
+    *canvas_out = fb.canvas;
+    return true;
+}
+
+typedef struct _mp_obj_draw_t {
+    mp_obj_base_t base;
+    mp_obj_t canvas_obj;
+    gfx_draw_t draw;
+} mp_obj_draw_t;
+
+const mp_obj_type_t mp_type_draw;
+
+static mp_obj_t draw_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+    mp_arg_check_num(n_args, n_kw, 1, 1, false);
+    mp_obj_framebuf_t fb;
+    if (!mp_get_framebuf(args[0], &fb)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("FrameBuffer required"));
+    }
+    mp_obj_draw_t *o = mp_obj_malloc(mp_obj_draw_t, &mp_type_draw);
+    o->canvas_obj = args[0];
+    gfx_draw_init(&o->draw, &fb.canvas);
+    return MP_OBJ_FROM_PTR(o);
+}
+
+static const gfx_canvas_t *draw_target(mp_obj_draw_t *self) {
+    mp_obj_framebuf_t fb;
+    if (mp_get_framebuf(self->canvas_obj, &fb)) {
+        self->draw.canvas = fb.canvas;
+    }
+    return gfx_draw_target(&self->draw);
+}
+
+static mp_obj_t draw_fill(mp_obj_t self_in, mp_obj_t col_in) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(self_in);
+    gfx_area_t area = gfx_shapes_fill(draw_target(self), mp_obj_get_int(col_in));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(draw_fill_obj, draw_fill);
+
+static mp_obj_t draw_fill_rect(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    gfx_area_t area = gfx_shapes_fill_rect(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_fill_rect_obj, 6, 6, draw_fill_rect);
+
+static mp_obj_t draw_rect(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    bool fill = n_args > 6 && mp_obj_is_true(args[6]);
+    gfx_area_t area = gfx_shapes_rect(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_rect_obj, 6, 7, draw_rect);
+
+static mp_obj_t draw_round_rect(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    bool fill = n_args > 7 && mp_obj_is_true(args[7]);
+    gfx_area_t area = gfx_shapes_round_rect(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), mp_obj_get_int(args[6]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_round_rect_obj, 7, 8, draw_round_rect);
+
+static mp_obj_t draw_line(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    gfx_area_t area = gfx_shapes_line(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_line_obj, 6, 6, draw_line);
+
+static mp_obj_t draw_text14(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
+    gfx_area_t area = gfx_font_text14(draw_target(self), mp_obj_str_get_str(args[1]),
+        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_text14_obj, 4, 5, draw_text14);
+
+static mp_obj_t draw_text(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
+    gfx_area_t area = gfx_font_text8(draw_target(self), mp_obj_str_get_str(args[1]),
+        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_text_obj, 4, 5, draw_text);
+
+static const mp_rom_map_elem_t draw_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&draw_fill_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fill_rect), MP_ROM_PTR(&draw_fill_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_rect), MP_ROM_PTR(&draw_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&draw_line_obj) },
+    { MP_ROM_QSTR(MP_QSTR_round_rect), MP_ROM_PTR(&draw_round_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&draw_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text14), MP_ROM_PTR(&draw_text14_obj) },
+};
+static MP_DEFINE_CONST_DICT(draw_locals_dict, draw_locals_dict_table);
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_type_draw,
+    MP_QSTR_Draw,
+    MP_TYPE_FLAG_NONE,
+    make_new, draw_make_new,
+    locals_dict, &draw_locals_dict
+);
+
+typedef struct _mp_obj_font_t {
+    mp_obj_base_t base;
+    gfx_font_t font;
+    mp_obj_t data_obj;
+} mp_obj_font_t;
+
+const mp_obj_type_t mp_type_font;
+
+static int parse_font_height_from_name(const char *path, int *height) {
+    const char *base = strrchr(path, '/');
+    base = base ? base + 1 : path;
+    const char *x = strrchr(base, 'x');
+    if (!x) {
+        return -1;
+    }
+    *height = atoi(x + 1);
+    return 0;
+}
+
+static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+    mp_arg_check_num(n_args, n_kw, 0, 2, false);
+    mp_obj_font_t *o = mp_obj_malloc(mp_obj_font_t, &mp_type_font);
+    o->data_obj = mp_const_none;
+    int height = 8;
+    if (n_args >= 2 && args[1] != mp_const_none) {
+        height = mp_obj_get_int(args[1]);
+    }
+    if (n_args >= 1 && args[0] != mp_const_none) {
+        if (mp_obj_is_str(args[0])) {
+            const char *path = mp_obj_str_get_str(args[0]);
+            if (n_args < 2 && parse_font_height_from_name(path, &height) < 0) {
+                mp_raise_ValueError(MP_ERROR_TEXT("Invalid font"));
+            }
+            FILE *f = fopen(path, "rb");
+            if (!f) {
+                mp_raise_ValueError(MP_ERROR_TEXT("Font not found"));
+            }
+            fseek(f, 0, SEEK_END);
+            long flen = ftell(f);
+            fseek(f, 0, SEEK_SET);
+            uint8_t *data = m_new(uint8_t, (size_t)flen);
+            if (fread(data, 1, (size_t)flen, f) != (size_t)flen) {
+                fclose(f);
+                m_del(uint8_t, data, (size_t)flen);
+                mp_raise_ValueError(MP_ERROR_TEXT("Font read failed"));
+            }
+            fclose(f);
+            o->font.data = data;
+            o->font.data_len = (size_t)flen;
+            o->font.height = height;
+            o->font.width = 8;
+            o->font.owns_data = 1;
+        } else {
+            mp_buffer_info_t bufinfo;
+            mp_get_buffer_raise(args[0], &bufinfo, MP_BUFFER_READ);
+            o->data_obj = args[0];
+            gfx_font_init_from_data(&o->font, bufinfo.buf, bufinfo.len, height);
+        }
+    } else {
+        gfx_font_init_default(&o->font, height);
+    }
+    return MP_OBJ_FROM_PTR(o);
+}
+
+static mp_obj_t font_text(size_t n_args, const mp_obj_t *args) {
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(args[0]);
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[1], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_int_t col = mp_obj_get_int(args[5]);
+    mp_int_t scale = n_args >= 7 ? mp_obj_get_int(args[6]) : 1;
+    mp_int_t inverted = n_args >= 8 && mp_obj_is_true(args[7]);
+    gfx_area_t area = gfx_font_text(&canvas, &self->font, mp_obj_str_get_str(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), col, scale, inverted);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(font_text_obj, 6, 8, font_text);
+
+static void font_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(self_in);
+    if (dest[0] == MP_OBJ_NULL) {
+        switch (attr) {
+            case MP_QSTR_width:
+                dest[0] = mp_obj_new_int(self->font.width);
+                break;
+            case MP_QSTR_height:
+                dest[0] = mp_obj_new_int(self->font.height);
+                break;
+            default:
+                dest[1] = MP_OBJ_SENTINEL;
+                break;
+        }
+    }
+}
+
+static const mp_rom_map_elem_t font_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&font_text_obj) },
+};
+static MP_DEFINE_CONST_DICT(font_locals_dict, font_locals_dict_table);
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_type_font,
+    MP_QSTR_Font,
+    MP_TYPE_FLAG_NONE,
+    make_new, font_make_new,
+    attr, font_attr,
+    locals_dict, &font_locals_dict
+);
+
+typedef struct _mp_obj_bmp565_t {
+    mp_obj_base_t base;
+    gfx_bmp565_t bmp;
+    mp_obj_t buf_obj;
+} mp_obj_bmp565_t;
+
+const mp_obj_type_t mp_type_bmp565;
+
+static mp_obj_t bmp565_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+    mp_arg_check_num(n_args, n_kw, 0, 4, true);
+    mp_obj_bmp565_t *o = mp_obj_malloc(mp_obj_bmp565_t, &mp_type_bmp565);
+    o->buf_obj = mp_const_none;
+    mp_obj_t filename = mp_const_none;
+    mp_obj_t source = mp_const_none;
+    mp_int_t width = 0;
+    mp_int_t height = 0;
+    if (n_args >= 1) {
+        if (mp_obj_is_str(args[0])) {
+            filename = args[0];
+        } else {
+            source = args[0];
+            if (n_args >= 3) {
+                width = mp_obj_get_int(args[1]);
+                height = mp_obj_get_int(args[2]);
+            }
+        }
+    }
+    if (source != mp_const_none) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(source, &bufinfo, MP_BUFFER_READ);
+        o->buf_obj = source;
+        gfx_bmp565_init_from_buffer(&o->bmp, bufinfo.buf, bufinfo.len, width, height);
+    } else if (filename != mp_const_none) {
+        const char *path = mp_obj_str_get_str(filename);
+        if (gfx_bmp565_load_from_file(path, &o->bmp) < 0) {
+            mp_raise_ValueError(MP_ERROR_TEXT("BMP load failed"));
+        }
+        o->buf_obj = mp_obj_new_bytearray(o->bmp.buffer_len, o->bmp.buffer);
+    } else {
+        mp_raise_ValueError(MP_ERROR_TEXT("Invalid arguments"));
+    }
+    return MP_OBJ_FROM_PTR(o);
+}
+
+static void bmp565_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_obj_bmp565_t *self = MP_OBJ_TO_PTR(self_in);
+    if (dest[0] == MP_OBJ_NULL) {
+        switch (attr) {
+            case MP_QSTR_width:
+                dest[0] = mp_obj_new_int(self->bmp.width);
+                break;
+            case MP_QSTR_height:
+                dest[0] = mp_obj_new_int(self->bmp.height);
+                break;
+            case MP_QSTR_buffer:
+                dest[0] = self->buf_obj;
+                break;
+            default:
+                dest[1] = MP_OBJ_SENTINEL;
+                break;
+        }
+    }
+}
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_type_bmp565,
+    MP_QSTR_BMP565,
+    MP_TYPE_FLAG_NONE,
+    make_new, bmp565_make_new,
+    attr, bmp565_attr
+);
+
+#define MOD_SHAPE_5(fn) \
+static mp_obj_t mod_##fn(size_t n_args, const mp_obj_t *args) { \
+    gfx_canvas_t canvas; \
+    if (!mp_get_canvas(args[0], &canvas)) mp_raise_TypeError(MP_ERROR_TEXT("canvas required")); \
+    gfx_area_t area = gfx_shapes_##fn(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]), \
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4])); \
+    return gfx_area_mp_from_gfx(&area); \
+} \
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_##fn##_obj, 5, 5, mod_##fn);
+
+static mp_obj_t mod_fill_rect(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    gfx_area_t area = gfx_shapes_fill_rect(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_fill_rect_obj, 6, 6, mod_fill_rect);
+
+MOD_SHAPE_5(hline)
+MOD_SHAPE_5(vline)
+
+static mp_obj_t mod_line(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    gfx_area_t area = gfx_shapes_line(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_line_obj, 6, 6, mod_line);
+
+static void get_readonly_framebuffer(mp_obj_t arg, mp_obj_framebuf_t *rofb) {
+    mp_obj_t fb = mp_obj_cast_to_native_base(arg, MP_OBJ_FROM_PTR(&mp_type_framebuf));
+    if (fb != MP_OBJ_NULL) {
+        *rofb = *(mp_obj_framebuf_t *)MP_OBJ_TO_PTR(fb);
+    } else {
+        size_t len;
+        mp_obj_t *items;
+        mp_obj_get_array(arg, &len, &items);
+        if (len < 4 || len > 5) {
+            mp_raise_ValueError(NULL);
+        }
+        framebuf_make_new_helper(len, items, MP_BUFFER_READ, rofb);
+    }
+}
+
+static mp_obj_t mod_ellipse(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    bool fill = n_args > 6 && mp_obj_is_true(args[6]);
+    mp_int_t mask = n_args > 7 ? mp_obj_get_int(args[7]) : 0x0f;
+    gfx_area_t area = gfx_shapes_ellipse(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), fill, mask);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_ellipse_obj, 6, 8, mod_ellipse);
+
+static mp_obj_t mod_arc(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    gfx_area_t area = gfx_shapes_arc(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), (float)mp_obj_get_float(args[4]), (float)mp_obj_get_float(args[5]), mp_obj_get_int(args[6]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_arc_obj, 7, 7, mod_arc);
+
+static mp_obj_t mod_triangle(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    bool fill = n_args > 8 && mp_obj_is_true(args[8]);
+    gfx_area_t area = gfx_shapes_triangle(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), mp_obj_get_int(args[6]),
+        mp_obj_get_int(args[7]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_triangle_obj, 8, 9, mod_triangle);
+
+static mp_obj_t mod_gradient_rect(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    int vertical = 1;
+    if (n_args > 7) {
+        vertical = mp_obj_is_true(args[7]);
+    }
+    int c2 = n_args > 6 ? mp_obj_get_int(args[6]) : mp_obj_get_int(args[5]);
+    gfx_area_t area = gfx_shapes_gradient_rect(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), c2, vertical);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_gradient_rect_obj, 6, 8, mod_gradient_rect);
+
+#if MICROPY_PY_ARRAY
+static mp_obj_t mod_poly(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[3], &bufinfo, MP_BUFFER_READ);
+    bool fill = n_args > 5 && mp_obj_is_true(args[5]);
+    char fmt[2] = { (char)bufinfo.typecode, '\0' };
+    gfx_area_t area = gfx_shapes_poly(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        bufinfo.buf, bufinfo.len, mp_binary_get_size('@', bufinfo.typecode, NULL), fmt,
+        mp_obj_get_int(args[4]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_poly_obj, 5, 6, mod_poly);
+#endif
+
+static mp_obj_t mod_blit(size_t n_args, const mp_obj_t *args) {
+    mp_obj_framebuf_t dest;
+    if (!mp_get_framebuf(args[0], &dest)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_obj_framebuf_t source;
+    get_readonly_framebuffer(args[1], &source);
+    mp_int_t key = n_args > 4 ? mp_obj_get_int(args[4]) : -1;
+    const gfx_fb_t *pal = NULL;
+    mp_obj_framebuf_t palette;
+    if (n_args > 5 && args[5] != mp_const_none) {
+        get_readonly_framebuffer(args[5], &palette);
+        pal = &palette.fb;
+    }
+    gfx_area_t area = gfx_shapes_blit(&dest.canvas, &source.fb, mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), key, pal);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_blit_obj, 4, 6, mod_blit);
+
+static mp_obj_t mod_blit_rect(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[1], &bufinfo, MP_BUFFER_READ);
+    gfx_area_t area = gfx_shapes_blit_rect(&canvas, bufinfo.buf, mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), 2);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_blit_rect_obj, 6, 6, mod_blit_rect);
+
+static mp_obj_t mod_blit_transparent(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[1], &bufinfo, MP_BUFFER_READ);
+    gfx_area_t area = gfx_shapes_blit_transparent(&canvas, bufinfo.buf, mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]),
+        mp_obj_get_int(args[6]), 2);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_blit_transparent_obj, 7, 7, mod_blit_transparent);
+
+static mp_obj_t mod_polygon(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    size_t len;
+    mp_obj_t *items;
+    mp_obj_get_array(args[1], &len, &items);
+    if (len < 3) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Polygon must have at least 3 points"));
+    }
+    int points[128];
+    if (len > 64) {
+        mp_raise_ValueError(NULL);
+    }
+    for (size_t i = 0; i < len; i++) {
+        if (mp_obj_is_type(items[i], &mp_type_tuple)) {
+            size_t plen;
+            mp_obj_t *pitems;
+            mp_obj_get_array(items[i], &plen, &pitems);
+            if (plen != 2) {
+                mp_raise_ValueError(NULL);
+            }
+            points[i * 2] = mp_obj_get_int(pitems[0]);
+            points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
+        } else {
+            mp_raise_TypeError(NULL);
+        }
+    }
+    float angle = (float)(n_args > 5 ? mp_obj_get_float(args[5]) : 0.0);
+    int cx = n_args > 6 ? mp_obj_get_int(args[6]) : 0;
+    int cy = n_args > 7 ? mp_obj_get_int(args[7]) : 0;
+    gfx_area_t area = gfx_shapes_polygon(&canvas, points, len, mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), angle, cx, cy);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_polygon_obj, 5, 8, mod_polygon);
+
+static mp_obj_t mod_fill(mp_obj_t target, mp_obj_t col_in) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(target, &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    gfx_area_t area = gfx_shapes_fill(&canvas, mp_obj_get_int(col_in));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(mod_fill_obj, mod_fill);
+
+static mp_obj_t mod_pixel(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    gfx_area_t area = gfx_shapes_pixel(&canvas, mp_obj_get_int(args[1]),
+        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_pixel_obj, 4, 4, mod_pixel);
+
+static mp_obj_t mod_rect(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    bool fill = n_args > 6 && mp_obj_is_true(args[6]);
+    gfx_area_t area = gfx_shapes_rect(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_rect_obj, 6, 7, mod_rect);
+
+static mp_obj_t mod_round_rect(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    bool fill = n_args > 7 && mp_obj_is_true(args[7]);
+    gfx_area_t area = gfx_shapes_round_rect(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), mp_obj_get_int(args[6]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_round_rect_obj, 7, 8, mod_round_rect);
+
+static mp_obj_t mod_circle(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    bool fill = n_args > 5 && mp_obj_is_true(args[5]);
+    gfx_area_t area = gfx_shapes_circle(&canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_circle_obj, 5, 6, mod_circle);
+
+static mp_obj_t mod_text8(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
+    gfx_area_t area = gfx_font_text8(&canvas, mp_obj_str_get_str(args[1]),
+        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text8_obj, 4, 5, mod_text8);
+
+static mp_obj_t mod_text14(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
+    gfx_area_t area = gfx_font_text14(&canvas, mp_obj_str_get_str(args[1]),
+        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text14_obj, 4, 5, mod_text14);
+
+static mp_obj_t mod_text16(size_t n_args, const mp_obj_t *args) {
+    gfx_canvas_t canvas;
+    if (!mp_get_canvas(args[0], &canvas)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
+    gfx_area_t area = gfx_font_text16(&canvas, mp_obj_str_get_str(args[1]),
+        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text16_obj, 4, 5, mod_text16);
+
+static mp_obj_t mod_text(size_t n_args, const mp_obj_t *args) {
+    mp_int_t height = 8;
+    if (n_args >= 6 && mp_obj_is_int(args[5])) {
+        height = mp_obj_get_int(args[5]);
+    }
+    if (height == 14) {
+        return mod_text14(n_args > 5 ? n_args - 1 : n_args, args);
+    }
+    if (height == 16) {
+        return mod_text16(n_args > 5 ? n_args - 1 : n_args, args);
+    }
+    return mod_text8(n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text_obj, 4, 6, mod_text);
+
+static mp_obj_t mod_load_image(mp_obj_t path_in) {
+    gfx_image_fb_t img;
+    if (gfx_files_load_image(mp_obj_str_get_str(path_in), &img) < 0) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Unsupported image"));
+    }
+    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
+    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(img.format) };
+    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
+    if (img.owns_buffer) {
+        free(img.buffer);
+    }
+    return fb;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(mod_load_image_obj, mod_load_image);
+
+static mp_obj_t mod_bmp_to_framebuffer(mp_obj_t path_in) {
+    gfx_image_fb_t img;
+    if (gfx_files_bmp_to_framebuffer(mp_obj_str_get_str(path_in), &img) < 0) {
+        mp_raise_ValueError(NULL);
+    }
+    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
+    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(GFX_RGB565) };
+    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
+    free(img.buffer);
+    return fb;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(mod_bmp_to_framebuffer_obj, mod_bmp_to_framebuffer);
+
+static mp_obj_t mod_pbm_to_framebuffer(mp_obj_t path_in) {
+    gfx_image_fb_t img;
+    if (gfx_files_pbm_to_framebuffer(mp_obj_str_get_str(path_in), &img) < 0) {
+        mp_raise_ValueError(NULL);
+    }
+    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
+    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(GFX_MHLSB) };
+    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
+    free(img.buffer);
+    return fb;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(mod_pbm_to_framebuffer_obj, mod_pbm_to_framebuffer);
+
+static mp_obj_t mod_pgm_to_framebuffer(mp_obj_t path_in) {
+    gfx_image_fb_t img;
+    if (gfx_files_pgm_to_framebuffer(mp_obj_str_get_str(path_in), &img) < 0) {
+        mp_raise_ValueError(NULL);
+    }
+    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
+    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(img.format) };
+    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
+    free(img.buffer);
+    return fb;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(mod_pgm_to_framebuffer_obj, mod_pgm_to_framebuffer);
+
+static mp_obj_t mod_save_image(size_t n_args, const mp_obj_t *args) {
+    mp_obj_framebuf_t fb;
+    if (!mp_get_framebuf(args[0], &fb)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("FrameBuffer required"));
+    }
+    const char *path = n_args >= 2 ? mp_obj_str_get_str(args[1]) : "screenshot";
+    char out_path[256];
+    if (gfx_files_save_image(&fb.fb, path, out_path, sizeof(out_path)) < 0) {
+        mp_raise_ValueError(NULL);
+    }
+    return mp_obj_new_str(out_path, strlen(out_path));
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_save_image_obj, 1, 2, mod_save_image);
+
+static mp_obj_t mod_framebuf_backend(void) {
+    return mp_obj_new_str(gfx_framebuf_backend(), strlen(gfx_framebuf_backend()));
+}
+MP_DEFINE_CONST_FUN_OBJ_0(mod_framebuf_backend_obj, mod_framebuf_backend);
+
+static mp_obj_t mod_implementation(void) {
+    return mp_obj_new_str(gfx_implementation(), strlen(gfx_implementation()));
+}
+MP_DEFINE_CONST_FUN_OBJ_0(mod_implementation_obj, mod_implementation);
+
+static mp_obj_t mod_capabilities(void) {
+    mp_obj_t caps = mp_obj_new_dict(0);
+    mp_obj_dict_store(caps, MP_OBJ_NEW_QSTR(MP_QSTR_implementation), mod_implementation());
+    mp_obj_dict_store(caps, MP_OBJ_NEW_QSTR(MP_QSTR_framebuf), mod_framebuf_backend());
+    mp_obj_t formats = mp_obj_new_list(0, NULL);
+    const char *names[] = {"MONO_VLSB", "MONO_HLSB", "MONO_HMSB", "RGB565", "GS2_HMSB", "GS4_HMSB", "GS8", "RGB888"};
+    for (int i = 0; i < 8; i++) {
+        mp_obj_list_append(formats, mp_obj_new_str(names[i], strlen(names[i])));
+    }
+    mp_obj_dict_store(caps, MP_OBJ_NEW_QSTR(MP_QSTR_formats), formats);
+    return caps;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(mod_capabilities_obj, mod_capabilities);
+
+static const mp_rom_map_elem_t graphics_module_globals_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_graphics) },
+    { MP_ROM_QSTR(MP_QSTR_FrameBuffer), MP_ROM_PTR(&mp_type_framebuf) },
+    { MP_ROM_QSTR(MP_QSTR_Area), MP_ROM_PTR(&mp_type_area) },
+    { MP_ROM_QSTR(MP_QSTR_Draw), MP_ROM_PTR(&mp_type_draw) },
+    { MP_ROM_QSTR(MP_QSTR_Font), MP_ROM_PTR(&mp_type_font) },
+    { MP_ROM_QSTR(MP_QSTR_BMP565), MP_ROM_PTR(&mp_type_bmp565) },
+    { MP_ROM_QSTR(MP_QSTR_MONO_VLSB), MP_ROM_INT(GFX_MVLSB) },
+    { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_INT(GFX_RGB565) },
+    { MP_ROM_QSTR(MP_QSTR_GS2_HMSB), MP_ROM_INT(GFX_GS2_HMSB) },
+    { MP_ROM_QSTR(MP_QSTR_GS4_HMSB), MP_ROM_INT(GFX_GS4_HMSB) },
+    { MP_ROM_QSTR(MP_QSTR_GS8), MP_ROM_INT(GFX_GS8) },
+    { MP_ROM_QSTR(MP_QSTR_MONO_HLSB), MP_ROM_INT(GFX_MHLSB) },
+    { MP_ROM_QSTR(MP_QSTR_MONO_HMSB), MP_ROM_INT(GFX_MHMSB) },
+    { MP_ROM_QSTR(MP_QSTR_RGB888), MP_ROM_INT(GFX_RGB888) },
+    { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&mod_fill_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fill_rect), MP_ROM_PTR(&mod_fill_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&mod_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_rect), MP_ROM_PTR(&mod_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_round_rect), MP_ROM_PTR(&mod_round_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&mod_circle_obj) },
+    { MP_ROM_QSTR(MP_QSTR_hline), MP_ROM_PTR(&mod_hline_obj) },
+    { MP_ROM_QSTR(MP_QSTR_vline), MP_ROM_PTR(&mod_vline_obj) },
+    { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&mod_line_obj) },
+    { MP_ROM_QSTR(MP_QSTR_ellipse), MP_ROM_PTR(&mod_ellipse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_arc), MP_ROM_PTR(&mod_arc_obj) },
+    { MP_ROM_QSTR(MP_QSTR_triangle), MP_ROM_PTR(&mod_triangle_obj) },
+    { MP_ROM_QSTR(MP_QSTR_gradient_rect), MP_ROM_PTR(&mod_gradient_rect_obj) },
+#if MICROPY_PY_ARRAY
+    { MP_ROM_QSTR(MP_QSTR_poly), MP_ROM_PTR(&mod_poly_obj) },
+#endif
+    { MP_ROM_QSTR(MP_QSTR_blit), MP_ROM_PTR(&mod_blit_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_rect), MP_ROM_PTR(&mod_blit_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_transparent), MP_ROM_PTR(&mod_blit_transparent_obj) },
+    { MP_ROM_QSTR(MP_QSTR_polygon), MP_ROM_PTR(&mod_polygon_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&mod_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text8), MP_ROM_PTR(&mod_text8_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text14), MP_ROM_PTR(&mod_text14_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text16), MP_ROM_PTR(&mod_text16_obj) },
+    { MP_ROM_QSTR(MP_QSTR_load_image), MP_ROM_PTR(&mod_load_image_obj) },
+    { MP_ROM_QSTR(MP_QSTR_save_image), MP_ROM_PTR(&mod_save_image_obj) },
+    { MP_ROM_QSTR(MP_QSTR_bmp_to_framebuffer), MP_ROM_PTR(&mod_bmp_to_framebuffer_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pbm_to_framebuffer), MP_ROM_PTR(&mod_pbm_to_framebuffer_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pgm_to_framebuffer), MP_ROM_PTR(&mod_pgm_to_framebuffer_obj) },
+    { MP_ROM_QSTR(MP_QSTR_framebuf_backend), MP_ROM_PTR(&mod_framebuf_backend_obj) },
+    { MP_ROM_QSTR(MP_QSTR_implementation), MP_ROM_PTR(&mod_implementation_obj) },
+    { MP_ROM_QSTR(MP_QSTR_capabilities), MP_ROM_PTR(&mod_capabilities_obj) },
+};
+
+MP_DEFINE_CONST_DICT(graphics_module_globals, graphics_module_globals_table);
+
+const mp_obj_module_t mp_module_graphics = {
+    .base = { &mp_type_module },
+    .globals = (mp_obj_dict_t *)&graphics_module_globals,
+};
+
+#if !CIRCUITPY
+MP_REGISTER_MODULE(MP_QSTR_graphics, mp_module_graphics);
+#endif
