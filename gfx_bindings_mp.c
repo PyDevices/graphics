@@ -167,19 +167,28 @@ static int parse_font_height_from_name(const char *path, int *height) {
     return 0;
 }
 
-static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    mp_arg_check_num(n_args, n_kw, 0, 2, false);
+static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args_in) {
+    enum { ARG_font_data, ARG_height };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_font_data, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_height, MP_ARG_INT, {.u_int = 0} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, args_in, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+
     mp_obj_font_t *o = mp_obj_malloc(mp_obj_font_t, &mp_type_font);
     o->data_obj = mp_const_none;
-    int height = 8;
-    if (n_args >= 2 && args[1] != mp_const_none) {
-        height = mp_obj_get_int(args[1]);
-    }
-    if (n_args >= 1 && args[0] != mp_const_none) {
-        if (mp_obj_is_str(args[0])) {
-            const char *path = mp_obj_str_get_str(args[0]);
-            if (n_args < 2 && parse_font_height_from_name(path, &height) < 0) {
+    int height = parsed[ARG_height].u_int;
+    mp_obj_t font_arg = parsed[ARG_font_data].u_obj;
+
+    if (font_arg != mp_const_none) {
+        if (mp_obj_is_str(font_arg)) {
+            const char *path = mp_obj_str_get_str(font_arg);
+            if (height == 0 && parse_font_height_from_name(path, &height) < 0) {
                 mp_raise_ValueError(MP_ERROR_TEXT("Invalid font"));
+            }
+            if (height == 0) {
+                height = 8;
             }
             FILE *f = fopen(path, "rb");
             if (!f) {
@@ -202,11 +211,17 @@ static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
             o->font.owns_data = 1;
         } else {
             mp_buffer_info_t bufinfo;
-            mp_get_buffer_raise(args[0], &bufinfo, MP_BUFFER_READ);
-            o->data_obj = args[0];
+            mp_get_buffer_raise(font_arg, &bufinfo, MP_BUFFER_READ);
+            o->data_obj = font_arg;
+            if (height == 0) {
+                height = 8;
+            }
             gfx_font_init_from_data(&o->font, bufinfo.buf, bufinfo.len, height);
         }
     } else {
+        if (height == 0) {
+            height = 8;
+        }
         gfx_font_init_default(&o->font, height);
     }
     return MP_OBJ_FROM_PTR(o);

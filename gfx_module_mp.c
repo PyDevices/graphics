@@ -131,6 +131,15 @@ static mp_obj_t framebuf_rect(size_t n_args, const mp_obj_t *args_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_rect_obj, 6, 7, framebuf_rect);
 
+static mp_obj_t framebuf_round_rect(size_t n_args, const mp_obj_t *args_in) {
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
+    bool fill = n_args > 7 && mp_obj_is_true(args_in[7]);
+    gfx_area_t area = gfx_shapes_round_rect(&self->canvas, mp_obj_get_int(args_in[1]), mp_obj_get_int(args_in[2]),
+        mp_obj_get_int(args_in[3]), mp_obj_get_int(args_in[4]), mp_obj_get_int(args_in[5]), mp_obj_get_int(args_in[6]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_round_rect_obj, 7, 8, framebuf_round_rect);
+
 static mp_obj_t framebuf_line(size_t n_args, const mp_obj_t *args_in) {
     (void)n_args;
     mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
@@ -215,6 +224,17 @@ static mp_obj_t framebuf_text(size_t n_args, const mp_obj_t *args_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_text_obj, 4, 5, framebuf_text);
 
+static mp_obj_t framebuf_text16(size_t n_args, const mp_obj_t *args_in) {
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
+    const char *str = mp_obj_str_get_str(args_in[1]);
+    mp_int_t x0 = mp_obj_get_int(args_in[2]);
+    mp_int_t y0 = mp_obj_get_int(args_in[3]);
+    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args_in[4]) : 1;
+    gfx_area_t area = gfx_font_text16(&self->canvas, str, x0, y0, col);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_text16_obj, 4, 5, framebuf_text16);
+
 static mp_obj_t framebuf_scroll(mp_obj_t self_in, mp_obj_t xstep_in, mp_obj_t ystep_in) {
     mp_obj_framebuf_t *self = framebuf_from_obj(self_in);
     gfx_fb_scroll(&self->fb, mp_obj_get_int(xstep_in), mp_obj_get_int(ystep_in));
@@ -255,6 +275,7 @@ static const mp_rom_map_elem_t framebuf_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_hline), MP_ROM_PTR(&framebuf_hline_obj) },
     { MP_ROM_QSTR(MP_QSTR_vline), MP_ROM_PTR(&framebuf_vline_obj) },
     { MP_ROM_QSTR(MP_QSTR_rect), MP_ROM_PTR(&framebuf_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_round_rect), MP_ROM_PTR(&framebuf_round_rect_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&framebuf_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_ellipse), MP_ROM_PTR(&framebuf_ellipse_obj) },
 #if MICROPY_PY_ARRAY
@@ -262,6 +283,7 @@ static const mp_rom_map_elem_t framebuf_locals_dict_table[] = {
 #endif
     { MP_ROM_QSTR(MP_QSTR_blit), MP_ROM_PTR(&framebuf_blit_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&framebuf_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text16), MP_ROM_PTR(&framebuf_text16_obj) },
     { MP_ROM_QSTR(MP_QSTR_scroll), MP_ROM_PTR(&framebuf_scroll_obj) },
 };
 static MP_DEFINE_CONST_DICT(framebuf_locals_dict, framebuf_locals_dict_table);
