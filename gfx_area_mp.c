@@ -14,6 +14,12 @@ typedef struct _mp_obj_area_t {
 
 const mp_obj_type_t mp_type_area;
 
+mp_obj_t gfx_area_mp_from_gfx(const gfx_area_t *a) {
+    mp_obj_area_t *out = mp_obj_malloc(mp_obj_area_t, &mp_type_area);
+    out->area = *a;
+    return MP_OBJ_FROM_PTR(out);
+}
+
 static mp_obj_area_t *area_from_obj(mp_obj_t obj) {
     mp_obj_t native = mp_obj_cast_to_native_base(obj, MP_OBJ_FROM_PTR(&mp_type_area));
     if (native == MP_OBJ_NULL) {
@@ -92,7 +98,9 @@ static void area_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
             case MP_QSTR_y: dest[0] = MP_OBJ_NEW_SMALL_INT(self->area.y); break;
             case MP_QSTR_w: dest[0] = MP_OBJ_NEW_SMALL_INT(self->area.w); break;
             case MP_QSTR_h: dest[0] = MP_OBJ_NEW_SMALL_INT(self->area.h); break;
-            default: dest[1] = MP_OBJ_NULL; break;
+            default:
+                dest[1] = MP_OBJ_SENTINEL;
+                break;
         }
     }
 }

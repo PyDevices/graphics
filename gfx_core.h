@@ -8,6 +8,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
+/* Format IDs — match MicroPython framebuf + pydisplay RGB888 extension */
 #define GFX_MVLSB    0
 #define GFX_RGB565   1
 #define GFX_GS4_HMSB 2
@@ -15,6 +23,11 @@
 #define GFX_MHMSB    4
 #define GFX_GS2_HMSB 5
 #define GFX_GS8      6
+#define GFX_RGB888   7
+
+#define GFX_MONO_VLSB GFX_MVLSB
+#define GFX_MONO_HLSB GFX_MHLSB
+#define GFX_MONO_HMSB GFX_MHMSB
 
 typedef struct {
     int32_t x;
@@ -91,5 +104,22 @@ static inline gfx_area_t gfx_area_inset(const gfx_area_t *a, int32_t d1, int32_t
     gfx_area_init(&out, a->x + d1, a->y + d2, a->w - d1 - d3, a->h - d2 - d4);
     return out;
 }
+
+static inline gfx_area_t gfx_area_from_rect(int32_t x, int32_t y, int32_t w, int32_t h) {
+    gfx_area_t out;
+    gfx_area_init(&out, x, y, w, h);
+    return out;
+}
+
+/* Draw-target vtable for shapes */
+typedef struct gfx_canvas {
+    void *ctx;
+    int width;
+    int height;
+    int (*pixel)(void *ctx, int x, int y, int c, int set);
+    void (*hline)(void *ctx, int x, int y, int w, int c);
+    void (*vline)(void *ctx, int x, int y, int h, int c);
+    void (*fill_rect)(void *ctx, int x, int y, int w, int h, int c);
+} gfx_canvas_t;
 
 #endif

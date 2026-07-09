@@ -9,6 +9,9 @@ description = "Native graphics cmod for CPython (FrameBuffer, Area)"
 license = "MIT"
 requires-python = ">=3.10"
 
+[tool.setuptools]
+packages = []
+
 [tool.setuptools.dynamic]
 version = { file = "VERSION" }
 
@@ -16,7 +19,7 @@ version = { file = "VERSION" }
 [tool.cibuildwheel]
 build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
 skip = "*musllinux* *-macosx_* *-win32"
-test-command = "python -c \"import graphics_native; from graphics import FrameBuffer, RGB565, framebuf_backend; assert framebuf_backend() == 'native'\""
+test-command = "python -c \"import graphics; from graphics import FrameBuffer, RGB565, framebuf_backend; assert framebuf_backend() == 'native'\""
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64"]
@@ -28,7 +31,7 @@ archs = ["AMD64"]
 [tool.cibuildwheel.android]
 archs = ["arm64_v8a", "x86_64"]
 environment = { ANDROID_API_LEVEL = "21" }
-test-command = "python -c \"import graphics_native; from graphics import framebuf_backend; assert framebuf_backend() == 'native'\""
+test-command = "python -c \"import graphics; assert graphics.framebuf_backend() == 'native'\""
 test-skip = "*"
 
 [[tool.cibuildwheel.overrides]]

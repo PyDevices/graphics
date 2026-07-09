@@ -1,60 +1,62 @@
 # graphics
 
-Native graphics cmod for **MicroPython**, **CircuitPython**, and **CPython**.
+Native all-C graphics cmod for **MicroPython**, **CircuitPython**, and **CPython**.
+
+`import graphics` loads a single C module — no Python package inside this repo.
 
 Provides:
 
-- `graphics_native` C module: framebuf-compatible `FrameBuffer`, native `Area`, format constants
-- Frozen / pip `graphics` package: `_framebuf`, `_framebuf_plus`, `_area`, capability reporting
+- `Area` — rectangle geometry helper
+- `FrameBuffer` — framebuf-compatible drawing surface (returns `Area` bounds)
+- Format constants: `MONO_VLSB`, `MONO_HLSB`, `MONO_HMSB`, `RGB565`, `GS2_HMSB`, `GS4_HMSB`, `GS8`, `RGB888`
+- `framebuf_backend()`, `capabilities()`, `implementation()`
 
 ## Layout
 
 ```
 graphics/
-  py/graphics/           # frozen MP package (graphics._framebuf, _area, …)
-  gfxpy/                 # CPython packaging placeholder
-  graphics_bundle.c      # MP/CP FrameBuffer (from micropython framebuf)
-  gfx_area_mp.c          # MP/CP native Area
-  graphics_native_cpy.c  # CPython extension
+  gfx_core.h           # types, format IDs, Area geometry
+  gfx_framebuffer.c/h  # format pixel ops
+  gfx_shapes.c/h       # drawing algorithms via gfx_canvas_t
+  gfx_draw.c/h         # Draw clip stack (C core)
+  gfx_font.c/h         # text8
+  gfx_capabilities.c/h # capabilities reporting
+  gfx_area_mp.c        # MicroPython Area bindings
+  gfx_module_mp.c      # MicroPython module registration
+  gfx_module_cpy.c     # CPython module registration
   micropython.mk
   circuitpython.mk
-  test_graphics.py
   test_area.py
-  scripts/benchmark_framebuf.py
+  test_graphics.py
+  test_subclass.py
 ```
 
 ## Build & test
-
-### MicroPython (from cmods workspace)
-
-```bash
-ln -sfn ../graphics graphics   # if not already linked
-# manifest.py: package("graphics", base_path="graphics/py", opt=3)
-./build_mp.sh --port unix --variant standard
-./micropython/ports/unix/build-standard/micropython ../graphics/test_area.py
-./micropython/ports/unix/build-standard/micropython ../graphics/test_graphics.py
-```
 
 ### CPython
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -e .
-.venv/bin/python test_area.py      # run from /tmp or after pip install
+.venv/bin/python test_area.py
 .venv/bin/python test_graphics.py
-.venv/bin/python scripts/benchmark_framebuf.py
+.venv/bin/python test_subclass.py
 ```
 
-### CircuitPython
+### MicroPython (from cmods workspace)
+
+The cmods root `manifest.py` must **not** freeze `graphics/py` when the C usermod is linked.
 
 ```bash
-./apply_cp_unix_graphics_patches.sh
-# then build unix/coverage via lv_circuitpython_mod/build_cp.sh
+cd /path/to/cmods
+./build_mp.sh --port unix --variant standard
+./micropython/ports/unix/build-standard/micropython graphics/test_area.py
+./micropython/ports/unix/build-standard/micropython graphics/test_graphics.py
 ```
 
 ## pydisplay integration
 
-`pydisplay` imports `from graphics._framebuf import FrameBuffer, RGB565, …`. With this cmod installed, `graphics.framebuf_backend()` reports `native`.
+pydisplay's Python `src/lib/graphics` remains the pure-Python implementation. When this cmod is installed or linked, `graphics.framebuf_backend()` reports `native` and `graphics.implementation()` reports `native_cmod`.
 
 ## License
 

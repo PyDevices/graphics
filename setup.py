@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: MIT
-"""Build graphics_native CPython extension and graphics package."""
+"""Build native graphics C extension."""
 
 import sys
 
 from setuptools import Extension, setup
-
-RELEASE_VERSION = "0.0.1"  # baseline when no git tags (see scripts/next_release_version.sh)
 
 if sys.platform == "win32":
     extra_compile_args = ["/wd4996"]
@@ -15,17 +13,23 @@ else:
         "-Wno-sign-compare",
     ]
 
+GFX_SOURCES = [
+    "gfx_module_cpy.c",
+    "gfx_framebuffer.c",
+    "gfx_shapes.c",
+    "gfx_draw.c",
+    "gfx_font.c",
+    "gfx_capabilities.c",
+]
+
 setup(
     name="graphics-cmod",
-    packages=["graphics", "gfxpy"],
-    package_dir={
-        "graphics": "py/graphics",
-        "gfxpy": "gfxpy",
-    },
+    packages=[],
+    py_modules=[],
     ext_modules=[
         Extension(
-            "graphics_native",
-            sources=["graphics_native_cpy.c"],
+            "graphics",
+            sources=GFX_SOURCES,
             include_dirs=["."],
             extra_compile_args=extra_compile_args,
         ),
