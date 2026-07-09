@@ -6,10 +6,13 @@ QSTR_DEFS += $(GRAPHICS_MOD_DIR)/graphics_qstrdefs.h
 
 GRAPHICS_SOURCES := \
     $(GRAPHICS_MOD_DIR)/gfx_module_mp.c \
+    $(GRAPHICS_MOD_DIR)/gfx_bindings_mp.c \
     $(GRAPHICS_MOD_DIR)/gfx_framebuffer.c \
     $(GRAPHICS_MOD_DIR)/gfx_shapes.c \
     $(GRAPHICS_MOD_DIR)/gfx_draw.c \
     $(GRAPHICS_MOD_DIR)/gfx_font.c \
+    $(GRAPHICS_MOD_DIR)/gfx_bmp565.c \
+    $(GRAPHICS_MOD_DIR)/gfx_files.c \
     $(GRAPHICS_MOD_DIR)/gfx_capabilities.c \
     $(GRAPHICS_MOD_DIR)/gfx_area_mp.c
 

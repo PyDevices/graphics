@@ -19,6 +19,14 @@
 
 const mp_obj_type_t mp_type_framebuf;
 
+static mp_obj_framebuf_t *framebuf_from_obj(mp_obj_t obj) {
+    mp_obj_t native = mp_obj_cast_to_native_base(obj, MP_OBJ_FROM_PTR(&mp_type_framebuf));
+    if (native == MP_OBJ_NULL) {
+        mp_raise_TypeError(MP_ERROR_TEXT("FrameBuffer required"));
+    }
+    return MP_OBJ_TO_PTR(native);
+}
+
 mp_obj_t framebuf_make_new_helper(size_t n_args, const mp_obj_t *args_in, unsigned int buf_flags, mp_obj_framebuf_t *o) {
     mp_int_t width = mp_obj_get_int(args_in[1]);
     mp_int_t height = mp_obj_get_int(args_in[2]);
@@ -47,7 +55,8 @@ mp_obj_t framebuf_make_new_helper(size_t n_args, const mp_obj_t *args_in, unsign
 
 static mp_obj_t framebuf_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args_in) {
     mp_arg_check_num(n_args, n_kw, 4, 5, false);
-    return framebuf_make_new_helper(n_args, args_in, MP_BUFFER_WRITE, NULL);
+    mp_obj_framebuf_t *o = mp_obj_malloc(mp_obj_framebuf_t, type);
+    return framebuf_make_new_helper(n_args, args_in, MP_BUFFER_WRITE, o);
 }
 
 static void framebuf_args(const mp_obj_t *args_in, mp_int_t *args_out, int n) {
@@ -57,19 +66,19 @@ static void framebuf_args(const mp_obj_t *args_in, mp_int_t *args_out, int n) {
 }
 
 static mp_int_t framebuf_get_buffer(mp_obj_t self_in, mp_buffer_info_t *bufinfo, mp_uint_t flags) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_framebuf_t *self = framebuf_from_obj(self_in);
     return mp_get_buffer(self->buf_obj, bufinfo, flags) ? 0 : 1;
 }
 
 static mp_obj_t framebuf_fill(mp_obj_t self_in, mp_obj_t col_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_framebuf_t *self = framebuf_from_obj(self_in);
     gfx_area_t area = gfx_shapes_fill(&self->canvas, mp_obj_get_int(col_in));
     return gfx_area_mp_from_gfx(&area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(framebuf_fill_obj, framebuf_fill);
 
 static mp_obj_t framebuf_fill_rect(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t args[5];
     framebuf_args(args_in, args, 5);
     gfx_area_t area = gfx_shapes_fill_rect(&self->canvas, args[0], args[1], args[2], args[3], args[4]);
@@ -78,7 +87,7 @@ static mp_obj_t framebuf_fill_rect(size_t n_args, const mp_obj_t *args_in) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_fill_rect_obj, 6, 6, framebuf_fill_rect);
 
 static mp_obj_t framebuf_pixel(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t x = mp_obj_get_int(args_in[1]);
     mp_int_t y = mp_obj_get_int(args_in[2]);
     if (0 <= x && x < self->fb.width && 0 <= y && y < self->fb.height) {
@@ -94,7 +103,7 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_pixel_obj, 3, 4, framebuf_pi
 
 static mp_obj_t framebuf_hline(size_t n_args, const mp_obj_t *args_in) {
     (void)n_args;
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t args[4];
     framebuf_args(args_in, args, 4);
     gfx_area_t area = gfx_shapes_hline(&self->canvas, args[0], args[1], args[2], args[3]);
@@ -104,7 +113,7 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_hline_obj, 5, 5, framebuf_hl
 
 static mp_obj_t framebuf_vline(size_t n_args, const mp_obj_t *args_in) {
     (void)n_args;
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t args[4];
     framebuf_args(args_in, args, 4);
     gfx_area_t area = gfx_shapes_vline(&self->canvas, args[0], args[1], args[2], args[3]);
@@ -113,7 +122,7 @@ static mp_obj_t framebuf_vline(size_t n_args, const mp_obj_t *args_in) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_vline_obj, 5, 5, framebuf_vline);
 
 static mp_obj_t framebuf_rect(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t args[5];
     framebuf_args(args_in, args, 5);
     bool fill = n_args > 6 && mp_obj_is_true(args_in[6]);
@@ -124,7 +133,7 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_rect_obj, 6, 7, framebuf_rec
 
 static mp_obj_t framebuf_line(size_t n_args, const mp_obj_t *args_in) {
     (void)n_args;
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t args[5];
     framebuf_args(args_in, args, 5);
     gfx_area_t area = gfx_shapes_line(&self->canvas, args[0], args[1], args[2], args[3], args[4]);
@@ -133,7 +142,7 @@ static mp_obj_t framebuf_line(size_t n_args, const mp_obj_t *args_in) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_line_obj, 6, 6, framebuf_line);
 
 static mp_obj_t framebuf_ellipse(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t args[5];
     framebuf_args(args_in, args, 5);
     mp_int_t fill = n_args > 6 && mp_obj_is_true(args_in[6]);
@@ -145,7 +154,7 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_ellipse_obj, 6, 8, framebuf_
 
 #if MICROPY_PY_ARRAY
 static mp_obj_t framebuf_poly(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_int_t x = mp_obj_get_int(args_in[1]);
     mp_int_t y = mp_obj_get_int(args_in[2]);
     mp_buffer_info_t bufinfo;
@@ -177,7 +186,7 @@ static void get_readonly_framebuffer(mp_obj_t arg, mp_obj_framebuf_t *rofb) {
 }
 
 static mp_obj_t framebuf_blit(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     mp_obj_framebuf_t source;
     get_readonly_framebuffer(args_in[1], &source);
     mp_int_t x = mp_obj_get_int(args_in[2]);
@@ -196,7 +205,7 @@ static mp_obj_t framebuf_blit(size_t n_args, const mp_obj_t *args_in) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_blit_obj, 4, 6, framebuf_blit);
 
 static mp_obj_t framebuf_text(size_t n_args, const mp_obj_t *args_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(args_in[0]);
+    mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     const char *str = mp_obj_str_get_str(args_in[1]);
     mp_int_t x0 = mp_obj_get_int(args_in[2]);
     mp_int_t y0 = mp_obj_get_int(args_in[3]);
@@ -207,14 +216,14 @@ static mp_obj_t framebuf_text(size_t n_args, const mp_obj_t *args_in) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_text_obj, 4, 5, framebuf_text);
 
 static mp_obj_t framebuf_scroll(mp_obj_t self_in, mp_obj_t xstep_in, mp_obj_t ystep_in) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_framebuf_t *self = framebuf_from_obj(self_in);
     gfx_fb_scroll(&self->fb, mp_obj_get_int(xstep_in), mp_obj_get_int(ystep_in));
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_3(framebuf_scroll_obj, framebuf_scroll);
 
 static void framebuf_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
-    mp_obj_framebuf_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_framebuf_t *self = framebuf_from_obj(self_in);
     if (dest[0] == MP_OBJ_NULL) {
         switch (attr) {
             case MP_QSTR_buffer:

@@ -8,6 +8,9 @@
 #include <structmember.h>
 #include <limits.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "gfx_core.h"
 #include "gfx_framebuffer.h"
@@ -591,12 +594,95 @@ static int get_canvas_from_target(PyObject *target, gfx_canvas_t *canvas, gfx_fb
     if (PyObject_TypeCheck(target, &GfxFrameBufferType)) {
         GfxFrameBufferObject *fb = (GfxFrameBufferObject *)target;
         *canvas = fb->canvas;
+        if (fb_storage) {
+            *fb_storage = fb->fb;
+        }
+        if (fb_keep) {
+            *fb_keep = target;
+        }
         return 0;
     }
     PyErr_SetString(PyExc_TypeError, "FrameBuffer or canvas required");
     (void)fb_storage;
     (void)fb_keep;
     return -1;
+}
+
+static int get_readonly_framebuffer(PyObject *arg, gfx_fb_t *fb_out, gfx_canvas_t *canvas_out, PyObject **keep) {
+    if (PyObject_TypeCheck(arg, &GfxFrameBufferType)) {
+        GfxFrameBufferObject *fb = (GfxFrameBufferObject *)arg;
+        *fb_out = fb->fb;
+        *canvas_out = fb->canvas;
+        if (keep) {
+            *keep = arg;
+        }
+        return 0;
+    }
+    PyObject *fast = PySequence_Fast(arg, "expected sequence");
+    if (!fast) {
+        return -1;
+    }
+    Py_ssize_t len = PySequence_Fast_GET_SIZE(fast);
+    if (len < 4 || len > 5) {
+        Py_DECREF(fast);
+        PyErr_SetString(PyExc_ValueError, "invalid framebuffer parameters");
+        return -1;
+    }
+    PyObject **items = PySequence_Fast_ITEMS(fast);
+    Py_buffer view;
+    if (PyObject_GetBuffer(items[0], &view, PyBUF_READ) < 0) {
+        Py_DECREF(fast);
+        return -1;
+    }
+    long width = PyLong_AsLong(items[1]);
+    long height = PyLong_AsLong(items[2]);
+    long format = PyLong_AsLong(items[3]);
+    long stride = len >= 5 ? PyLong_AsLong(items[4]) : width;
+    if ((width == -1 || height == -1 || format == -1 || stride == -1) && PyErr_Occurred()) {
+        PyBuffer_Release(&view);
+        Py_DECREF(fast);
+        return -1;
+    }
+    if (gfx_fb_validate_buffer(view.len, (int)width, (int)height, (int)format, (int)stride) < 0) {
+        PyBuffer_Release(&view);
+        Py_DECREF(fast);
+        PyErr_SetString(PyExc_ValueError, "invalid framebuffer parameters");
+        return -1;
+    }
+    fb_out->buf = view.buf;
+    fb_out->width = (uint16_t)width;
+    fb_out->height = (uint16_t)height;
+    fb_out->stride = (uint16_t)stride;
+    fb_out->format = (uint8_t)format;
+    gfx_fb_canvas_init(canvas_out, fb_out);
+    if (keep) {
+        Py_INCREF(items[0]);
+        *keep = items[0];
+    }
+    Py_DECREF(fast);
+    return 0;
+}
+
+static PyObject *framebuffer_from_image(gfx_image_fb_t *img) {
+    int width = img->width;
+    int height = img->height;
+    int format = img->format;
+    PyObject *buf = PyByteArray_FromStringAndSize((const char *)img->buffer, (Py_ssize_t)img->buffer_len);
+    gfx_image_fb_free(img);
+    if (!buf) {
+        return NULL;
+    }
+    PyObject *fb = PyObject_New(GfxFrameBufferObject, &GfxFrameBufferType);
+    if (!fb) {
+        Py_DECREF(buf);
+        return NULL;
+    }
+    if (framebuffer_init_from_buffer(buf, width, height, format, width, (GfxFrameBufferObject *)fb) < 0) {
+        Py_DECREF(fb);
+        Py_DECREF(buf);
+        return NULL;
+    }
+    return fb;
 }
 
 static PyObject *mod_framebuf_backend(PyObject *self, PyObject *args) {
@@ -872,6 +958,315 @@ static PyObject *mod_text(PyObject *self, PyObject *args, PyObject *kwds) {
     return mod_text8(self, Py_BuildValue("Osiii", target, str, x, y, col));
 }
 
+static PyObject *mod_ellipse(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int cx, cy, xradius, yradius, col;
+    int fill = 0;
+    int mask_part = 0x0f;
+    if (!PyArg_ParseTuple(args, "Oiiiii|pi", &target, &cx, &cy, &xradius, &yradius, &col, &fill, &mask_part)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_ellipse(&canvas, cx, cy, xradius, yradius, col, fill, mask_part);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_arc(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, r, col;
+    double a0, a1;
+    if (!PyArg_ParseTuple(args, "Oiiiddi", &target, &x, &y, &r, &a0, &a1, &col)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_arc(&canvas, x, y, r, (float)a0, (float)a1, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_triangle(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x0, y0, x1, y1, x2, y2, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "Oiiiiiii|p", &target, &x0, &y0, &x1, &y1, &x2, &y2, &col, &fill)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_triangle(&canvas, x0, y0, x1, y1, x2, y2, col, fill);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_gradient_rect(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, w, h, c1, c2;
+    int vertical = 1;
+    if (!PyArg_ParseTuple(args, "Oiiiii|ip", &target, &x, &y, &w, &h, &c1, &c2, &vertical)) {
+        return NULL;
+    }
+    if (PyTuple_GET_SIZE(args) < 7) {
+        c2 = c1;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_gradient_rect(&canvas, x, y, w, h, c1, c2, vertical);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_poly(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    int x, y, col;
+    PyObject *coords;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "OiiOi|p", &target, &x, &y, &coords, &col, &fill)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    Py_buffer view;
+    if (PyObject_GetBuffer(coords, &view, PyBUF_READ) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_poly(
+        &canvas, x, y, view.buf, (size_t)view.len, (size_t)view.itemsize, view.format, col, fill);
+    PyBuffer_Release(&view);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_blit(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    PyObject *source;
+    int x, y;
+    int key = -1;
+    PyObject *palette = NULL;
+    if (!PyArg_ParseTuple(args, "OOii|iO", &target, &source, &x, &y, &key, &palette)) {
+        return NULL;
+    }
+    gfx_canvas_t dest_canvas;
+    gfx_fb_t dest_fb;
+    PyObject *dest_keep = NULL;
+    if (get_canvas_from_target(target, &dest_canvas, &dest_fb, &dest_keep) < 0) {
+        return NULL;
+    }
+    gfx_fb_t source_fb;
+    gfx_canvas_t source_canvas;
+    PyObject *source_keep = NULL;
+    if (get_readonly_framebuffer(source, &source_fb, &source_canvas, &source_keep) < 0) {
+        return NULL;
+    }
+    const gfx_fb_t *pal = NULL;
+    gfx_fb_t palette_fb;
+    gfx_canvas_t palette_canvas;
+    PyObject *palette_keep = NULL;
+    if (palette != NULL && palette != Py_None) {
+        if (get_readonly_framebuffer(palette, &palette_fb, &palette_canvas, &palette_keep) < 0) {
+            Py_XDECREF(source_keep);
+            return NULL;
+        }
+        pal = &palette_fb;
+    }
+    gfx_area_t area = gfx_shapes_blit(&dest_canvas, &source_fb, x, y, key, pal);
+    Py_XDECREF(source_keep);
+    Py_XDECREF(palette_keep);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_blit_rect(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    PyObject *buf;
+    int x, y, w, h;
+    if (!PyArg_ParseTuple(args, "OOiiii", &target, &buf, &x, &y, &w, &h)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    Py_buffer view;
+    if (PyObject_GetBuffer(buf, &view, PyBUF_READ) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_blit_rect(&canvas, view.buf, x, y, w, h, 2);
+    PyBuffer_Release(&view);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_blit_transparent(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    PyObject *buf;
+    int x, y, w, h, key;
+    if (!PyArg_ParseTuple(args, "OOiiiii", &target, &buf, &x, &y, &w, &h, &key)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    Py_buffer view;
+    if (PyObject_GetBuffer(buf, &view, PyBUF_READ) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_blit_transparent(&canvas, view.buf, x, y, w, h, key, 2);
+    PyBuffer_Release(&view);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_polygon(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    PyObject *points_seq;
+    int x, y, col;
+    double angle = 0.0;
+    int cx = 0;
+    int cy = 0;
+    if (!PyArg_ParseTuple(args, "OOiii|ddi", &target, &points_seq, &x, &y, &col, &angle, &cx, &cy)) {
+        return NULL;
+    }
+    gfx_canvas_t canvas;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(target, &canvas, &fs, &fk) < 0) {
+        return NULL;
+    }
+    PyObject *fast = PySequence_Fast(points_seq, "expected sequence of points");
+    if (!fast) {
+        return NULL;
+    }
+    Py_ssize_t len = PySequence_Fast_GET_SIZE(fast);
+    if (len < 3 || len > 64) {
+        Py_DECREF(fast);
+        PyErr_SetString(PyExc_ValueError, "Polygon must have 3 to 64 points");
+        return NULL;
+    }
+    int points[128];
+    PyObject **items = PySequence_Fast_ITEMS(fast);
+    for (Py_ssize_t i = 0; i < len; i++) {
+        if (!PyTuple_Check(items[i]) || PyTuple_GET_SIZE(items[i]) != 2) {
+            Py_DECREF(fast);
+            PyErr_SetString(PyExc_TypeError, "expected sequence of (x, y) tuples");
+            return NULL;
+        }
+        points[i * 2] = (int)PyLong_AsLong(PyTuple_GET_ITEM(items[i], 0));
+        points[i * 2 + 1] = (int)PyLong_AsLong(PyTuple_GET_ITEM(items[i], 1));
+        if (PyErr_Occurred()) {
+            Py_DECREF(fast);
+            return NULL;
+        }
+    }
+    Py_DECREF(fast);
+    gfx_area_t area = gfx_shapes_polygon(&canvas, points, (size_t)len, x, y, col, (float)angle, cx, cy);
+    return area_from_gfx(&area);
+}
+
+static PyObject *mod_load_image(PyObject *self, PyObject *args) {
+    (void)self;
+    const char *path;
+    if (!PyArg_ParseTuple(args, "s", &path)) {
+        return NULL;
+    }
+    gfx_image_fb_t img = {0};
+    if (gfx_files_load_image(path, &img) < 0) {
+        PyErr_SetString(PyExc_ValueError, "Unsupported image");
+        return NULL;
+    }
+    return framebuffer_from_image(&img);
+}
+
+static PyObject *mod_bmp_to_framebuffer(PyObject *self, PyObject *args) {
+    (void)self;
+    const char *path;
+    if (!PyArg_ParseTuple(args, "s", &path)) {
+        return NULL;
+    }
+    gfx_image_fb_t img = {0};
+    if (gfx_files_bmp_to_framebuffer(path, &img) < 0) {
+        PyErr_SetString(PyExc_ValueError, "BMP load failed");
+        return NULL;
+    }
+    return framebuffer_from_image(&img);
+}
+
+static PyObject *mod_pbm_to_framebuffer(PyObject *self, PyObject *args) {
+    (void)self;
+    const char *path;
+    if (!PyArg_ParseTuple(args, "s", &path)) {
+        return NULL;
+    }
+    gfx_image_fb_t img = {0};
+    if (gfx_files_pbm_to_framebuffer(path, &img) < 0) {
+        PyErr_SetString(PyExc_ValueError, "PBM load failed");
+        return NULL;
+    }
+    return framebuffer_from_image(&img);
+}
+
+static PyObject *mod_pgm_to_framebuffer(PyObject *self, PyObject *args) {
+    (void)self;
+    const char *path;
+    if (!PyArg_ParseTuple(args, "s", &path)) {
+        return NULL;
+    }
+    gfx_image_fb_t img = {0};
+    if (gfx_files_pgm_to_framebuffer(path, &img) < 0) {
+        PyErr_SetString(PyExc_ValueError, "PGM load failed");
+        return NULL;
+    }
+    return framebuffer_from_image(&img);
+}
+
+static PyObject *mod_save_image(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *target;
+    const char *path = "screenshot";
+    if (!PyArg_ParseTuple(args, "O|s", &target, &path)) {
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(target, &GfxFrameBufferType)) {
+        PyErr_SetString(PyExc_TypeError, "FrameBuffer required");
+        return NULL;
+    }
+    GfxFrameBufferObject *fb = (GfxFrameBufferObject *)target;
+    char out_path[256];
+    if (gfx_files_save_image(&fb->fb, path, out_path, sizeof(out_path)) < 0) {
+        PyErr_SetString(PyExc_ValueError, "save_image failed");
+        return NULL;
+    }
+    return PyUnicode_FromString(out_path);
+}
+
 typedef struct {
     PyObject_HEAD
     PyObject *canvas_obj;
@@ -919,8 +1314,74 @@ static PyObject *draw_fill_rect(GfxDrawObject *self, PyObject *args) {
     return area_from_gfx(&area);
 }
 
+static PyObject *draw_fill(GfxDrawObject *self, PyObject *args) {
+    int col;
+    if (!PyArg_ParseTuple(args, "i", &col)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_fill(draw_target(self), col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *draw_rect(GfxDrawObject *self, PyObject *args) {
+    int x, y, w, h, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "iiiii|p", &x, &y, &w, &h, &col, &fill)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_rect(draw_target(self), x, y, w, h, col, fill);
+    return area_from_gfx(&area);
+}
+
+static PyObject *draw_line(GfxDrawObject *self, PyObject *args) {
+    int x1, y1, x2, y2, col;
+    if (!PyArg_ParseTuple(args, "iiiii", &x1, &y1, &x2, &y2, &col)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_line(draw_target(self), x1, y1, x2, y2, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *draw_round_rect(GfxDrawObject *self, PyObject *args) {
+    int x, y, w, h, r, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "iiiiii|p", &x, &y, &w, &h, &r, &col, &fill)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_shapes_round_rect(draw_target(self), x, y, w, h, r, col, fill);
+    return area_from_gfx(&area);
+}
+
+static PyObject *draw_text(GfxDrawObject *self, PyObject *args) {
+    const char *str;
+    int x, y;
+    int col = 1;
+    if (!PyArg_ParseTuple(args, "sii|i", &str, &x, &y, &col)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_font_text8(draw_target(self), str, x, y, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *draw_text14(GfxDrawObject *self, PyObject *args) {
+    const char *str;
+    int x, y;
+    int col = 1;
+    if (!PyArg_ParseTuple(args, "sii|i", &str, &x, &y, &col)) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_font_text14(draw_target(self), str, x, y, col);
+    return area_from_gfx(&area);
+}
+
 static PyMethodDef draw_methods[] = {
+    {"fill", (PyCFunction)draw_fill, METH_VARARGS, NULL},
     {"fill_rect", (PyCFunction)draw_fill_rect, METH_VARARGS, NULL},
+    {"rect", (PyCFunction)draw_rect, METH_VARARGS, NULL},
+    {"line", (PyCFunction)draw_line, METH_VARARGS, NULL},
+    {"round_rect", (PyCFunction)draw_round_rect, METH_VARARGS, NULL},
+    {"text", (PyCFunction)draw_text, METH_VARARGS, NULL},
+    {"text14", (PyCFunction)draw_text14, METH_VARARGS, NULL},
     {NULL},
 };
 
@@ -939,6 +1400,19 @@ typedef struct {
     gfx_font_t font;
 } GfxFontObject;
 
+static PyTypeObject GfxFontType;
+
+static int parse_font_height_from_name(const char *path, int *height) {
+    const char *base = strrchr(path, '/');
+    base = base ? base + 1 : path;
+    const char *x = strrchr(base, 'x');
+    if (!x) {
+        return -1;
+    }
+    *height = atoi(x + 1);
+    return 0;
+}
+
 static PyObject *font_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     (void)kwds;
     PyObject *font_data = Py_None;
@@ -954,6 +1428,11 @@ static PyObject *font_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         gfx_font_init_default(&o->font, height);
     } else if (PyUnicode_Check(font_data)) {
         const char *path = PyUnicode_AsUTF8(font_data);
+        if (PyTuple_GET_SIZE(args) < 2 && parse_font_height_from_name(path, &height) < 0) {
+            Py_DECREF(o);
+            PyErr_SetString(PyExc_ValueError, "Invalid font");
+            return NULL;
+        }
         FILE *f = fopen(path, "rb");
         if (!f) {
             Py_DECREF(o);
@@ -964,7 +1443,13 @@ static PyObject *font_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         long flen = ftell(f);
         fseek(f, 0, SEEK_SET);
         uint8_t *data = (uint8_t *)malloc((size_t)flen);
-        fread(data, 1, (size_t)flen, f);
+        if (!data || fread(data, 1, (size_t)flen, f) != (size_t)flen) {
+            fclose(f);
+            free(data);
+            Py_DECREF(o);
+            PyErr_SetString(PyExc_OSError, "Font read failed");
+            return NULL;
+        }
         fclose(f);
         o->font.data = data;
         o->font.data_len = (size_t)flen;
@@ -983,12 +1468,160 @@ static PyObject *font_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return (PyObject *)o;
 }
 
+static void font_dealloc(GfxFontObject *self) {
+    gfx_font_deinit(&self->font);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+static PyObject *font_text(GfxFontObject *self, PyObject *args) {
+    PyObject *canvas;
+    const char *str;
+    int x, y, col;
+    int scale = 1;
+    int inverted = 0;
+    if (!PyArg_ParseTuple(args, "Osiii|ip", &canvas, &str, &x, &y, &col, &scale, &inverted)) {
+        return NULL;
+    }
+    gfx_canvas_t target;
+    gfx_fb_t fs;
+    PyObject *fk = NULL;
+    if (get_canvas_from_target(canvas, &target, &fs, &fk) < 0) {
+        return NULL;
+    }
+    gfx_area_t area = gfx_font_text(&target, &self->font, str, x, y, col, scale, inverted);
+    return area_from_gfx(&area);
+}
+
+static PyObject *font_get_width(GfxFontObject *self, void *closure) {
+    (void)closure;
+    return PyLong_FromLong(self->font.width);
+}
+
+static PyObject *font_get_height(GfxFontObject *self, void *closure) {
+    (void)closure;
+    return PyLong_FromLong(self->font.height);
+}
+
+static PyGetSetDef font_getset[] = {
+    {"width", (getter)font_get_width, NULL, NULL},
+    {"height", (getter)font_get_height, NULL, NULL},
+    {NULL},
+};
+
+static PyMethodDef font_methods[] = {
+    {"text", (PyCFunction)font_text, METH_VARARGS, NULL},
+    {NULL},
+};
+
 static PyTypeObject GfxFontType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "graphics.Font",
     .tp_basicsize = sizeof(GfxFontObject),
+    .tp_dealloc = (destructor)font_dealloc,
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_methods = font_methods,
+    .tp_getset = font_getset,
     .tp_new = font_new,
+};
+
+typedef struct {
+    PyObject_HEAD
+    gfx_bmp565_t bmp;
+    PyObject *buf_obj;
+} GfxBmp565Object;
+
+static PyTypeObject GfxBmp565Type;
+
+static PyObject *bmp565_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    (void)kwds;
+    Py_ssize_t n = PyTuple_GET_SIZE(args);
+    if (n == 0) {
+        PyErr_SetString(PyExc_ValueError, "Invalid arguments");
+        return NULL;
+    }
+    GfxBmp565Object *o = (GfxBmp565Object *)type->tp_alloc(type, 0);
+    if (!o) {
+        return NULL;
+    }
+    o->buf_obj = Py_None;
+    Py_INCREF(Py_None);
+    PyObject *arg0 = PyTuple_GET_ITEM(args, 0);
+    if (PyUnicode_Check(arg0)) {
+        const char *path = PyUnicode_AsUTF8(arg0);
+        if (gfx_bmp565_load_from_file(path, &o->bmp) < 0) {
+            Py_DECREF(o);
+            PyErr_SetString(PyExc_ValueError, "BMP load failed");
+            return NULL;
+        }
+        Py_SETREF(o->buf_obj, PyByteArray_FromStringAndSize((const char *)o->bmp.buffer, (Py_ssize_t)o->bmp.buffer_len));
+        if (!o->buf_obj) {
+            gfx_bmp565_deinit(&o->bmp);
+            Py_DECREF(o);
+            return NULL;
+        }
+    } else {
+        if (n < 3) {
+            Py_DECREF(o);
+            PyErr_SetString(PyExc_ValueError, "Invalid arguments");
+            return NULL;
+        }
+        int width = (int)PyLong_AsLong(PyTuple_GET_ITEM(args, 1));
+        int height = (int)PyLong_AsLong(PyTuple_GET_ITEM(args, 2));
+        if (PyErr_Occurred()) {
+            Py_DECREF(o);
+            return NULL;
+        }
+        Py_buffer view;
+        if (PyObject_GetBuffer(arg0, &view, PyBUF_READ) < 0) {
+            Py_DECREF(o);
+            return NULL;
+        }
+        Py_SETREF(o->buf_obj, arg0);
+        Py_INCREF(arg0);
+        Py_DECREF(Py_None);
+        gfx_bmp565_init_from_buffer(&o->bmp, view.buf, (size_t)view.len, width, height);
+        PyBuffer_Release(&view);
+    }
+    return (PyObject *)o;
+}
+
+static void bmp565_dealloc(GfxBmp565Object *self) {
+    gfx_bmp565_deinit(&self->bmp);
+    Py_XDECREF(self->buf_obj);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+static PyObject *bmp565_get_width(GfxBmp565Object *self, void *closure) {
+    (void)closure;
+    return PyLong_FromLong(self->bmp.width);
+}
+
+static PyObject *bmp565_get_height(GfxBmp565Object *self, void *closure) {
+    (void)closure;
+    return PyLong_FromLong(self->bmp.height);
+}
+
+static PyObject *bmp565_get_buffer(GfxBmp565Object *self, void *closure) {
+    (void)closure;
+    Py_INCREF(self->buf_obj);
+    return self->buf_obj;
+}
+
+static PyGetSetDef bmp565_getset[] = {
+    {"width", (getter)bmp565_get_width, NULL, NULL},
+    {"height", (getter)bmp565_get_height, NULL, NULL},
+    {"buffer", (getter)bmp565_get_buffer, NULL, NULL},
+    {NULL},
+};
+
+static PyTypeObject GfxBmp565Type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "graphics.BMP565",
+    .tp_basicsize = sizeof(GfxBmp565Object),
+    .tp_dealloc = (destructor)bmp565_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_getset = bmp565_getset,
+    .tp_new = bmp565_new,
 };
 
 static PyMethodDef module_methods[] = {
@@ -1004,6 +1637,20 @@ static PyMethodDef module_methods[] = {
     {"rect", mod_rect, METH_VARARGS, NULL},
     {"round_rect", mod_round_rect, METH_VARARGS, NULL},
     {"circle", mod_circle, METH_VARARGS, NULL},
+    {"ellipse", mod_ellipse, METH_VARARGS, NULL},
+    {"arc", mod_arc, METH_VARARGS, NULL},
+    {"triangle", mod_triangle, METH_VARARGS, NULL},
+    {"gradient_rect", mod_gradient_rect, METH_VARARGS, NULL},
+    {"poly", mod_poly, METH_VARARGS, NULL},
+    {"blit", mod_blit, METH_VARARGS, NULL},
+    {"blit_rect", mod_blit_rect, METH_VARARGS, NULL},
+    {"blit_transparent", mod_blit_transparent, METH_VARARGS, NULL},
+    {"polygon", mod_polygon, METH_VARARGS, NULL},
+    {"load_image", mod_load_image, METH_VARARGS, NULL},
+    {"save_image", mod_save_image, METH_VARARGS, NULL},
+    {"bmp_to_framebuffer", mod_bmp_to_framebuffer, METH_VARARGS, NULL},
+    {"pbm_to_framebuffer", mod_pbm_to_framebuffer, METH_VARARGS, NULL},
+    {"pgm_to_framebuffer", mod_pgm_to_framebuffer, METH_VARARGS, NULL},
     {"text", (PyCFunction)mod_text, METH_VARARGS | METH_KEYWORDS, NULL},
     {"text8", mod_text8, METH_VARARGS, NULL},
     {"text14", mod_text14, METH_VARARGS, NULL},
@@ -1025,7 +1672,8 @@ PyMODINIT_FUNC PyInit_graphics(void) {
         return NULL;
     }
     if (PyType_Ready(&GfxAreaType) < 0 || PyType_Ready(&GfxFrameBufferType) < 0
-        || PyType_Ready(&GfxDrawType) < 0 || PyType_Ready(&GfxFontType) < 0) {
+        || PyType_Ready(&GfxDrawType) < 0 || PyType_Ready(&GfxFontType) < 0
+        || PyType_Ready(&GfxBmp565Type) < 0) {
         Py_DECREF(m);
         return NULL;
     }
@@ -1033,10 +1681,12 @@ PyMODINIT_FUNC PyInit_graphics(void) {
     Py_INCREF(&GfxFrameBufferType);
     Py_INCREF(&GfxDrawType);
     Py_INCREF(&GfxFontType);
+    Py_INCREF(&GfxBmp565Type);
     if (PyModule_AddObject(m, "Area", (PyObject *)&GfxAreaType) < 0
         || PyModule_AddObject(m, "FrameBuffer", (PyObject *)&GfxFrameBufferType) < 0
         || PyModule_AddObject(m, "Draw", (PyObject *)&GfxDrawType) < 0
-        || PyModule_AddObject(m, "Font", (PyObject *)&GfxFontType) < 0) {
+        || PyModule_AddObject(m, "Font", (PyObject *)&GfxFontType) < 0
+        || PyModule_AddObject(m, "BMP565", (PyObject *)&GfxBmp565Type) < 0) {
         Py_DECREF(m);
         return NULL;
     }

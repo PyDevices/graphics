@@ -1,4 +1,3 @@
 // CircuitPython shared-module stub for graphics.
+// Module object is defined in gfx_bindings_mp.c (graphics cmod).
 #include "shared-module/graphics/__init__.h"
-
-const mp_obj_module_t mp_module_graphics;

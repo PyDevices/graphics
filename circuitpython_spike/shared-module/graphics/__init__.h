@@ -2,6 +2,4 @@
 #ifndef SHARED_MODULE_GRAPHICS___INIT___H
 #define SHARED_MODULE_GRAPHICS___INIT___H
 
-extern const mp_obj_module_t mp_module_graphics;
-
 #endif
