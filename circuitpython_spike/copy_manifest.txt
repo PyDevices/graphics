@@ -1,4 +1,4 @@
 shared-bindings/graphics_native	__init__.c
 shared-bindings/graphics_native	__init__.h
-shared-module/graphics_native	__init__.c
-shared-module/graphics_native	__init__.h
+shared-module/graphics_native	__init.c
+shared-module/graphics_native	__init.h
