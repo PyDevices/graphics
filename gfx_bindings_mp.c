@@ -157,6 +157,15 @@ static mp_obj_t draw_pixel(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_pixel_obj, 4, 4, draw_pixel);
 
+static mp_obj_t draw_circle(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    int fill = n_args >= 6 ? mp_obj_is_true(args[5]) : 0;
+    gfx_area_t area = gfx_shapes_circle(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_circle_obj, 5, 6, draw_circle);
+
 static const mp_rom_map_elem_t draw_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&draw_fill_obj) },
     { MP_ROM_QSTR(MP_QSTR_fill_rect), MP_ROM_PTR(&draw_fill_rect_obj) },
@@ -166,6 +175,7 @@ static const mp_rom_map_elem_t draw_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_hline), MP_ROM_PTR(&draw_hline_obj) },
     { MP_ROM_QSTR(MP_QSTR_vline), MP_ROM_PTR(&draw_vline_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&draw_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&draw_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&draw_text_obj) },
     { MP_ROM_QSTR(MP_QSTR_text14), MP_ROM_PTR(&draw_text14_obj) },
 };
