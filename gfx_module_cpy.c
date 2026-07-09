@@ -672,17 +672,17 @@ static PyObject *framebuffer_from_image(gfx_image_fb_t *img) {
     if (!buf) {
         return NULL;
     }
-    PyObject *fb = PyObject_New(GfxFrameBufferObject, &GfxFrameBufferType);
+    GfxFrameBufferObject *fb = PyObject_New(GfxFrameBufferObject, &GfxFrameBufferType);
     if (!fb) {
         Py_DECREF(buf);
         return NULL;
     }
-    if (framebuffer_init_from_buffer(buf, width, height, format, width, (GfxFrameBufferObject *)fb) < 0) {
+    if (framebuffer_init_from_buffer(buf, width, height, format, width, fb) < 0) {
         Py_DECREF(fb);
         Py_DECREF(buf);
         return NULL;
     }
-    return fb;
+    return (PyObject *)fb;
 }
 
 static PyObject *mod_framebuf_backend(PyObject *self, PyObject *args) {
