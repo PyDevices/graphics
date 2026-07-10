@@ -191,6 +191,28 @@ static mp_obj_t framebuf_round_rect(size_t n_args, const mp_obj_t *args, mp_map_
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(framebuf_round_rect_obj, 7, framebuf_round_rect);
 
+static mp_obj_t framebuf_circle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_r, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_framebuf_t *self = framebuf_from_obj(parsed[ARG_self].u_obj);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_circle(&self->canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_r].u_int, parsed[ARG_c].u_int, fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(framebuf_circle_obj, 5, framebuf_circle);
+
 static mp_obj_t framebuf_line(size_t n_args, const mp_obj_t *args_in) {
     (void)n_args;
     mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
@@ -352,6 +374,7 @@ static const mp_rom_map_elem_t framebuf_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_vline), MP_ROM_PTR(&framebuf_vline_obj) },
     { MP_ROM_QSTR(MP_QSTR_rect), MP_ROM_PTR(&framebuf_rect_obj) },
     { MP_ROM_QSTR(MP_QSTR_round_rect), MP_ROM_PTR(&framebuf_round_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&framebuf_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&framebuf_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_ellipse), MP_ROM_PTR(&framebuf_ellipse_obj) },
 #if MICROPY_PY_ARRAY

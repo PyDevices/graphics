@@ -493,6 +493,26 @@ static PyObject *framebuffer_rect(GfxFrameBufferObject *self, PyObject *args) {
     return area_from_gfx(&result);
 }
 
+static PyObject *framebuffer_round_rect(GfxFrameBufferObject *self, PyObject *args) {
+    int x, y, w, h, r, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "iiiiii|p", &x, &y, &w, &h, &r, &col, &fill)) {
+        return NULL;
+    }
+    gfx_area_t result = gfx_shapes_round_rect(&self->canvas, x, y, w, h, r, col, fill);
+    return area_from_gfx(&result);
+}
+
+static PyObject *framebuffer_circle(GfxFrameBufferObject *self, PyObject *args) {
+    int x, y, r, col;
+    int fill = 0;
+    if (!PyArg_ParseTuple(args, "iiii|p", &x, &y, &r, &col, &fill)) {
+        return NULL;
+    }
+    gfx_area_t result = gfx_shapes_circle(&self->canvas, x, y, r, col, fill);
+    return area_from_gfx(&result);
+}
+
 static PyObject *framebuffer_line(GfxFrameBufferObject *self, PyObject *args) {
     int x1, y1, x2, y2, col;
     if (!PyArg_ParseTuple(args, "iiiii", &x1, &y1, &x2, &y2, &col)) {
@@ -568,6 +588,8 @@ static PyMethodDef framebuffer_methods[] = {
     {"hline", (PyCFunction)framebuffer_hline, METH_VARARGS, NULL},
     {"vline", (PyCFunction)framebuffer_vline, METH_VARARGS, NULL},
     {"rect", (PyCFunction)framebuffer_rect, METH_VARARGS, NULL},
+    {"round_rect", (PyCFunction)framebuffer_round_rect, METH_VARARGS, NULL},
+    {"circle", (PyCFunction)framebuffer_circle, METH_VARARGS, NULL},
     {"line", (PyCFunction)framebuffer_line, METH_VARARGS, NULL},
     {"ellipse", (PyCFunction)framebuffer_ellipse, METH_VARARGS, NULL},
     {"poly", (PyCFunction)framebuffer_poly, METH_VARARGS, NULL},
