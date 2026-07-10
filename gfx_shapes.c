@@ -9,6 +9,7 @@
 
 #include <limits.h>
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "gfx_shapes.h"
@@ -104,69 +105,61 @@ gfx_area_t gfx_shapes_fill(const gfx_canvas_t *canvas, int c) {
     return gfx_area_from_rect(0, 0, canvas->width, canvas->height);
 }
 
-gfx_area_t gfx_shapes_line(const gfx_canvas_t *canvas, int ox1, int oy1, int ox2, int oy2, int col) {
+gfx_area_t gfx_shapes_line(const gfx_canvas_t *canvas, int ox0, int oy0, int ox1, int oy1, int col) {
+    int x0 = ox0;
+    int y0 = oy0;
     int x1 = ox1;
     int y1 = oy1;
-    int x2 = ox2;
-    int y2 = oy2;
-    int dx = x2 - x1;
-    int sx;
-    if (dx > 0) {
-        sx = 1;
-    } else {
-        dx = -dx;
-        sx = -1;
+
+    if (x0 == x1) {
+        int y = y0 < y1 ? y0 : y1;
+        return gfx_shapes_vline(canvas, x0, y, abs(y1 - y0) + 1, col);
+    }
+    if (y0 == y1) {
+        int x = x0 < x1 ? x0 : x1;
+        return gfx_shapes_hline(canvas, x, y0, abs(x1 - x0) + 1, col);
     }
 
-    int dy = y2 - y1;
-    int sy;
-    if (dy > 0) {
-        sy = 1;
-    } else {
-        dy = -dy;
-        sy = -1;
-    }
-
-    bool steep;
-    if (dy > dx) {
-        int temp = x1;
+    bool steep = abs(y1 - y0) > abs(x1 - x0);
+    if (steep) {
+        int t = x0;
+        x0 = y0;
+        y0 = t;
+        t = x1;
         x1 = y1;
-        y1 = temp;
-        temp = dx;
-        dx = dy;
-        dy = temp;
-        temp = sx;
-        sx = sy;
-        sy = temp;
-        steep = true;
-    } else {
-        steep = false;
+        y1 = t;
+    }
+    if (x0 > x1) {
+        int t = x0;
+        x0 = x1;
+        x1 = t;
+        t = y0;
+        y0 = y1;
+        y1 = t;
     }
 
-    int e = 2 * dy - dx;
-    for (int i = 0; i < dx; ++i) {
+    int dx = x1 - x0;
+    int dy = abs(y1 - y0);
+    int err = dx / 2;
+    int ystep = y0 < y1 ? 1 : -1;
+    while (x0 <= x1) {
         if (steep) {
-            if (0 <= y1 && y1 < canvas->width && 0 <= x1 && x1 < canvas->height) {
-                canvas->pixel(canvas->ctx, y1, x1, col, 1);
-            }
+            gfx_shapes_pixel(canvas, y0, x0, col);
         } else {
-            if (0 <= x1 && x1 < canvas->width && 0 <= y1 && y1 < canvas->height) {
-                canvas->pixel(canvas->ctx, x1, y1, col, 1);
-            }
+            gfx_shapes_pixel(canvas, x0, y0, col);
         }
-        while (e >= 0) {
-            y1 += sy;
-            e -= 2 * dx;
+        err -= dy;
+        if (err < 0) {
+            y0 += ystep;
+            err += dx;
         }
-        x1 += sx;
-        e += 2 * dy;
+        x0 += 1;
     }
-    canvas->pixel(canvas->ctx, x2, y2, col, 1);
 
-    int x_min = MIN(ox1, ox2);
-    int x_max = MAX(ox1, ox2);
-    int y_min = MIN(oy1, oy2);
-    int y_max = MAX(oy1, oy2);
+    int x_min = MIN(ox0, ox1);
+    int y_min = MIN(oy0, oy1);
+    int x_max = MAX(ox0, ox1);
+    int y_max = MAX(oy0, oy1);
     return gfx_area_from_rect(x_min, y_min, x_max - x_min + 1, y_max - y_min + 1);
 }
 

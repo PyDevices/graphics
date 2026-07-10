@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "font_petme128_8x8.h"
+#include "font_8x8.h"
 #include "font_8x14.h"
 #include "font_8x16.h"
 
@@ -21,7 +21,7 @@ static void ensure_defaults(void) {
     if (defaults_ready) {
         return;
     }
-    gfx_font_init_from_data(&default_font8, font_petme128_8x8, sizeof(font_petme128_8x8), 8);
+    gfx_font_init_from_data(&default_font8, font_8x8, FONT_8X8_LEN, 8);
     gfx_font_init_from_data(&default_font14, font_8x14, FONT_8X14_LEN, 14);
     gfx_font_init_from_data(&default_font16, font_8x16, FONT_8X16_LEN, 16);
     defaults_ready = 1;
