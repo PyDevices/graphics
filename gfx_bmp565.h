@@ -30,6 +30,7 @@ int gfx_bmp565_load_from_file(const char *path, gfx_bmp565_t *out);
 int gfx_bmp565_init_from_buffer(gfx_bmp565_t *out, const uint8_t *buf, size_t len, int width, int height);
 void gfx_bmp565_deinit(gfx_bmp565_t *bmp);
 int gfx_bmp565_save(const gfx_bmp565_t *bmp, const char *path);
+int gfx_bmp565_save_versioned(const gfx_bmp565_t *bmp, const char *path, char *out_path, size_t out_path_len);
 int gfx_bmp565_read_bytes(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out, size_t out_cap, size_t *out_len);
 int gfx_bmp565_read_region(const gfx_bmp565_t *bmp, int x0, int x1, int y0, int y1, uint8_t *out, size_t out_cap, size_t *out_len);
 

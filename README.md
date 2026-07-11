@@ -45,7 +45,7 @@ python3 -m venv .venv
 
 ### MicroPython (from cmods workspace)
 
-The cmods root `manifest.py` must **not** freeze `graphics/py` when the C usermod is linked.
+There is no `graphics/manifest.py` — the C usermod is the only graphics path when linked via cmods.
 
 ```bash
 cd /path/to/cmods

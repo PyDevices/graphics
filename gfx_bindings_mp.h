@@ -26,6 +26,7 @@ typedef struct _mp_obj_bmp565_t {
     mp_obj_base_t base;
     gfx_bmp565_t bmp;
     mp_obj_t buf_obj;
+    mp_obj_t filename_obj;
 } mp_obj_bmp565_t;
 
 #endif

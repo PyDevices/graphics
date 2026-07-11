@@ -89,23 +89,52 @@ static mp_obj_t draw_fill_rect(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_fill_rect_obj, 6, 6, draw_fill_rect);
 
-static mp_obj_t draw_rect(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
-    bool fill = n_args > 6 && mp_obj_is_true(args[6]);
-    gfx_area_t area = gfx_shapes_rect(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), fill);
+static mp_obj_t draw_rect(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_rect(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int, parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_rect_obj, 6, 7, draw_rect);
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_rect_obj, 6, draw_rect);
 
-static mp_obj_t draw_round_rect(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
-    bool fill = n_args > 7 && mp_obj_is_true(args[7]);
-    gfx_area_t area = gfx_shapes_round_rect(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), mp_obj_get_int(args[6]), fill);
+static mp_obj_t draw_round_rect(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h, ARG_r, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_round_rect(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int, parsed[ARG_r].u_int, parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_round_rect_obj, 7, 8, draw_round_rect);
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_round_rect_obj, 7, draw_round_rect);
 
 static mp_obj_t draw_line(size_t n_args, const mp_obj_t *args) {
     mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
@@ -114,24 +143,6 @@ static mp_obj_t draw_line(size_t n_args, const mp_obj_t *args) {
     return gfx_area_mp_from_gfx(&area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_line_obj, 6, 6, draw_line);
-
-static mp_obj_t draw_text14(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
-    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
-    gfx_area_t area = gfx_font_text14(draw_target(self), mp_obj_str_get_str(args[1]),
-        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
-    return gfx_area_mp_from_gfx(&area);
-}
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_text14_obj, 4, 5, draw_text14);
-
-static mp_obj_t draw_text(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
-    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
-    gfx_area_t area = gfx_font_text8(draw_target(self), mp_obj_str_get_str(args[1]),
-        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
-    return gfx_area_mp_from_gfx(&area);
-}
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_text_obj, 4, 5, draw_text);
 
 static mp_obj_t draw_hline(size_t n_args, const mp_obj_t *args) {
     mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
@@ -157,14 +168,397 @@ static mp_obj_t draw_pixel(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_pixel_obj, 4, 4, draw_pixel);
 
-static mp_obj_t draw_circle(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
-    int fill = n_args >= 6 ? mp_obj_is_true(args[5]) : 0;
-    gfx_area_t area = gfx_shapes_circle(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), fill);
+static mp_obj_t draw_circle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_r, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_circle(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_r].u_int, parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_circle_obj, 5, 6, draw_circle);
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_circle_obj, 5, draw_circle);
+
+static mp_obj_t draw_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_r1, ARG_r2, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0x0f} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_m, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0x0f} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    mp_int_t mask = (n_args > 7) ? parsed[ARG_mask_pos].u_int : parsed[ARG_m].u_int;
+    gfx_area_t area = gfx_shapes_ellipse(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_r1].u_int, parsed[ARG_r2].u_int, parsed[ARG_c].u_int, fill, mask);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_ellipse_obj, 6, draw_ellipse);
+
+static mp_obj_t draw_arc(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    gfx_area_t area = gfx_shapes_arc(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), (float)mp_obj_get_float(args[4]), (float)mp_obj_get_float(args[5]),
+        mp_obj_get_int(args[6]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_arc_obj, 7, 7, draw_arc);
+
+static mp_obj_t draw_triangle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x0, ARG_y0, ARG_x1, ARG_y1, ARG_x2, ARG_y2, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_triangle(draw_target(self),
+        parsed[ARG_x0].u_int, parsed[ARG_y0].u_int, parsed[ARG_x1].u_int, parsed[ARG_y1].u_int,
+        parsed[ARG_x2].u_int, parsed[ARG_y2].u_int, parsed[ARG_c].u_int, fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_triangle_obj, 8, draw_triangle);
+
+static mp_obj_t draw_gradient_rect(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h, ARG_c1, ARG_c2_pos, ARG_vert_pos, ARG_c2, ARG_vertical };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_, MP_ARG_BOOL, {.u_bool = true} },
+        { MP_QSTR_c2, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_vertical, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = true} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    mp_obj_t c2_obj = (n_args > 6) ? parsed[ARG_c2_pos].u_obj : parsed[ARG_c2].u_obj;
+    int c2 = (c2_obj == mp_const_none) ? parsed[ARG_c1].u_int : mp_obj_get_int(c2_obj);
+    int vertical = (n_args > 7) ? parsed[ARG_vert_pos].u_bool : parsed[ARG_vertical].u_bool;
+    gfx_area_t area = gfx_shapes_gradient_rect(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int, parsed[ARG_c1].u_int, c2, vertical);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_gradient_rect_obj, 6, draw_gradient_rect);
+
+#if MICROPY_PY_ARRAY
+static mp_obj_t draw_poly(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_coords, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(parsed[ARG_coords].u_obj, &bufinfo, MP_BUFFER_READ);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    char fmt[2] = { (char)bufinfo.typecode, '\0' };
+    gfx_area_t area = gfx_shapes_poly(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        bufinfo.buf, bufinfo.len, mp_binary_get_size('@', bufinfo.typecode, NULL), fmt,
+        parsed[ARG_c].u_int, fill);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_poly_obj, 5, draw_poly);
+#endif
+
+static mp_obj_t draw_polygon(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_points, ARG_x, ARG_y, ARG_color, ARG_angle_pos, ARG_cx_pos, ARG_cy_pos, ARG_angle, ARG_center_x, ARG_center_y };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = MP_OBJ_NEW_SMALL_INT(0)} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_angle, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NEW_SMALL_INT(0)} },
+        { MP_QSTR_center_x, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_center_y, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    size_t len;
+    mp_obj_t *items;
+    mp_obj_get_array(parsed[ARG_points].u_obj, &len, &items);
+    if (len < 3) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Polygon must have at least 3 points"));
+    }
+    int points[128];
+    if (len > 64) {
+        mp_raise_ValueError(NULL);
+    }
+    for (size_t i = 0; i < len; i++) {
+        size_t plen;
+        mp_obj_t *pitems;
+        mp_obj_get_array(items[i], &plen, &pitems);
+        if (plen != 2) {
+            mp_raise_ValueError(NULL);
+        }
+        points[i * 2] = mp_obj_get_int(pitems[0]);
+        points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
+    }
+    mp_obj_t angle_obj = (n_args > 5) ? parsed[ARG_angle_pos].u_obj : parsed[ARG_angle].u_obj;
+    float angle = (float)mp_obj_get_float(angle_obj);
+    int cx = (n_args > 6) ? parsed[ARG_cx_pos].u_int : parsed[ARG_center_x].u_int;
+    int cy = (n_args > 7) ? parsed[ARG_cy_pos].u_int : parsed[ARG_center_y].u_int;
+    gfx_area_t area = gfx_shapes_polygon(draw_target(self), points, len, parsed[ARG_x].u_int,
+        parsed[ARG_y].u_int, parsed[ARG_color].u_int, angle, cx, cy);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_polygon_obj, 5, draw_polygon);
+
+static void get_readonly_framebuffer_draw(mp_obj_t arg, mp_obj_framebuf_t *rofb) {
+    mp_obj_t fb = mp_obj_cast_to_native_base(arg, MP_OBJ_FROM_PTR(&mp_type_framebuf));
+    if (fb != MP_OBJ_NULL) {
+        *rofb = *(mp_obj_framebuf_t *)MP_OBJ_TO_PTR(fb);
+    } else {
+        size_t len;
+        mp_obj_t *items;
+        mp_obj_get_array(arg, &len, &items);
+        if (len < 4 || len > 5) {
+            mp_raise_ValueError(NULL);
+        }
+        framebuf_make_new_helper(len, items, MP_BUFFER_READ, rofb);
+    }
+}
+
+static mp_obj_t draw_blit(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_source, ARG_x, ARG_y, ARG_key_pos, ARG_palette_pos, ARG_key, ARG_palette };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_key, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_palette, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    mp_obj_framebuf_t source;
+    get_readonly_framebuffer_draw(parsed[ARG_source].u_obj, &source);
+    mp_int_t key = (n_args > 4) ? parsed[ARG_key_pos].u_int : parsed[ARG_key].u_int;
+    mp_obj_t pal_obj = (n_args > 5) ? parsed[ARG_palette_pos].u_obj : parsed[ARG_palette].u_obj;
+    const gfx_fb_t *pal = NULL;
+    mp_obj_framebuf_t palette;
+    if (pal_obj != mp_const_none) {
+        get_readonly_framebuffer_draw(pal_obj, &palette);
+        pal = &palette.fb;
+    }
+    gfx_area_t area = gfx_shapes_blit(draw_target(self), &source.fb, parsed[ARG_x].u_int, parsed[ARG_y].u_int, key, pal);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_blit_obj, 4, draw_blit);
+
+static mp_obj_t draw_blit_rect(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[1], &bufinfo, MP_BUFFER_READ);
+    gfx_area_t area = gfx_shapes_blit_rect(draw_target(self), bufinfo.buf, mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), 2);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_blit_rect_obj, 6, 6, draw_blit_rect);
+
+static mp_obj_t draw_blit_transparent(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[1], &bufinfo, MP_BUFFER_READ);
+    gfx_area_t area = gfx_shapes_blit_transparent(draw_target(self), bufinfo.buf, mp_obj_get_int(args[2]),
+        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]),
+        mp_obj_get_int(args[6]), 2);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_blit_transparent_obj, 7, 7, draw_blit_transparent);
+
+static mp_obj_t draw_text_height(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args, int height) {
+    enum { ARG_self, ARG_s, ARG_x, ARG_y, ARG_c, ARG_scale, ARG_inverted, ARG_font_data };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_scale, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_font_data, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    gfx_font_t font;
+    if (parsed[ARG_font_data].u_obj != mp_const_none) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(parsed[ARG_font_data].u_obj, &bufinfo, MP_BUFFER_READ);
+        gfx_font_init_from_data(&font, bufinfo.buf, bufinfo.len, height);
+    } else {
+        gfx_font_init_default(&font, height);
+    }
+    gfx_area_t area = gfx_font_text(draw_target(self), &font, mp_obj_str_get_str(parsed[ARG_s].u_obj),
+        parsed[ARG_x].u_int, parsed[ARG_y].u_int, parsed[ARG_c].u_int,
+        parsed[ARG_scale].u_int, parsed[ARG_inverted].u_bool);
+    if (font.owns_data) {
+        gfx_font_deinit(&font);
+    }
+    return gfx_area_mp_from_gfx(&area);
+}
+
+static mp_obj_t draw_text(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_s, ARG_x, ARG_y, ARG_c, ARG_scale, ARG_inverted, ARG_font_data, ARG_height };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_scale, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_font_data, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 8} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    mp_int_t height = parsed[ARG_height].u_int;
+    gfx_font_t font;
+    if (parsed[ARG_font_data].u_obj != mp_const_none) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(parsed[ARG_font_data].u_obj, &bufinfo, MP_BUFFER_READ);
+        gfx_font_init_from_data(&font, bufinfo.buf, bufinfo.len, height);
+    } else {
+        gfx_font_init_default(&font, height);
+    }
+    gfx_area_t area = gfx_font_text(draw_target(self), &font, mp_obj_str_get_str(parsed[ARG_s].u_obj),
+        parsed[ARG_x].u_int, parsed[ARG_y].u_int, parsed[ARG_c].u_int,
+        parsed[ARG_scale].u_int, parsed[ARG_inverted].u_bool);
+    if (font.owns_data) {
+        gfx_font_deinit(&font);
+    }
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text_obj, 4, draw_text);
+
+static mp_obj_t draw_text8(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    return draw_text_height(n_args, args, kw_args, 8);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text8_obj, 4, draw_text8);
+
+static mp_obj_t draw_text14(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    return draw_text_height(n_args, args, kw_args, 14);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text14_obj, 4, draw_text14);
+
+static mp_obj_t draw_text16(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    return draw_text_height(n_args, args, kw_args, 16);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text16_obj, 4, draw_text16);
+
+/* ClipContext: with draw.clip(x,y,w,h) / draw.clip(Area) */
+typedef struct _mp_obj_clip_ctx_t {
+    mp_obj_base_t base;
+    mp_obj_t draw_obj;
+} mp_obj_clip_ctx_t;
+
+const mp_obj_type_t mp_type_clip_ctx;
+
+static mp_obj_t clip_ctx_enter(mp_obj_t self_in) {
+    return self_in;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(clip_ctx_enter_obj, clip_ctx_enter);
+
+static mp_obj_t clip_ctx_exit(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_obj_clip_ctx_t *self = MP_OBJ_TO_PTR(args[0]);
+    mp_obj_draw_t *draw = MP_OBJ_TO_PTR(self->draw_obj);
+    gfx_draw_pop_clip(&draw->draw);
+    return mp_const_false;
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clip_ctx_exit_obj, 4, 4, clip_ctx_exit);
+
+static const mp_rom_map_elem_t clip_ctx_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___enter__), MP_ROM_PTR(&clip_ctx_enter_obj) },
+    { MP_ROM_QSTR(MP_QSTR___exit__), MP_ROM_PTR(&clip_ctx_exit_obj) },
+};
+static MP_DEFINE_CONST_DICT(clip_ctx_locals_dict, clip_ctx_locals_dict_table);
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_type_clip_ctx,
+    MP_QSTR_clip,
+    MP_TYPE_FLAG_NONE,
+    locals_dict, &clip_ctx_locals_dict
+);
+
+static mp_obj_t draw_clip(size_t n_args, const mp_obj_t *args) {
+    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    gfx_area_t area;
+    if (n_args == 2) {
+        mp_obj_t native = mp_obj_cast_to_native_base(args[1], MP_OBJ_FROM_PTR(&mp_type_area));
+        if (native == MP_OBJ_NULL) {
+            mp_raise_ValueError(MP_ERROR_TEXT("clip() requires x, y, w, h or an Area"));
+        }
+        /* Area layout: base + gfx_area_t */
+        typedef struct { mp_obj_base_t base; gfx_area_t area; } mp_obj_area_t;
+        area = ((mp_obj_area_t *)MP_OBJ_TO_PTR(native))->area;
+    } else if (n_args == 5) {
+        gfx_area_init(&area, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+            mp_obj_get_int(args[3]), mp_obj_get_int(args[4]));
+    } else {
+        mp_raise_ValueError(MP_ERROR_TEXT("clip() requires x, y, w, h or an Area"));
+    }
+    gfx_draw_push_clip(&self->draw, &area);
+    mp_obj_clip_ctx_t *ctx = mp_obj_malloc(mp_obj_clip_ctx_t, &mp_type_clip_ctx);
+    ctx->draw_obj = args[0];
+    return MP_OBJ_FROM_PTR(ctx);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_clip_obj, 2, 5, draw_clip);
 
 static const mp_rom_map_elem_t draw_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&draw_fill_obj) },
@@ -176,8 +570,22 @@ static const mp_rom_map_elem_t draw_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_vline), MP_ROM_PTR(&draw_vline_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&draw_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&draw_circle_obj) },
+    { MP_ROM_QSTR(MP_QSTR_ellipse), MP_ROM_PTR(&draw_ellipse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_arc), MP_ROM_PTR(&draw_arc_obj) },
+    { MP_ROM_QSTR(MP_QSTR_triangle), MP_ROM_PTR(&draw_triangle_obj) },
+    { MP_ROM_QSTR(MP_QSTR_gradient_rect), MP_ROM_PTR(&draw_gradient_rect_obj) },
+#if MICROPY_PY_ARRAY
+    { MP_ROM_QSTR(MP_QSTR_poly), MP_ROM_PTR(&draw_poly_obj) },
+#endif
+    { MP_ROM_QSTR(MP_QSTR_polygon), MP_ROM_PTR(&draw_polygon_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit), MP_ROM_PTR(&draw_blit_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_rect), MP_ROM_PTR(&draw_blit_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_transparent), MP_ROM_PTR(&draw_blit_transparent_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&draw_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text8), MP_ROM_PTR(&draw_text8_obj) },
     { MP_ROM_QSTR(MP_QSTR_text14), MP_ROM_PTR(&draw_text14_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text16), MP_ROM_PTR(&draw_text16_obj) },
+    { MP_ROM_QSTR(MP_QSTR_clip), MP_ROM_PTR(&draw_clip_obj) },
 };
 static MP_DEFINE_CONST_DICT(draw_locals_dict, draw_locals_dict_table);
 
@@ -258,7 +666,11 @@ static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
             mp_get_buffer_raise(font_arg, &bufinfo, MP_BUFFER_READ);
             o->data_obj = font_arg;
             if (height == 0) {
-                height = 8;
+                /* Match Python: derive height from a full 256-glyph memoryview. */
+                height = bufinfo.len ? (int)(bufinfo.len / 256) : 8;
+                if (height == 0) {
+                    height = 8;
+                }
             }
             gfx_font_init_from_data(&o->font, bufinfo.buf, bufinfo.len, height);
         }
@@ -271,21 +683,92 @@ static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     return MP_OBJ_FROM_PTR(o);
 }
 
-static mp_obj_t font_text(size_t n_args, const mp_obj_t *args) {
-    mp_obj_font_t *self = MP_OBJ_TO_PTR(args[0]);
+static mp_obj_t font_text(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_canvas, ARG_s, ARG_x, ARG_y, ARG_color, ARG_scale, ARG_inverted };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[1], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    mp_int_t col = mp_obj_get_int(args[5]);
-    mp_int_t scale = n_args >= 7 ? mp_obj_get_int(args[6]) : 1;
-    mp_int_t inverted = n_args >= 8 && mp_obj_is_true(args[7]);
-    gfx_area_t area = gfx_font_text(canvas, &self->font, mp_obj_str_get_str(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), col, scale, inverted);
+    gfx_area_t area = gfx_font_text(&slot.canvas, &self->font, mp_obj_str_get_str(parsed[ARG_s].u_obj),
+        parsed[ARG_x].u_int, parsed[ARG_y].u_int, parsed[ARG_color].u_int,
+        parsed[ARG_scale].u_int, parsed[ARG_inverted].u_bool);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(font_text_obj, 6, 8, font_text);
+static MP_DEFINE_CONST_FUN_OBJ_KW(font_text_obj, 6, font_text);
+
+static mp_obj_t font_draw_char(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    /* Font.draw_char(char, x, y, canvas, color, scale=1, inverted=False) */
+    enum { ARG_self, ARG_char, ARG_x, ARG_y, ARG_canvas, ARG_color, ARG_scale, ARG_inverted };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    mp_canvas_slot_t slot;
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    const char *ch = mp_obj_str_get_str(parsed[ARG_char].u_obj);
+    gfx_area_t area = gfx_font_draw_char(&slot.canvas, &self->font, (unsigned char)ch[0],
+        parsed[ARG_x].u_int, parsed[ARG_y].u_int, parsed[ARG_color].u_int,
+        parsed[ARG_scale].u_int, parsed[ARG_inverted].u_bool);
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(font_draw_char_obj, 6, font_draw_char);
+
+static mp_obj_t font_text_width(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_text, ARG_scale };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 1} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(parsed[ARG_self].u_obj);
+    return mp_obj_new_int(gfx_font_text_width(&self->font, mp_obj_str_get_str(parsed[ARG_text].u_obj),
+        parsed[ARG_scale].u_int));
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(font_text_width_obj, 2, font_text_width);
+
+static mp_obj_t font_deinit(mp_obj_t self_in) {
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(self_in);
+    gfx_font_deinit(&self->font);
+    self->data_obj = mp_const_none;
+    self->path_obj = mp_const_none;
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(font_deinit_obj, font_deinit);
+
+static mp_obj_t font_export(mp_obj_t self_in, mp_obj_t filename_in) {
+    mp_obj_font_t *self = MP_OBJ_TO_PTR(self_in);
+    if (gfx_font_export(&self->font, mp_obj_str_get_str(filename_in)) < 0) {
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Font data not cached, cannot export"));
+    }
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(font_export_obj, font_export);
 
 static void font_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
     mp_obj_font_t *self = MP_OBJ_TO_PTR(self_in);
@@ -315,6 +798,10 @@ static void font_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
 
 static const mp_rom_map_elem_t font_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&font_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_draw_char), MP_ROM_PTR(&font_draw_char_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text_width), MP_ROM_PTR(&font_text_width_obj) },
+    { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&font_deinit_obj) },
+    { MP_ROM_QSTR(MP_QSTR_export), MP_ROM_PTR(&font_export_obj) },
 };
 static MP_DEFINE_CONST_DICT(font_locals_dict, font_locals_dict_table);
 
@@ -405,29 +892,50 @@ static mp_obj_t bmp565_deinit(mp_obj_t self_in) {
     mp_obj_bmp565_t *self = MP_OBJ_TO_PTR(self_in);
     gfx_bmp565_deinit(&self->bmp);
     self->buf_obj = mp_const_none;
+    self->filename_obj = mp_const_none;
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(bmp565_deinit_obj, bmp565_deinit);
 
+static mp_obj_t bmp565_save(size_t n_args, const mp_obj_t *args) {
+    mp_obj_bmp565_t *self = MP_OBJ_TO_PTR(args[0]);
+    const char *path = NULL;
+    if (n_args >= 2 && args[1] != mp_const_none) {
+        path = mp_obj_str_get_str(args[1]);
+    } else if (self->filename_obj != mp_const_none) {
+        path = mp_obj_str_get_str(self->filename_obj);
+    }
+    char out_path[512];
+    if (gfx_bmp565_save_versioned(&self->bmp, path, out_path, sizeof(out_path)) < 0) {
+        mp_raise_ValueError(MP_ERROR_TEXT("BMP save failed"));
+    }
+    return mp_obj_new_str(out_path, strlen(out_path));
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(bmp565_save_obj, 1, 2, bmp565_save);
+
 static mp_obj_t bmp565_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args_in) {
-    enum { ARG_file, ARG_width, ARG_height, ARG_streamed, ARG_mirrored };
+    /* Mirror Python BMP565.__init__(filename=None, source=None, streamed=False,
+     * mirrored=False, width=None, height=None). A non-str filename is also
+     * accepted as a buffer source for convenience. */
+    enum { ARG_filename, ARG_source, ARG_streamed, ARG_mirrored, ARG_width, ARG_height };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_streamed, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_mirrored, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_filename, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_source, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_streamed, MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_mirrored, MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_width, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_height, MP_ARG_INT, {.u_int = 0} },
     };
     mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, args_in, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
 
     mp_obj_t filename = mp_const_none;
-    mp_obj_t source = mp_const_none;
-    if (parsed[ARG_file].u_obj != mp_const_none) {
-        if (mp_obj_is_str(parsed[ARG_file].u_obj)) {
-            filename = parsed[ARG_file].u_obj;
-        } else {
-            source = parsed[ARG_file].u_obj;
+    mp_obj_t source = parsed[ARG_source].u_obj;
+    if (parsed[ARG_filename].u_obj != mp_const_none) {
+        if (mp_obj_is_str(parsed[ARG_filename].u_obj)) {
+            filename = parsed[ARG_filename].u_obj;
+        } else if (source == mp_const_none) {
+            source = parsed[ARG_filename].u_obj;
         }
     }
     mp_int_t width = parsed[ARG_width].u_int;
@@ -435,6 +943,7 @@ static mp_obj_t bmp565_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 
     mp_obj_bmp565_t *o = mp_obj_malloc(mp_obj_bmp565_t, &mp_type_bmp565);
     o->buf_obj = mp_const_none;
+    o->filename_obj = filename;
 
     if (source != mp_const_none) {
         mp_buffer_info_t bufinfo;
@@ -486,6 +995,7 @@ static void bmp565_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
 
 static const mp_rom_map_elem_t bmp565_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&bmp565_deinit_obj) },
+    { MP_ROM_QSTR(MP_QSTR_save), MP_ROM_PTR(&bmp565_save_obj) },
 };
 static MP_DEFINE_CONST_DICT(bmp565_locals_dict, bmp565_locals_dict_table);
 
@@ -552,19 +1062,34 @@ static void get_readonly_framebuffer(mp_obj_t arg, mp_obj_framebuf_t *rofb) {
     }
 }
 
-static mp_obj_t mod_ellipse(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_x, ARG_y, ARG_rx, ARG_ry, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0x0f} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_m, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0x0f} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    bool fill = n_args > 6 && mp_obj_is_true(args[6]);
-    mp_int_t mask = n_args > 7 ? mp_obj_get_int(args[7]) : 0x0f;
-    gfx_area_t area = gfx_shapes_ellipse(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), fill, mask);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    mp_int_t mask = (n_args > 7) ? parsed[ARG_mask_pos].u_int : parsed[ARG_m].u_int;
+    gfx_area_t area = gfx_shapes_ellipse(&slot.canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_rx].u_int, parsed[ARG_ry].u_int, parsed[ARG_c].u_int, fill, mask);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_ellipse_obj, 6, 8, mod_ellipse);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_ellipse_obj, 6, mod_ellipse);
 
 static mp_obj_t mod_arc(size_t n_args, const mp_obj_t *args) {
     mp_canvas_slot_t slot;
@@ -578,75 +1103,127 @@ static mp_obj_t mod_arc(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_arc_obj, 7, 7, mod_arc);
 
-static mp_obj_t mod_triangle(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_triangle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_x0, ARG_y0, ARG_x1, ARG_y1, ARG_x2, ARG_y2, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    bool fill = n_args > 8 && mp_obj_is_true(args[8]);
-    gfx_area_t area = gfx_shapes_triangle(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), mp_obj_get_int(args[6]),
-        mp_obj_get_int(args[7]), fill);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_triangle(&slot.canvas,
+        parsed[ARG_x0].u_int, parsed[ARG_y0].u_int, parsed[ARG_x1].u_int, parsed[ARG_y1].u_int,
+        parsed[ARG_x2].u_int, parsed[ARG_y2].u_int, parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_triangle_obj, 8, 9, mod_triangle);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_triangle_obj, 8, mod_triangle);
 
-static mp_obj_t mod_gradient_rect(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_gradient_rect(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_x, ARG_y, ARG_w, ARG_h, ARG_c1, ARG_c2_pos, ARG_vert_pos, ARG_c2, ARG_vertical };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_, MP_ARG_BOOL, {.u_bool = true} },
+        { MP_QSTR_c2, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_vertical, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = true} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    int vertical = 1;
-    if (n_args > 7) {
-        vertical = mp_obj_is_true(args[7]);
-    }
-    int c2 = n_args > 6 ? mp_obj_get_int(args[6]) : mp_obj_get_int(args[5]);
-    gfx_area_t area = gfx_shapes_gradient_rect(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), c2, vertical);
+    mp_obj_t c2_obj = (n_args > 6) ? parsed[ARG_c2_pos].u_obj : parsed[ARG_c2].u_obj;
+    int c2 = (c2_obj == mp_const_none) ? parsed[ARG_c1].u_int : mp_obj_get_int(c2_obj);
+    int vertical = (n_args > 7) ? parsed[ARG_vert_pos].u_bool : parsed[ARG_vertical].u_bool;
+    gfx_area_t area = gfx_shapes_gradient_rect(&slot.canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int, parsed[ARG_c1].u_int, c2, vertical);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_gradient_rect_obj, 6, 8, mod_gradient_rect);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_gradient_rect_obj, 6, mod_gradient_rect);
 
 #if MICROPY_PY_ARRAY
-static mp_obj_t mod_poly(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_poly(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_x, ARG_y, ARG_coords, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
     mp_buffer_info_t bufinfo;
-    mp_get_buffer_raise(args[3], &bufinfo, MP_BUFFER_READ);
-    bool fill = n_args > 5 && mp_obj_is_true(args[5]);
+    mp_get_buffer_raise(parsed[ARG_coords].u_obj, &bufinfo, MP_BUFFER_READ);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
     char fmt[2] = { (char)bufinfo.typecode, '\0' };
-    gfx_area_t area = gfx_shapes_poly(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+    gfx_area_t area = gfx_shapes_poly(&slot.canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
         bufinfo.buf, bufinfo.len, mp_binary_get_size('@', bufinfo.typecode, NULL), fmt,
-        mp_obj_get_int(args[4]), fill);
+        parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_poly_obj, 5, 6, mod_poly);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_poly_obj, 5, mod_poly);
 #endif
 
-static mp_obj_t mod_blit(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_blit(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_dest, ARG_source, ARG_x, ARG_y, ARG_key_pos, ARG_palette_pos, ARG_key, ARG_palette };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_key, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_palette, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_obj_framebuf_t dest;
-    if (!mp_get_framebuf(args[0], &dest)) {
+    if (!mp_get_framebuf(parsed[ARG_dest].u_obj, &dest)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
     mp_obj_framebuf_t source;
-    get_readonly_framebuffer(args[1], &source);
-    mp_int_t key = n_args > 4 ? mp_obj_get_int(args[4]) : -1;
+    get_readonly_framebuffer(parsed[ARG_source].u_obj, &source);
+    mp_int_t key = (n_args > 4) ? parsed[ARG_key_pos].u_int : parsed[ARG_key].u_int;
+    mp_obj_t pal_obj = (n_args > 5) ? parsed[ARG_palette_pos].u_obj : parsed[ARG_palette].u_obj;
     const gfx_fb_t *pal = NULL;
     mp_obj_framebuf_t palette;
-    if (n_args > 5 && args[5] != mp_const_none) {
-        get_readonly_framebuffer(args[5], &palette);
+    if (pal_obj != mp_const_none) {
+        get_readonly_framebuffer(pal_obj, &palette);
         pal = &palette.fb;
     }
-    gfx_area_t area = gfx_shapes_blit(&dest.canvas, &source.fb, mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), key, pal);
+    gfx_area_t area = gfx_shapes_blit(&dest.canvas, &source.fb, parsed[ARG_x].u_int, parsed[ARG_y].u_int, key, pal);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_blit_obj, 4, 6, mod_blit);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_blit_obj, 4, mod_blit);
 
 static mp_obj_t mod_blit_rect(size_t n_args, const mp_obj_t *args) {
     mp_canvas_slot_t slot;
@@ -677,15 +1254,30 @@ static mp_obj_t mod_blit_transparent(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_blit_transparent_obj, 7, 7, mod_blit_transparent);
 
-static mp_obj_t mod_polygon(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_polygon(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_points, ARG_x, ARG_y, ARG_color, ARG_angle_pos, ARG_cx_pos, ARG_cy_pos, ARG_angle, ARG_center_x, ARG_center_y };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_OBJ, {.u_obj = MP_OBJ_NEW_SMALL_INT(0)} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_angle, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NEW_SMALL_INT(0)} },
+        { MP_QSTR_center_x, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_center_y, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
     size_t len;
     mp_obj_t *items;
-    mp_obj_get_array(args[1], &len, &items);
+    mp_obj_get_array(parsed[ARG_points].u_obj, &len, &items);
     if (len < 3) {
         mp_raise_ValueError(MP_ERROR_TEXT("Polygon must have at least 3 points"));
     }
@@ -694,27 +1286,24 @@ static mp_obj_t mod_polygon(size_t n_args, const mp_obj_t *args) {
         mp_raise_ValueError(NULL);
     }
     for (size_t i = 0; i < len; i++) {
-        if (mp_obj_is_type(items[i], &mp_type_tuple)) {
-            size_t plen;
-            mp_obj_t *pitems;
-            mp_obj_get_array(items[i], &plen, &pitems);
-            if (plen != 2) {
-                mp_raise_ValueError(NULL);
-            }
-            points[i * 2] = mp_obj_get_int(pitems[0]);
-            points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
-        } else {
-            mp_raise_TypeError(NULL);
+        size_t plen;
+        mp_obj_t *pitems;
+        mp_obj_get_array(items[i], &plen, &pitems);
+        if (plen != 2) {
+            mp_raise_ValueError(NULL);
         }
+        points[i * 2] = mp_obj_get_int(pitems[0]);
+        points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
     }
-    float angle = (float)(n_args > 5 ? mp_obj_get_float(args[5]) : 0.0);
-    int cx = n_args > 6 ? mp_obj_get_int(args[6]) : 0;
-    int cy = n_args > 7 ? mp_obj_get_int(args[7]) : 0;
-    gfx_area_t area = gfx_shapes_polygon(canvas, points, len, mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), angle, cx, cy);
+    mp_obj_t angle_obj = (n_args > 5) ? parsed[ARG_angle_pos].u_obj : parsed[ARG_angle].u_obj;
+    float angle = (float)mp_obj_get_float(angle_obj);
+    int cx = (n_args > 6) ? parsed[ARG_cx_pos].u_int : parsed[ARG_center_x].u_int;
+    int cy = (n_args > 7) ? parsed[ARG_cy_pos].u_int : parsed[ARG_center_y].u_int;
+    gfx_area_t area = gfx_shapes_polygon(&slot.canvas, points, len, parsed[ARG_x].u_int,
+        parsed[ARG_y].u_int, parsed[ARG_color].u_int, angle, cx, cy);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_polygon_obj, 5, 8, mod_polygon);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_polygon_obj, 5, mod_polygon);
 
 static mp_obj_t mod_fill(mp_obj_t target, mp_obj_t col_in) {
     mp_canvas_slot_t slot;
@@ -739,31 +1328,58 @@ static mp_obj_t mod_pixel(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_pixel_obj, 4, 4, mod_pixel);
 
-static mp_obj_t mod_rect(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_rect(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_x, ARG_y, ARG_w, ARG_h, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    bool fill = n_args > 6 && mp_obj_is_true(args[6]);
-    gfx_area_t area = gfx_shapes_rect(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), fill);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_rect(&slot.canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int, parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_rect_obj, 6, 7, mod_rect);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_rect_obj, 6, mod_rect);
 
-static mp_obj_t mod_round_rect(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_round_rect(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_x, ARG_y, ARG_w, ARG_h, ARG_r, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    bool fill = n_args > 7 && mp_obj_is_true(args[7]);
-    gfx_area_t area = gfx_shapes_round_rect(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), mp_obj_get_int(args[5]), mp_obj_get_int(args[6]), fill);
+    bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
+    gfx_area_t area = gfx_shapes_round_rect(&slot.canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int, parsed[ARG_r].u_int, parsed[ARG_c].u_int, fill);
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_round_rect_obj, 7, 8, mod_round_rect);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_round_rect_obj, 7, mod_round_rect);
 
 static mp_obj_t mod_circle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
     enum { ARG_canvas, ARG_x, ARG_y, ARG_r, ARG_c, ARG_fill_pos, ARG_f, ARG_fill };
@@ -772,7 +1388,7 @@ static mp_obj_t mod_circle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_arg
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
@@ -790,59 +1406,93 @@ static mp_obj_t mod_circle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_arg
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(mod_circle_obj, 5, mod_circle);
 
-static mp_obj_t mod_text8(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_text_height(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args, int height) {
+    enum { ARG_canvas, ARG_s, ARG_x, ARG_y, ARG_c, ARG_scale, ARG_inverted, ARG_font_data };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_scale, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_font_data, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
-    gfx_area_t area = gfx_font_text8(canvas, mp_obj_str_get_str(args[1]),
-        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    gfx_font_t font;
+    if (parsed[ARG_font_data].u_obj != mp_const_none) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(parsed[ARG_font_data].u_obj, &bufinfo, MP_BUFFER_READ);
+        gfx_font_init_from_data(&font, bufinfo.buf, bufinfo.len, height);
+    } else {
+        gfx_font_init_default(&font, height);
+    }
+    gfx_area_t area = gfx_font_text(&slot.canvas, &font, mp_obj_str_get_str(parsed[ARG_s].u_obj),
+        parsed[ARG_x].u_int, parsed[ARG_y].u_int, parsed[ARG_c].u_int,
+        parsed[ARG_scale].u_int, parsed[ARG_inverted].u_bool);
+    if (font.owns_data) {
+        gfx_font_deinit(&font);
+    }
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text8_obj, 4, 5, mod_text8);
 
-static mp_obj_t mod_text14(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mod_text8(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    return mod_text_height(n_args, args, kw_args, 8);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_text8_obj, 4, mod_text8);
+
+static mp_obj_t mod_text14(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    return mod_text_height(n_args, args, kw_args, 14);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_text14_obj, 4, mod_text14);
+
+static mp_obj_t mod_text16(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    return mod_text_height(n_args, args, kw_args, 16);
+}
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_text16_obj, 4, mod_text16);
+
+static mp_obj_t mod_text(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    enum { ARG_canvas, ARG_s, ARG_x, ARG_y, ARG_c, ARG_scale, ARG_inverted, ARG_font_data, ARG_height };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_c, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_scale, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_font_data, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 8} },
+    };
+    mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
+    mp_int_t height = parsed[ARG_height].u_int;
     mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
+    if (!mp_canvas_resolve(parsed[ARG_canvas].u_obj, &slot)) {
         mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
     }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
-    gfx_area_t area = gfx_font_text14(canvas, mp_obj_str_get_str(args[1]),
-        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
+    gfx_font_t font;
+    if (parsed[ARG_font_data].u_obj != mp_const_none) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(parsed[ARG_font_data].u_obj, &bufinfo, MP_BUFFER_READ);
+        gfx_font_init_from_data(&font, bufinfo.buf, bufinfo.len, height);
+    } else {
+        gfx_font_init_default(&font, height);
+    }
+    gfx_area_t area = gfx_font_text(&slot.canvas, &font, mp_obj_str_get_str(parsed[ARG_s].u_obj),
+        parsed[ARG_x].u_int, parsed[ARG_y].u_int, parsed[ARG_c].u_int,
+        parsed[ARG_scale].u_int, parsed[ARG_inverted].u_bool);
+    if (font.owns_data) {
+        gfx_font_deinit(&font);
+    }
     return gfx_area_mp_from_gfx(&area);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text14_obj, 4, 5, mod_text14);
-
-static mp_obj_t mod_text16(size_t n_args, const mp_obj_t *args) {
-    mp_canvas_slot_t slot;
-    if (!mp_canvas_resolve(args[0], &slot)) {
-        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
-    }
-    const gfx_canvas_t *canvas = &slot.canvas;
-    mp_int_t col = n_args >= 5 ? mp_obj_get_int(args[4]) : 1;
-    gfx_area_t area = gfx_font_text16(canvas, mp_obj_str_get_str(args[1]),
-        mp_obj_get_int(args[2]), mp_obj_get_int(args[3]), col);
-    return gfx_area_mp_from_gfx(&area);
-}
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text16_obj, 4, 5, mod_text16);
-
-static mp_obj_t mod_text(size_t n_args, const mp_obj_t *args) {
-    mp_int_t height = 8;
-    if (n_args >= 6 && mp_obj_is_int(args[5])) {
-        height = mp_obj_get_int(args[5]);
-    }
-    if (height == 14) {
-        return mod_text14(n_args > 5 ? n_args - 1 : n_args, args);
-    }
-    if (height == 16) {
-        return mod_text16(n_args > 5 ? n_args - 1 : n_args, args);
-    }
-    return mod_text8(n_args, args);
-}
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_text_obj, 4, 6, mod_text);
+static MP_DEFINE_CONST_FUN_OBJ_KW(mod_text_obj, 4, mod_text);
 
 static mp_obj_t mod_load_image(mp_obj_t path_in) {
     gfx_image_fb_t img;

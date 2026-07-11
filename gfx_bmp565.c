@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -269,4 +270,56 @@ int gfx_bmp565_save(const gfx_bmp565_t *bmp, const char *path) {
     }
     fclose(f);
     return 0;
+}
+
+static int bmp565_file_exists(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (f) {
+        fclose(f);
+        return 1;
+    }
+    return 0;
+}
+
+int gfx_bmp565_save_versioned(const gfx_bmp565_t *bmp, const char *path, char *out_path, size_t out_path_len) {
+    /* Mirror Python BMP565.save: default filename, then auto-version on
+     * collision by incrementing a trailing integer before the extension. */
+    if (!path) {
+        path = "image.bmp";
+    }
+    strncpy(out_path, path, out_path_len - 1);
+    out_path[out_path_len - 1] = '\0';
+
+    while (bmp565_file_exists(out_path)) {
+        const char *dot = strrchr(out_path, '.');
+        if (!dot) {
+            /* No extension: Python raises here; overwrite instead of looping. */
+            break;
+        }
+        char name[512];
+        char ext[128];
+        size_t nlen = (size_t)(dot - out_path);
+        if (nlen >= sizeof(name)) {
+            nlen = sizeof(name) - 1;
+        }
+        memcpy(name, out_path, nlen);
+        name[nlen] = '\0';
+        strncpy(ext, dot + 1, sizeof(ext) - 1);
+        ext[sizeof(ext) - 1] = '\0';
+
+        size_t L = strlen(name);
+        if (L > 0 && isdigit((unsigned char)name[L - 1])) {
+            size_t s = L;
+            while (s > 0 && isdigit((unsigned char)name[s - 1])) {
+                s--;
+            }
+            long ver = atol(name + s);
+            name[s] = '\0';
+            snprintf(out_path, out_path_len, "%s%ld.%s", name, ver + 1, ext);
+        } else {
+            snprintf(out_path, out_path_len, "%s_1.%s", name, ext);
+        }
+    }
+
+    return gfx_bmp565_save(bmp, out_path);
 }

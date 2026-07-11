@@ -5,6 +5,7 @@
 
 #include "gfx_font.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -86,6 +87,23 @@ static gfx_area_t draw_char(const gfx_canvas_t *canvas, const gfx_font_t *font, 
     return gfx_area_from_rect(x, y, font->width * scale, font->height * scale);
 }
 
+gfx_area_t gfx_font_draw_char(const gfx_canvas_t *canvas, const gfx_font_t *font, unsigned char ch, int x, int y, int color, int scale, int inverted) {
+    return draw_char(canvas, font, ch, x, y, color, scale, inverted);
+}
+
+int gfx_font_text_width(const gfx_font_t *font, const char *str, int scale) {
+    if (scale < 1) {
+        scale = 1;
+    }
+    int n = 0;
+    if (str) {
+        while (str[n]) {
+            n++;
+        }
+    }
+    return n * font->width * scale;
+}
+
 gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, const char *str, int x0, int y0, int col, int scale, int inverted) {
     int start_x = x0;
     int char_y = y0;
@@ -111,6 +129,32 @@ gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, con
         }
     }
     return gfx_area_from_rect(start_x, y0, largest_x - start_x, char_y + font->height * scale - y0);
+}
+
+int gfx_font_export(const gfx_font_t *font, const char *filename) {
+    /* Mirror Python Font.export: dump font->data to a .py file with a single
+     * bytes object named _FONT (256 lines, one per character) and a trailing
+     * FONT = memoryview(_FONT). Requires cached data (font->data). */
+    if (!font->data) {
+        return -1;
+    }
+    FILE *f = fopen(filename, "w");
+    if (!f) {
+        return -1;
+    }
+    fputs("_FONT =\\\n", f);
+    for (int i = 0; i < 256; i++) {
+        fputs("b'", f);
+        for (int j = 0; j < font->height; j++) {
+            size_t off = (size_t)i * (size_t)font->height + (size_t)j;
+            uint8_t b = off < font->data_len ? font->data[off] : 0;
+            fprintf(f, "\\x%02x", b);
+        }
+        fputs("'\\\n", f);
+    }
+    fputs("\nFONT = memoryview(_FONT)\n", f);
+    fclose(f);
+    return 0;
 }
 
 gfx_area_t gfx_font_text8(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col) {
