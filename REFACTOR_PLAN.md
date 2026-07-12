@@ -2,9 +2,9 @@
 
 **Goal:** One coherent all-C `graphics` module. No Python package inside the cmod. Public API matches `pydisplay/src/lib/graphics` exactly. Build/install chooses either the Python package OR this C module — no runtime fallbacks inside either product.
 
-**Python reference (public contract):** `/home/brad/github/pydisplay/src/lib/graphics/`
+**Python reference (public contract):** [pydisplay `src/lib/graphics/`](https://github.com/PyDevices/pydisplay/tree/main/src/lib/graphics)
 
-**Do not modify:** `cmods/micropython/`, `cmods/circuitpython/` (upstream clones).
+**Do not modify:** upstream `micropython/` / `circuitpython/` clones (leave uncommitted).
 
 ---
 
@@ -73,7 +73,7 @@ Sync gaps with Python tree: add `RGB888` and `ellipse` to both `__all__` lists w
 - [ ] Create `gfx_core.h`, stub headers for each layer
 - [ ] Remove `py/graphics/` entire tree from cmod (after Phase 4 exports work — or move to `_deprecated_py/` until cutover)
 - [ ] Remove `gfxpy/` placeholder if unused
-- [ ] Stop freezing Python graphics in `cmods/manifest.py` when usermod linked (comment or conditional — document in README)
+- [ ] Stop freezing Python graphics in `workspace manifest.py` when usermod linked (comment or conditional — document in README)
 - [ ] Update `setup.py`: extension module name `graphics`, not `graphics_native`; no `packages=["graphics"]` from py/
 
 ### Phase 1 — Area (`gfx_area.c`)
@@ -111,7 +111,7 @@ Sync gaps with Python tree: add `RGB888` and `ellipse` to both `__all__` lists w
 - [ ] Register module as `graphics` (MP_QSTR_graphics), not `graphics_native`
 - [ ] Export all public symbols on module dict
 - [ ] Update `micropython.mk`, `circuitpython.mk`, CP spike bindings under `circuitpython_spike/`
-- [ ] Update `cmods/manifest.py`: remove `package("graphics", base_path="graphics/py")` — use C module only when building with cmod
+- [ ] Update `workspace manifest.py`: remove `package("graphics", base_path="graphics/py")` — use C module only when building with cmod
 
 ### Phase 6 — Font, BMP565, files, capabilities
 
@@ -125,7 +125,7 @@ Sync gaps with Python tree: add `RGB888` and `ellipse` to both `__all__` lists w
 - [ ] Delete obsolete: `graphics_bundle.c`, `graphics_native_cpy.c`, `gfx_area_mp.c` (merged), entire `py/` tree
 - [ ] Update README.md, PUBLISHING.md
 - [ ] `pip install -e .` → `import graphics` is C only
-- [ ] Rebuild MP unix: `cmods/build_mp.sh --port unix --variant standard`
+- [ ] Rebuild MP unix: `build_mp.sh (optional workspace wrapper) --port unix --variant standard`
 - [ ] Run `test_area.py`, `test_graphics.py`, `test_subclass.py`
 - [ ] pydisplay smoke: `font_simpletest3`, `displaybuf_simpletest` with cmod wheel (optional — parent handles matrix)
 
@@ -145,7 +145,7 @@ Sync gaps with Python tree: add `RGB888` and `ellipse` to both `__all__` lists w
 
 ## Risks & notes
 
-- **Manifest conflict:** pydisplay MP builds currently freeze `graphics/py` AND link usermod. After cutover, manifest must choose one. Coordinate with `cmods/manifest.py` line `package("graphics", base_path="graphics/py")`.
+- **Manifest conflict:** pydisplay MP builds currently freeze `graphics/py` AND link usermod. After cutover, manifest must choose one. Coordinate with `workspace manifest.py` line `package("graphics", base_path="graphics/py")`.
 - **CPython pip name:** May remain `graphics-cmod` on PyPI but import name `graphics`.
 - **CircuitPython:** Update spike bindings to match module rename.
 - **pydisplay `src/lib/graphics`:** Unchanged by this work; remains the Python implementation.
@@ -154,4 +154,4 @@ Sync gaps with Python tree: add `RGB888` and `ellipse` to both `__all__` lists w
 
 ## Agent handoff
 
-Implement phases 0→7 in order. Commit to `cmods/graphics` repo on meaningful phase boundaries. Do not commit micropython/circuitpython upstream. Report back with: files added/removed, test results, remaining public API gaps vs pydisplay.
+Implement phases 0→7 in order. Commit to the graphics repo on meaningful phase boundaries. Do not commit micropython/circuitpython upstream. Report back with: files added/removed, test results, remaining public API gaps vs pydisplay.

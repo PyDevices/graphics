@@ -1,38 +1,11 @@
 # SPDX-License-Identifier: MIT
 """Parity probe: kwargs + missing methods vs pydisplay lib/graphics contract."""
 
-import sys
-import time
-
 try:
     import graphics
 except ImportError as e:
     print("FAIL: import graphics:", e)
     raise SystemExit(1)
-
-LOG = "/home/brad/github/pydisplay/.cursor/debug-e5efbf.log"
-SESSION = "e5efbf"
-
-
-def log(hypothesis_id, message, data=None):
-    # region agent log
-    import json
-
-    line = {
-        "sessionId": SESSION,
-        "hypothesisId": hypothesis_id,
-        "location": "test_parity_kwargs.py",
-        "message": message,
-        "data": data or {},
-        "timestamp": int(time.time() * 1000),
-    }
-    try:
-        with open(LOG, "a") as f:
-            f.write(json.dumps(line) + "\n")
-    except OSError:
-        pass
-    # endregion
-
 
 results = {}
 
@@ -42,18 +15,15 @@ def check(name, fn):
         fn()
         results[name] = "pass"
         print("PASS:", name)
-        log("parity", name, {"status": "pass"})
     except Exception as e:
         results[name] = "fail:" + repr(e)
         print("FAIL:", name, e)
-        log("parity", name, {"status": "fail", "error": repr(e)})
 
 
 impl = graphics.implementation()
 backend = graphics.framebuf_backend()
 print("implementation:", impl)
 print("framebuf_backend:", backend)
-log("meta", "runtime", {"implementation": impl, "framebuf_backend": backend})
 assert impl == "native_cmod", impl
 assert backend == "native", backend
 
@@ -180,11 +150,6 @@ check("font_kwargs", t_font_kwargs)
 check("area_return", t_area_return)
 
 failed = [k for k, v in results.items() if not v.startswith("pass")]
-log(
-    "summary",
-    "probe_complete",
-    {"passed": len(results) - len(failed), "failed": len(failed), "results": results},
-)
 if failed:
     print("FAILED:", ", ".join(failed))
     raise SystemExit(1)
