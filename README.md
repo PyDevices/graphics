@@ -31,7 +31,7 @@ graphics/
   test_subclass.py
 ```
 
-## Build & test
+## 🚀 Build & test
 
 ### CPython
 
