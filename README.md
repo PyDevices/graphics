@@ -43,16 +43,29 @@ python3 -m venv .venv
 .venv/bin/python test_subclass.py
 ```
 
-### MicroPython (from cmods workspace)
+### MicroPython
 
-There is no `graphics/manifest.py` — the C usermod is the only graphics path when linked via cmods.
+Clone as a sibling of `micropython/`:
+
+```
+workspace/
+  graphics/       ← this repo
+  micropython/
+```
+
+There is no `graphics/manifest.py` — the C usermod is the only graphics path when linked in.
 
 ```bash
-cd /path/to/cmods
-./build_mp.sh --port unix --variant standard
+cd micropython/ports/unix
+make submodules
+make USER_C_MODULES=../../..
+cd ../../..
 ./micropython/ports/unix/build-standard/micropython graphics/test_area.py
 ./micropython/ports/unix/build-standard/micropython graphics/test_graphics.py
+./micropython/ports/unix/build-standard/micropython graphics/test_subclass.py
 ```
+
+([cmods](https://github.com/PyDevices/cmods) is an optional convenience workspace with `./build_mp.sh`; it is not required.)
 
 ## pydisplay integration
 

@@ -1,4 +1,8 @@
 # MicroPython user C module glue for graphics.
+#
+# Discovered via USER_C_MODULES pointing at the workspace directory that
+# contains this repo (its parent), e.g. `make USER_C_MODULES=../../..`.
+
 GRAPHICS_MOD_DIR := $(USERMOD_DIR)
 
 CFLAGS_USERMOD += -I$(GRAPHICS_MOD_DIR) -Wno-unused-function -Wno-sign-compare -Wno-unused-const-variable
