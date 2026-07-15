@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Compute the next graphics-cmod release version.
+# Compute the next release version for this repo.
 #
-#   With existing vX.Y.Z tags — highest tag + 1 patch (e.g. v0.0.1 → 0.0.2)
-#   With no tags — RELEASE_VERSION from setup.py (default first release)
+#   With existing vX.Y.Z tags — highest tag + 1 patch (e.g. v0.0.1 -> 0.0.2).
+#     Non-semver / pre-release tags (e.g. v0.1.0-alpha) are ignored.
+#   With no vX.Y.Z tags — base version from the first match of setup.py
+#     RELEASE_VERSION, pyproject.toml [project] version, a VERSION file, else 0.0.1.
 #
 # Usage:
 #   ./scripts/next_release_version.sh
@@ -32,17 +34,29 @@ while [[ $# -gt 0 ]]; do
 done
 
 read_base_version() {
-    local version=""
-    if [[ ! -f "$SOURCE_REPO/setup.py" ]]; then
-        echo "Error: setup.py not found in $SOURCE_REPO" >&2
-        return 1
+    local v=""
+    if [[ -f "$SOURCE_REPO/setup.py" ]]; then
+        v="$(grep -E '^\s*RELEASE_VERSION\s*=' "$SOURCE_REPO/setup.py" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+        [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && {
+            echo "$v"
+            return 0
+        }
     fi
-    version="$(grep -E '^\s*RELEASE_VERSION\s*=' "$SOURCE_REPO/setup.py" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
-    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "Error: could not read RELEASE_VERSION from setup.py (got: ${version:-<empty>})" >&2
-        return 1
+    if [[ -f "$SOURCE_REPO/pyproject.toml" ]]; then
+        v="$(grep -E '^\s*version\s*=\s*"[0-9]' "$SOURCE_REPO/pyproject.toml" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+        [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && {
+            echo "$v"
+            return 0
+        }
     fi
-    echo "$version"
+    if [[ -f "$SOURCE_REPO/VERSION" ]]; then
+        v="$(tr -d '[:space:]' < "$SOURCE_REPO/VERSION")"
+        [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && {
+            echo "$v"
+            return 0
+        }
+    fi
+    echo "0.0.1"
 }
 
 increment_patch() {
@@ -55,7 +69,7 @@ increment_patch() {
 highest_tag_version() {
     local tag=""
     cd "$SOURCE_REPO"
-    tag="$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -1)"
+    tag="$(git tag -l 'v[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
     if [[ -z "$tag" ]]; then
         return 1
     fi
@@ -69,7 +83,7 @@ if LAST_VERSION="$(highest_tag_version)"; then
     VERSION_SOURCE="git tag v${LAST_VERSION} + 1 patch"
 else
     VERSION="$(read_base_version)"
-    VERSION_SOURCE="setup.py RELEASE_VERSION (no release tags yet)"
+    VERSION_SOURCE="base version (no release tags yet)"
 fi
 
 if [[ "$VERBOSE" -eq 1 ]]; then
