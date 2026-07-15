@@ -20,6 +20,7 @@ typedef struct gfx_draw {
 
 void gfx_draw_init(gfx_draw_t *draw, const gfx_canvas_t *canvas);
 const gfx_canvas_t *gfx_draw_target(gfx_draw_t *draw);
+gfx_area_t gfx_draw_effective_clip(const gfx_draw_t *draw);
 void gfx_draw_push_clip(gfx_draw_t *draw, const gfx_area_t *clip);
 void gfx_draw_pop_clip(gfx_draw_t *draw);
 

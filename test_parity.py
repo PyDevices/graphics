@@ -14,6 +14,8 @@ ALL = [
     "MONO_VLSB",
     "RGB565",
     "Area",
+    "ClipContext",
+    "ClippedCanvas",
     "Draw",
     "Font",
     "FrameBuffer",

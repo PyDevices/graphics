@@ -501,16 +501,42 @@ static mp_obj_t draw_text16(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text16_obj, 4, draw_text16);
 
-/* ClipContext: with draw.clip(x,y,w,h) / draw.clip(Area) */
+/* ClipContext: with draw.clip(x,y,w,h) / draw.clip(Area) — matches graphics._clip */
 typedef struct _mp_obj_clip_ctx_t {
     mp_obj_base_t base;
     mp_obj_t draw_obj;
+    gfx_area_t area;
 } mp_obj_clip_ctx_t;
 
 const mp_obj_type_t mp_type_clip_ctx;
 
+static gfx_area_t clip_ctx_parse_area(mp_obj_t area_in) {
+    mp_obj_t native = mp_obj_cast_to_native_base(area_in, MP_OBJ_FROM_PTR(&mp_type_area));
+    if (native == MP_OBJ_NULL) {
+        mp_raise_TypeError(MP_ERROR_TEXT("Area required"));
+    }
+    typedef struct { mp_obj_base_t base; gfx_area_t area; } mp_obj_area_t;
+    return ((mp_obj_area_t *)MP_OBJ_TO_PTR(native))->area;
+}
+
+static mp_obj_t clip_ctx_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+    (void)type;
+    mp_arg_check_num(n_args, n_kw, 2, 2, false);
+    if (!mp_obj_is_type(args[0], &mp_type_draw)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("Draw required"));
+    }
+    mp_obj_clip_ctx_t *ctx = mp_obj_malloc(mp_obj_clip_ctx_t, &mp_type_clip_ctx);
+    ctx->draw_obj = args[0];
+    ctx->area = clip_ctx_parse_area(args[1]);
+    return MP_OBJ_FROM_PTR(ctx);
+}
+
 static mp_obj_t clip_ctx_enter(mp_obj_t self_in) {
-    return self_in;
+    mp_obj_clip_ctx_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_draw_t *draw = MP_OBJ_TO_PTR(self->draw_obj);
+    gfx_draw_push_clip(&draw->draw, &self->area);
+    gfx_area_t eff = gfx_draw_effective_clip(&draw->draw);
+    return gfx_area_mp_from_gfx(&eff);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(clip_ctx_enter_obj, clip_ctx_enter);
 
@@ -531,34 +557,254 @@ static MP_DEFINE_CONST_DICT(clip_ctx_locals_dict, clip_ctx_locals_dict_table);
 
 MP_DEFINE_CONST_OBJ_TYPE(
     mp_type_clip_ctx,
-    MP_QSTR_clip,
+    MP_QSTR_ClipContext,
     MP_TYPE_FLAG_NONE,
+    make_new, clip_ctx_make_new,
     locals_dict, &clip_ctx_locals_dict
 );
 
 static mp_obj_t draw_clip(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
     gfx_area_t area;
     if (n_args == 2) {
-        mp_obj_t native = mp_obj_cast_to_native_base(args[1], MP_OBJ_FROM_PTR(&mp_type_area));
-        if (native == MP_OBJ_NULL) {
-            mp_raise_ValueError(MP_ERROR_TEXT("clip() requires x, y, w, h or an Area"));
-        }
-        /* Area layout: base + gfx_area_t */
-        typedef struct { mp_obj_base_t base; gfx_area_t area; } mp_obj_area_t;
-        area = ((mp_obj_area_t *)MP_OBJ_TO_PTR(native))->area;
+        area = clip_ctx_parse_area(args[1]);
     } else if (n_args == 5) {
         gfx_area_init(&area, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
             mp_obj_get_int(args[3]), mp_obj_get_int(args[4]));
     } else {
         mp_raise_ValueError(MP_ERROR_TEXT("clip() requires x, y, w, h or an Area"));
     }
-    gfx_draw_push_clip(&self->draw, &area);
     mp_obj_clip_ctx_t *ctx = mp_obj_malloc(mp_obj_clip_ctx_t, &mp_type_clip_ctx);
     ctx->draw_obj = args[0];
+    ctx->area = area;
     return MP_OBJ_FROM_PTR(ctx);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_clip_obj, 2, 5, draw_clip);
+
+/* ClippedCanvas: proxy that restricts drawing to a clip Area — matches graphics._clip */
+typedef struct _mp_obj_clipped_canvas_t {
+    mp_obj_base_t base;
+    mp_obj_t canvas_obj;
+    mp_obj_t clip_obj;
+    gfx_area_t clip;
+} mp_obj_clipped_canvas_t;
+
+const mp_obj_type_t mp_type_clipped_canvas;
+
+static bool clipped_intersect(const gfx_area_t *clip, int x, int y, int w, int h, gfx_area_t *out) {
+    if (w <= 0 || h <= 0) {
+        return false;
+    }
+    gfx_area_t rect = gfx_area_from_rect(x, y, w, h);
+    *out = gfx_area_clip(&rect, clip);
+    return out->w > 0 && out->h > 0;
+}
+
+static const gfx_canvas_t *clipped_bind(mp_obj_clipped_canvas_t *self, mp_canvas_slot_t *slot, gfx_clipped_canvas_t *cc) {
+    if (!mp_canvas_resolve(self->canvas_obj, slot)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("canvas required"));
+    }
+    gfx_clipped_canvas_init(cc, &slot->canvas, &self->clip);
+    return &cc->base;
+}
+
+static mp_obj_t clipped_canvas_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+    (void)type;
+    mp_arg_check_num(n_args, n_kw, 2, 2, false);
+    mp_obj_clipped_canvas_t *o = mp_obj_malloc(mp_obj_clipped_canvas_t, &mp_type_clipped_canvas);
+    o->canvas_obj = args[0];
+    o->clip_obj = args[1];
+    o->clip = clip_ctx_parse_area(args[1]);
+    return MP_OBJ_FROM_PTR(o);
+}
+
+static mp_obj_t clipped_pixel(size_t n_args, const mp_obj_t *args) {
+    mp_obj_clipped_canvas_t *self = MP_OBJ_TO_PTR(args[0]);
+    int x = mp_obj_get_int(args[1]);
+    int y = mp_obj_get_int(args[2]);
+    if (!gfx_area_contains_point(&self->clip, x, y)) {
+        return mp_const_none;
+    }
+    mp_canvas_slot_t slot;
+    gfx_clipped_canvas_t cc;
+    const gfx_canvas_t *canvas = clipped_bind(self, &slot, &cc);
+    if (n_args == 3) {
+        return mp_obj_new_int(canvas->pixel(canvas->ctx, x, y, 0, 0));
+    }
+    gfx_area_t area = gfx_shapes_pixel(canvas, x, y, mp_obj_get_int(args[3]));
+    return gfx_area_mp_from_gfx(&area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clipped_pixel_obj, 3, 4, clipped_pixel);
+
+static mp_obj_t clipped_fill_rect(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_obj_clipped_canvas_t *self = MP_OBJ_TO_PTR(args[0]);
+    gfx_area_t hit;
+    if (!clipped_intersect(&self->clip, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
+            mp_obj_get_int(args[3]), mp_obj_get_int(args[4]), &hit)) {
+        return mp_const_none;
+    }
+    mp_canvas_slot_t slot;
+    gfx_clipped_canvas_t cc;
+    const gfx_canvas_t *canvas = clipped_bind(self, &slot, &cc);
+    gfx_shapes_fill_rect(canvas, hit.x, hit.y, hit.w, hit.h, mp_obj_get_int(args[5]));
+    return gfx_area_mp_from_gfx(&hit);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clipped_fill_rect_obj, 6, 6, clipped_fill_rect);
+
+static mp_obj_t clipped_fill(mp_obj_t self_in, mp_obj_t c_in) {
+    mp_obj_clipped_canvas_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_t args[] = {
+        self_in,
+        mp_obj_new_int(self->clip.x),
+        mp_obj_new_int(self->clip.y),
+        mp_obj_new_int(self->clip.w),
+        mp_obj_new_int(self->clip.h),
+        c_in,
+    };
+    return clipped_fill_rect(6, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(clipped_fill_obj, clipped_fill);
+
+static mp_obj_t clipped_hline(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_obj_t call[] = {
+        args[0], args[1], args[2], args[3], mp_obj_new_int(1), args[4],
+    };
+    return clipped_fill_rect(6, call);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clipped_hline_obj, 5, 5, clipped_hline);
+
+static mp_obj_t clipped_vline(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_obj_t call[] = {
+        args[0], args[1], args[2], mp_obj_new_int(1), args[3], args[4],
+    };
+    return clipped_fill_rect(6, call);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clipped_vline_obj, 5, 5, clipped_vline);
+
+static mp_obj_t clipped_blit_rect(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_obj_clipped_canvas_t *self = MP_OBJ_TO_PTR(args[0]);
+    int x = mp_obj_get_int(args[2]);
+    int y = mp_obj_get_int(args[3]);
+    int w = mp_obj_get_int(args[4]);
+    int h = mp_obj_get_int(args[5]);
+    gfx_area_t hit;
+    if (!clipped_intersect(&self->clip, x, y, w, h, &hit)) {
+        return mp_const_none;
+    }
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[1], &bufinfo, MP_BUFFER_READ);
+    mp_canvas_slot_t slot;
+    gfx_clipped_canvas_t cc;
+    const gfx_canvas_t *canvas = clipped_bind(self, &slot, &cc);
+    /* Crop when the destination rect is partially outside the clip (RGB565). */
+    int dx = hit.x - x;
+    int dy = hit.y - y;
+    if (dx || dy || hit.w != w || hit.h != h) {
+        size_t row_bytes = (size_t)hit.w * 2;
+        size_t out_len = row_bytes * (size_t)hit.h;
+        uint8_t *out = m_new(uint8_t, out_len);
+        const uint8_t *src = (const uint8_t *)bufinfo.buf;
+        for (int row = 0; row < hit.h; row++) {
+            size_t src_start = ((size_t)(dy + row) * (size_t)w + (size_t)dx) * 2;
+            memcpy(out + (size_t)row * row_bytes, src + src_start, row_bytes);
+        }
+        gfx_shapes_blit_rect(canvas, out, hit.x, hit.y, hit.w, hit.h, 2);
+        m_del(uint8_t, out, out_len);
+    } else {
+        gfx_shapes_blit_rect(canvas, bufinfo.buf, hit.x, hit.y, hit.w, hit.h, 2);
+    }
+    return gfx_area_mp_from_gfx(&hit);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clipped_blit_rect_obj, 6, 6, clipped_blit_rect);
+
+static mp_obj_t clipped_blit_transparent(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_obj_clipped_canvas_t *self = MP_OBJ_TO_PTR(args[0]);
+    int x = mp_obj_get_int(args[2]);
+    int y = mp_obj_get_int(args[3]);
+    int w = mp_obj_get_int(args[4]);
+    int h = mp_obj_get_int(args[5]);
+    gfx_area_t hit;
+    if (!clipped_intersect(&self->clip, x, y, w, h, &hit)) {
+        return mp_const_none;
+    }
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[1], &bufinfo, MP_BUFFER_READ);
+    mp_canvas_slot_t slot;
+    gfx_clipped_canvas_t cc;
+    const gfx_canvas_t *canvas = clipped_bind(self, &slot, &cc);
+    int dx = hit.x - x;
+    int dy = hit.y - y;
+    int key = mp_obj_get_int(args[6]);
+    if (dx || dy || hit.w != w || hit.h != h) {
+        size_t row_bytes = (size_t)hit.w * 2;
+        size_t out_len = row_bytes * (size_t)hit.h;
+        uint8_t *out = m_new(uint8_t, out_len);
+        const uint8_t *src = (const uint8_t *)bufinfo.buf;
+        for (int row = 0; row < hit.h; row++) {
+            size_t src_start = ((size_t)(dy + row) * (size_t)w + (size_t)dx) * 2;
+            memcpy(out + (size_t)row * row_bytes, src + src_start, row_bytes);
+        }
+        gfx_shapes_blit_transparent(canvas, out, hit.x, hit.y, hit.w, hit.h, key, 2);
+        m_del(uint8_t, out, out_len);
+    } else {
+        gfx_shapes_blit_transparent(canvas, bufinfo.buf, hit.x, hit.y, hit.w, hit.h, key, 2);
+    }
+    return gfx_area_mp_from_gfx(&hit);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clipped_blit_transparent_obj, 7, 7, clipped_blit_transparent);
+
+static void clipped_canvas_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_obj_clipped_canvas_t *self = MP_OBJ_TO_PTR(self_in);
+    if (dest[0] == MP_OBJ_NULL) {
+        switch (attr) {
+            case MP_QSTR_width:
+            case MP_QSTR_height:
+                dest[0] = mp_load_attr(self->canvas_obj, attr);
+                return;
+            case MP_QSTR_pixel:
+            case MP_QSTR_fill:
+            case MP_QSTR_fill_rect:
+            case MP_QSTR_hline:
+            case MP_QSTR_vline:
+            case MP_QSTR_blit_rect:
+            case MP_QSTR_blit_transparent:
+                /* Defer to locals_dict (attr runs first). */
+                dest[1] = MP_OBJ_SENTINEL;
+                return;
+            default:
+                /* Forward other attributes / methods to the underlying canvas. */
+                mp_load_method_maybe(self->canvas_obj, attr, dest);
+                return;
+        }
+    } else {
+        mp_store_attr(self->canvas_obj, attr, dest[1]);
+        dest[0] = MP_OBJ_NULL;
+    }
+}
+
+static const mp_rom_map_elem_t clipped_canvas_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&clipped_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&clipped_fill_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fill_rect), MP_ROM_PTR(&clipped_fill_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_hline), MP_ROM_PTR(&clipped_hline_obj) },
+    { MP_ROM_QSTR(MP_QSTR_vline), MP_ROM_PTR(&clipped_vline_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_rect), MP_ROM_PTR(&clipped_blit_rect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_transparent), MP_ROM_PTR(&clipped_blit_transparent_obj) },
+};
+static MP_DEFINE_CONST_DICT(clipped_canvas_locals_dict, clipped_canvas_locals_dict_table);
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_type_clipped_canvas,
+    MP_QSTR_ClippedCanvas,
+    MP_TYPE_FLAG_NONE,
+    make_new, clipped_canvas_make_new,
+    attr, clipped_canvas_attr,
+    locals_dict, &clipped_canvas_locals_dict
+);
 
 static const mp_rom_map_elem_t draw_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&draw_fill_obj) },
@@ -1591,6 +1837,8 @@ static const mp_rom_map_elem_t graphics_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_FrameBuffer), MP_ROM_PTR(&mp_type_framebuf) },
     { MP_ROM_QSTR(MP_QSTR_Area), MP_ROM_PTR(&mp_type_area) },
     { MP_ROM_QSTR(MP_QSTR_Draw), MP_ROM_PTR(&mp_type_draw) },
+    { MP_ROM_QSTR(MP_QSTR_ClipContext), MP_ROM_PTR(&mp_type_clip_ctx) },
+    { MP_ROM_QSTR(MP_QSTR_ClippedCanvas), MP_ROM_PTR(&mp_type_clipped_canvas) },
     { MP_ROM_QSTR(MP_QSTR_Font), MP_ROM_PTR(&mp_type_font) },
     { MP_ROM_QSTR(MP_QSTR_BMP565), MP_ROM_PTR(&mp_type_bmp565) },
     { MP_ROM_QSTR(MP_QSTR_MONO_VLSB), MP_ROM_INT(GFX_MVLSB) },
