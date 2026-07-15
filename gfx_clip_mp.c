@@ -26,6 +26,8 @@ typedef struct _mp_obj_clipped_canvas_t {
 
 const mp_obj_type_t mp_type_clipped_canvas;
 
+static const mp_obj_dict_t clipped_canvas_locals_dict;
+
 static mp_obj_clipped_canvas_t *clipped_canvas_from_obj(mp_obj_t obj) {
     if (!mp_obj_is_type(obj, &mp_type_clipped_canvas)) {
         mp_raise_TypeError(MP_ERROR_TEXT("ClippedCanvas required"));
@@ -58,13 +60,23 @@ static void clipped_canvas_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
     mp_obj_clipped_canvas_t *self = clipped_canvas_from_obj(self_in);
     if (dest[0] == MP_OBJ_NULL) {
         if (attr == MP_QSTR_width) {
+            clipped_canvas_bind_parent(self);
             dest[0] = mp_obj_new_int(self->parent_slot.canvas.width);
-        } else if (attr == MP_QSTR_height) {
-            dest[0] = mp_obj_new_int(self->parent_slot.canvas.height);
-        } else {
-            dest[1] = self->canvas_obj;
-            dest[0] = MP_OBJ_NULL;
+            return;
         }
+        if (attr == MP_QSTR_height) {
+            clipped_canvas_bind_parent(self);
+            dest[0] = mp_obj_new_int(self->parent_slot.canvas.height);
+            return;
+        }
+        mp_map_elem_t *elem = mp_map_lookup(
+            (mp_map_t *)&clipped_canvas_locals_dict.map, MP_OBJ_NEW_QSTR(attr), MP_MAP_LOOKUP);
+        if (elem != NULL) {
+            mp_convert_member_lookup(self_in, &mp_type_clipped_canvas, elem->value, dest);
+            return;
+        }
+        dest[1] = self->canvas_obj;
+        dest[0] = MP_OBJ_NULL;
     }
 }
 
