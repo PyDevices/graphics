@@ -22,38 +22,39 @@ void gfx_image_fb_free(gfx_image_fb_t *img) {
     img->owns_buffer = 0;
 }
 
-static int skip_comments(const uint8_t **data, size_t *len) {
-    while (*len > 0 && **data == '#') {
-        const uint8_t *nl = memchr(*data, '\n', *len);
-        if (!nl) {
-            return -1;
+/* Read one PNM header line from f, skipping '#' comments. Line excludes newline. */
+static int read_header_line(FILE *f, char *line, size_t line_cap) {
+    for (;;) {
+        size_t i = 0;
+        int c;
+        for (;;) {
+            c = fgetc(f);
+            if (c == EOF) {
+                return -1;
+            }
+            if (c == '\n') {
+                break;
+            }
+            if (i + 1 < line_cap) {
+                line[i++] = (char)c;
+            }
         }
-        size_t skip = (size_t)(nl - *data) + 1;
-        *data += skip;
-        *len -= skip;
+        line[i] = '\0';
+        if (i > 0 && line[0] == '#') {
+            continue;
+        }
+        return 0;
     }
-    return 0;
 }
 
-static int parse_dims_line(const uint8_t **data, size_t *len, int *width, int *height) {
-    if (skip_comments(data, len) < 0) {
-        return -1;
-    }
-    char line[128];
-    size_t i = 0;
-    while (*len > 0 && **data != '\n' && i + 1 < sizeof(line)) {
-        line[i++] = (char)**data;
-        (*data)++;
-        (*len)--;
-    }
-    if (*len == 0 || **data != '\n') {
-        return -1;
-    }
-    (*data)++;
-    (*len)--;
-    line[i] = '\0';
-    if (sscanf(line, "%d %d", width, height) != 2) {
-        return -1;
+static int read_exact(FILE *f, uint8_t *buf, size_t n) {
+    size_t got = 0;
+    while (got < n) {
+        size_t nread = fread(buf + got, 1, n - got, f);
+        if (nread == 0) {
+            return -1;
+        }
+        got += nread;
     }
     return 0;
 }
@@ -68,40 +69,28 @@ int gfx_files_pbm_to_framebuffer(const char *path, gfx_image_fb_t *out) {
         fclose(f);
         return -1;
     }
-    fseek(f, 0, SEEK_END);
-    long flen = ftell(f);
-    fseek(f, 3, SEEK_SET);
-    uint8_t *all = (uint8_t *)malloc((size_t)flen - 3);
-    if (!all) {
+    char line[128];
+    if (read_header_line(f, line, sizeof(line)) < 0) {
         fclose(f);
         return -1;
     }
-    if (fread(all, 1, (size_t)flen - 3, f) != (size_t)flen - 3) {
-        free(all);
-        fclose(f);
-        return -1;
-    }
-    fclose(f);
-    const uint8_t *data = all;
-    size_t len = (size_t)flen - 3;
     int width, height;
-    if (parse_dims_line(&data, &len, &width, &height) < 0) {
-        free(all);
+    if (sscanf(line, "%d %d", &width, &height) != 2 || width <= 0 || height <= 0) {
+        fclose(f);
         return -1;
     }
     size_t buf_len = (size_t)((width + 7) / 8) * (size_t)height;
     uint8_t *buf = (uint8_t *)malloc(buf_len);
     if (!buf) {
-        free(all);
+        fclose(f);
         return -1;
     }
-    if (len < buf_len) {
+    if (read_exact(f, buf, buf_len) < 0) {
         free(buf);
-        free(all);
+        fclose(f);
         return -1;
     }
-    memcpy(buf, data, buf_len);
-    free(all);
+    fclose(f);
     out->buffer = buf;
     out->buffer_len = buf_len;
     out->width = width;
@@ -121,46 +110,21 @@ int gfx_files_pgm_to_framebuffer(const char *path, gfx_image_fb_t *out) {
         fclose(f);
         return -1;
     }
-    fseek(f, 0, SEEK_END);
-    long flen = ftell(f);
-    fseek(f, 3, SEEK_SET);
-    uint8_t *all = (uint8_t *)malloc((size_t)flen - 3);
-    if (!all) {
+    char line[128];
+    if (read_header_line(f, line, sizeof(line)) < 0) {
         fclose(f);
         return -1;
     }
-    if (fread(all, 1, (size_t)flen - 3, f) != (size_t)flen - 3) {
-        free(all);
-        fclose(f);
-        return -1;
-    }
-    fclose(f);
-    const uint8_t *data = all;
-    size_t len = (size_t)flen - 3;
     int width, height;
-    if (parse_dims_line(&data, &len, &width, &height) < 0) {
-        free(all);
+    if (sscanf(line, "%d %d", &width, &height) != 2 || width <= 0 || height <= 0) {
+        fclose(f);
         return -1;
     }
-    if (skip_comments(&data, &len) < 0) {
-        free(all);
+    if (read_header_line(f, line, sizeof(line)) < 0) {
+        fclose(f);
         return -1;
     }
-    char max_line[32];
-    size_t i = 0;
-    while (len > 0 && *data != '\n' && i + 1 < sizeof(max_line)) {
-        max_line[i++] = (char)*data;
-        data++;
-        len--;
-    }
-    if (len == 0 || *data != '\n') {
-        free(all);
-        return -1;
-    }
-    data++;
-    len--;
-    max_line[i] = '\0';
-    int max_value = atoi(max_line);
+    int max_value = atoi(line);
     int format;
     size_t buf_len;
     if (max_value == 3) {
@@ -173,21 +137,20 @@ int gfx_files_pgm_to_framebuffer(const char *path, gfx_image_fb_t *out) {
         format = GFX_GS8;
         buf_len = (size_t)width * (size_t)height;
     } else {
-        free(all);
+        fclose(f);
         return -1;
     }
     uint8_t *buf = (uint8_t *)malloc(buf_len);
     if (!buf) {
-        free(all);
+        fclose(f);
         return -1;
     }
-    if (len < buf_len) {
+    if (read_exact(f, buf, buf_len) < 0) {
         free(buf);
-        free(all);
+        fclose(f);
         return -1;
     }
-    memcpy(buf, data, buf_len);
-    free(all);
+    fclose(f);
     out->buffer = buf;
     out->buffer_len = buf_len;
     out->width = width;
