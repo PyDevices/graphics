@@ -500,7 +500,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text16_obj, 4, draw_text16);
 
 /* ClipContext is defined in gfx_clip_mp.c */
 static mp_obj_t draw_clip(size_t n_args, const mp_obj_t *args) {
-    mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
+    (void)args;
     gfx_area_t area;
     if (n_args == 2) {
         mp_obj_t native = mp_obj_cast_to_native_base(args[1], MP_OBJ_FROM_PTR(&mp_type_area));
