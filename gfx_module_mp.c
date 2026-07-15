@@ -224,7 +224,7 @@ static mp_obj_t framebuf_line(size_t n_args, const mp_obj_t *args_in) {
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_line_obj, 6, 6, framebuf_line);
 
 static mp_obj_t framebuf_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_rx, ARG_ry, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m };
+    enum { ARG_self, ARG_x, ARG_y, ARG_rx, ARG_ry, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m, ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
@@ -237,6 +237,8 @@ static mp_obj_t framebuf_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *
         { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_m, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0x0f} },
+        { MP_QSTR_w, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_h, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
     };
     mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
@@ -244,7 +246,8 @@ static mp_obj_t framebuf_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *
     bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
     mp_int_t mask = (n_args > 7) ? parsed[ARG_mask_pos].u_int : parsed[ARG_m].u_int;
     gfx_area_t area = gfx_shapes_ellipse(&self->canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
-        parsed[ARG_rx].u_int, parsed[ARG_ry].u_int, parsed[ARG_c].u_int, fill, mask);
+        parsed[ARG_rx].u_int, parsed[ARG_ry].u_int, parsed[ARG_c].u_int, fill, mask,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int);
     return gfx_area_mp_from_gfx(&area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(framebuf_ellipse_obj, 6, framebuf_ellipse);

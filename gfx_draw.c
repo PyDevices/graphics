@@ -11,7 +11,7 @@ void gfx_draw_init(gfx_draw_t *draw, const gfx_canvas_t *canvas) {
     draw->use_clipped = 0;
 }
 
-static gfx_area_t effective_clip(const gfx_draw_t *draw) {
+gfx_area_t gfx_draw_effective_clip(const gfx_draw_t *draw) {
     if (draw->clip_depth <= 0) {
         return gfx_area_from_rect(0, 0, draw->canvas.width, draw->canvas.height);
     }
@@ -28,7 +28,7 @@ const gfx_canvas_t *gfx_draw_target(gfx_draw_t *draw) {
         draw->use_clipped = 0;
         return &draw->canvas;
     }
-    gfx_area_t clip = effective_clip(draw);
+    gfx_area_t clip = gfx_draw_effective_clip(draw);
     if (clip.w <= 0 || clip.h <= 0) {
         draw->use_clipped = 0;
         return &draw->canvas;

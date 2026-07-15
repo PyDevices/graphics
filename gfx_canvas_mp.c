@@ -4,6 +4,7 @@
  */
 
 #include "gfx_canvas_mp.h"
+#include "gfx_clip_mp.h"
 
 #include "py/runtime.h"
 #include "py/misc.h"
@@ -122,6 +123,24 @@ static bool mp_init_py_canvas(mp_obj_t target, mp_canvas_slot_t *slot) {
 }
 
 bool mp_canvas_resolve(mp_obj_t target, mp_canvas_slot_t *slot) {
+    if (mp_obj_is_type(target, &mp_type_clipped_canvas)) {
+        typedef struct _mp_obj_clipped_canvas_t {
+            mp_obj_base_t base;
+            mp_obj_t canvas_obj;
+            gfx_area_t clip;
+            mp_canvas_slot_t parent_slot;
+            gfx_clipped_canvas_t clipped;
+        } mp_obj_clipped_canvas_t;
+        mp_obj_clipped_canvas_t *cc = MP_OBJ_TO_PTR(target);
+        if (!mp_canvas_resolve(cc->canvas_obj, &cc->parent_slot)) {
+            return false;
+        }
+        gfx_clipped_canvas_init(&cc->clipped, &cc->parent_slot.canvas, &cc->clip);
+        slot->kind = MP_CANVAS_PY_OBJ;
+        slot->u.py.obj = target;
+        slot->canvas = cc->clipped.base;
+        return true;
+    }
     if (mp_get_native_framebuf(target, &slot->u.fb)) {
         slot->kind = MP_CANVAS_NATIVE_FB;
         slot->canvas = slot->u.fb.canvas;

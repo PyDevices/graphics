@@ -13,7 +13,10 @@ ALL = [
     "MONO_HMSB",
     "MONO_VLSB",
     "RGB565",
+    "RGB888",
     "Area",
+    "ClipContext",
+    "ClippedCanvas",
     "Draw",
     "Font",
     "FrameBuffer",
@@ -62,6 +65,13 @@ assert fb.buffer is buf or bytes(fb.buffer) == bytes(buf)
 fb.fill(0)
 graphics.fill_rect(fb, 1, 1, 4, 4, 0xF800)
 graphics.text8(fb, "Hi", 0, 0, 0xFFFF)
+graphics.text16(fb, "C", 0, 32, scale=1)
 d = graphics.Draw(fb)
 d.fill_rect(0, 0, 2, 2, 1)
+clip = graphics.Area(0, 0, 8, 8)
+cc = graphics.ClippedCanvas(fb, clip)
+assert cc.width == 32
+ctx = graphics.ClipContext(d, clip)
+with ctx as eff:
+    assert isinstance(eff, graphics.Area)
 print("test_parity: ok")

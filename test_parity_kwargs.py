@@ -139,6 +139,27 @@ def t_area_return():
     assert isinstance(a2, graphics.Area), type(a2)
 
 
+def t_clip_types():
+    clip = graphics.Area(2, 2, 10, 10)
+    cc = graphics.ClippedCanvas(fb, clip)
+    assert cc.width == W and cc.height == H
+    cc.fill_rect(0, 0, 20, 20, 0xF800)
+    d = graphics.Draw(fb)
+    with d.clip(clip) as eff:
+        assert isinstance(eff, graphics.Area)
+        d.fill_rect(0, 0, 4, 4, 0x07E0)
+    ctx = graphics.ClipContext(d, graphics.Area(0, 0, 8, 8))
+    with ctx as eff2:
+        assert isinstance(eff2, graphics.Area)
+
+
+def t_ellipse_wh():
+    graphics.ellipse(fb, 40, 40, 6, 4, 0xFFFF, f=True, w=20, h=16)
+    fb.ellipse(50, 50, 5, 5, 0xF800, f=False, w=18, h=14)
+    d = graphics.Draw(fb)
+    d.ellipse(10, 10, 3, 3, 0x07E0, w=12, h=10)
+
+
 check("text_module", t_text_module)
 check("text_fb", t_text_fb)
 check("text_draw", t_text_draw)
@@ -148,6 +169,8 @@ check("missing_fb_methods", t_missing_fb_methods)
 check("missing_draw_methods", t_missing_draw_methods)
 check("font_kwargs", t_font_kwargs)
 check("area_return", t_area_return)
+check("clip_types", t_clip_types)
+check("ellipse_wh", t_ellipse_wh)
 
 failed = [k for k, v in results.items() if not v.startswith("pass")]
 if failed:

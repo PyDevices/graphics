@@ -33,6 +33,8 @@ static PyTypeObject GfxFrameBufferType;
 static PyTypeObject GfxDrawType;
 static PyTypeObject GfxFontType;
 static PyTypeObject GfxBmp565Type;
+static PyTypeObject GfxClippedCanvasType;
+static PyTypeObject GfxClipCtxType;
 
 /* ------------------------------------------------------------------------- */
 /* Object structs (declared early so the canvas resolver can see them)       */
@@ -499,9 +501,17 @@ static void py_canvas_vline(void *ctx, int x, int y, int h, int c) {
     py_canvas_fill_rect(ctx, x, y, 1, h, c);
 }
 
+typedef struct {
+    PyObject_HEAD
+    PyObject *canvas_obj;
+    gfx_area_t clip;
+    cpy_canvas_slot_t parent_slot;
+    gfx_clipped_canvas_t clipped;
+} GfxClippedCanvasObject;
+
 /* Resolve a drawing target into a gfx_canvas_t. slot must outlive the draw
  * call (its py ctx is referenced by canvas.ctx). Returns 0 on success. */
-static int cpy_canvas_resolve(PyObject *target, cpy_canvas_slot_t *slot) {
+static int cpy_canvas_resolve_inner(PyObject *target, cpy_canvas_slot_t *slot) {
     if (PyObject_TypeCheck(target, &GfxFrameBufferType)) {
         GfxFrameBufferObject *fb = (GfxFrameBufferObject *)target;
         slot->canvas = fb->canvas;
@@ -537,6 +547,249 @@ static int cpy_canvas_resolve(PyObject *target, cpy_canvas_slot_t *slot) {
     PyErr_SetString(PyExc_TypeError, "FrameBuffer or canvas required");
     return -1;
 }
+
+static int cpy_canvas_resolve(PyObject *target, cpy_canvas_slot_t *slot) {
+    if (PyObject_TypeCheck(target, &GfxClippedCanvasType)) {
+        GfxClippedCanvasObject *cc = (GfxClippedCanvasObject *)target;
+        if (cpy_canvas_resolve_inner(cc->canvas_obj, &cc->parent_slot) < 0) {
+            return -1;
+        }
+        gfx_clipped_canvas_init(&cc->clipped, &cc->parent_slot.canvas, &cc->clip);
+        slot->py.obj = target;
+        slot->canvas = cc->clipped.base;
+        return 0;
+    }
+    return cpy_canvas_resolve_inner(target, slot);
+}
+
+/* ------------------------------------------------------------------------- */
+/* ClippedCanvas                                                             */
+/* ------------------------------------------------------------------------- */
+
+static int clipped_canvas_bind(GfxClippedCanvasObject *self) {
+    return cpy_canvas_resolve_inner(self->canvas_obj, &self->parent_slot);
+}
+
+static PyObject *clipped_canvas_getattro(PyObject *self, PyObject *name) {
+    PyObject *r = PyObject_GenericGetAttr(self, name);
+    if (r || !PyErr_ExceptionMatches(PyExc_AttributeError)) {
+        return r;
+    }
+    PyErr_Clear();
+    return PyObject_GetAttr(((GfxClippedCanvasObject *)self)->canvas_obj, name);
+}
+
+static PyObject *clipped_canvas_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    (void)kwds;
+    PyObject *canvas;
+    PyObject *clip_obj;
+    if (!PyArg_ParseTuple(args, "OO", &canvas, &clip_obj)) {
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(clip_obj, &GfxAreaType)) {
+        PyErr_SetString(PyExc_TypeError, "Area required");
+        return NULL;
+    }
+    GfxClippedCanvasObject *o = (GfxClippedCanvasObject *)type->tp_alloc(type, 0);
+    if (!o) {
+        return NULL;
+    }
+    o->canvas_obj = canvas;
+    Py_INCREF(canvas);
+    o->clip = ((GfxAreaObject *)clip_obj)->area;
+    if (clipped_canvas_bind(o) < 0) {
+        Py_DECREF(o);
+        return NULL;
+    }
+    gfx_clipped_canvas_init(&o->clipped, &o->parent_slot.canvas, &o->clip);
+    return (PyObject *)o;
+}
+
+static void clipped_canvas_dealloc(GfxClippedCanvasObject *self) {
+    Py_XDECREF(self->canvas_obj);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+static PyObject *clipped_canvas_get_width(GfxClippedCanvasObject *self, void *closure) {
+    (void)closure;
+    if (clipped_canvas_bind(self) < 0) {
+        return NULL;
+    }
+    return PyLong_FromLong(self->parent_slot.canvas.width);
+}
+
+static PyObject *clipped_canvas_get_height(GfxClippedCanvasObject *self, void *closure) {
+    (void)closure;
+    if (clipped_canvas_bind(self) < 0) {
+        return NULL;
+    }
+    return PyLong_FromLong(self->parent_slot.canvas.height);
+}
+
+static PyGetSetDef clipped_canvas_getset[] = {
+    {"width", (getter)clipped_canvas_get_width, NULL, NULL},
+    {"height", (getter)clipped_canvas_get_height, NULL, NULL},
+    {NULL},
+};
+
+static PyObject *clipped_canvas_pixel(GfxClippedCanvasObject *self, PyObject *args) {
+    int x, y;
+    int c = -1;
+    if (!PyArg_ParseTuple(args, "ii|i", &x, &y, &c)) {
+        return NULL;
+    }
+    if (!gfx_area_contains_point(&self->clip, x, y)) {
+        Py_RETURN_NONE;
+    }
+    if (c < 0) {
+        return PyObject_CallMethod(self->canvas_obj, "pixel", "ii", x, y);
+    }
+    if (clipped_canvas_bind(self) < 0) {
+        return NULL;
+    }
+    gfx_clipped_canvas_init(&self->clipped, &self->parent_slot.canvas, &self->clip);
+    gfx_area_t area = gfx_shapes_pixel(&self->clipped.base, x, y, c);
+    return area_from_gfx(&area);
+}
+
+static PyObject *clipped_canvas_fill(GfxClippedCanvasObject *self, PyObject *args) {
+    int col;
+    if (!PyArg_ParseTuple(args, "i", &col)) {
+        return NULL;
+    }
+    if (clipped_canvas_bind(self) < 0) {
+        return NULL;
+    }
+    gfx_clipped_canvas_init(&self->clipped, &self->parent_slot.canvas, &self->clip);
+    gfx_area_t area = gfx_shapes_fill_rect(&self->clipped.base, self->clip.x, self->clip.y, self->clip.w, self->clip.h, col);
+    return area_from_gfx(&area);
+}
+
+static PyObject *clipped_canvas_fill_rect(GfxClippedCanvasObject *self, PyObject *args) {
+    int x, y, w, h, c;
+    if (!PyArg_ParseTuple(args, "iiiii", &x, &y, &w, &h, &c)) {
+        return NULL;
+    }
+    gfx_area_t hit;
+    if (!gfx_intersect_rect(x, y, w, h, &self->clip, &hit)) {
+        Py_RETURN_NONE;
+    }
+    if (clipped_canvas_bind(self) < 0) {
+        return NULL;
+    }
+    gfx_clipped_canvas_init(&self->clipped, &self->parent_slot.canvas, &self->clip);
+    gfx_area_t area = gfx_shapes_fill_rect(&self->clipped.base, hit.x, hit.y, hit.w, hit.h, c);
+    return area_from_gfx(&area);
+}
+
+static PyObject *clipped_canvas_hline(GfxClippedCanvasObject *self, PyObject *args) {
+    int x, y, w, c;
+    if (!PyArg_ParseTuple(args, "iiii", &x, &y, &w, &c)) {
+        return NULL;
+    }
+    return PyObject_CallMethod((PyObject *)self, "fill_rect", "iiiii", x, y, w, 1, c);
+}
+
+static PyObject *clipped_canvas_vline(GfxClippedCanvasObject *self, PyObject *args) {
+    int x, y, h, c;
+    if (!PyArg_ParseTuple(args, "iiii", &x, &y, &h, &c)) {
+        return NULL;
+    }
+    return PyObject_CallMethod((PyObject *)self, "fill_rect", "iiiii", x, y, 1, h, c);
+}
+
+static PyObject *clipped_canvas_blit_rect(GfxClippedCanvasObject *self, PyObject *args) {
+    Py_buffer view;
+    int x, y, w, h;
+    if (!PyArg_ParseTuple(args, "y*iiii", &view, &x, &y, &w, &h)) {
+        return NULL;
+    }
+    gfx_area_t hit;
+    if (!gfx_intersect_rect(x, y, w, h, &self->clip, &hit)) {
+        PyBuffer_Release(&view);
+        Py_RETURN_NONE;
+    }
+    int dx = hit.x - x;
+    int dy = hit.y - y;
+    const void *blit_buf = view.buf;
+    uint8_t crop_buf[4096];
+    if (dx || dy || hit.w != w || hit.h != h) {
+        size_t need = (size_t)hit.w * (size_t)hit.h * 2;
+        if (need > sizeof(crop_buf)) {
+            PyBuffer_Release(&view);
+            PyErr_SetString(PyExc_ValueError, "blit crop too large");
+            return NULL;
+        }
+        gfx_crop_rgb565_buffer(view.buf, w, dx, dy, hit.w, hit.h, crop_buf);
+        blit_buf = crop_buf;
+    }
+    if (clipped_canvas_bind(self) < 0) {
+        PyBuffer_Release(&view);
+        return NULL;
+    }
+    gfx_clipped_canvas_init(&self->clipped, &self->parent_slot.canvas, &self->clip);
+    gfx_area_t area = gfx_shapes_blit_rect(&self->clipped.base, blit_buf, hit.x, hit.y, hit.w, hit.h, 2);
+    PyBuffer_Release(&view);
+    return area_from_gfx(&area);
+}
+
+static PyObject *clipped_canvas_blit_transparent(GfxClippedCanvasObject *self, PyObject *args) {
+    Py_buffer view;
+    int x, y, w, h, key;
+    if (!PyArg_ParseTuple(args, "y*iiiii", &view, &x, &y, &w, &h, &key)) {
+        return NULL;
+    }
+    gfx_area_t hit;
+    if (!gfx_intersect_rect(x, y, w, h, &self->clip, &hit)) {
+        PyBuffer_Release(&view);
+        Py_RETURN_NONE;
+    }
+    int dx = hit.x - x;
+    int dy = hit.y - y;
+    const void *blit_buf = view.buf;
+    uint8_t crop_buf[4096];
+    if (dx || dy || hit.w != w || hit.h != h) {
+        size_t need = (size_t)hit.w * (size_t)hit.h * 2;
+        if (need > sizeof(crop_buf)) {
+            PyBuffer_Release(&view);
+            PyErr_SetString(PyExc_ValueError, "blit crop too large");
+            return NULL;
+        }
+        gfx_crop_rgb565_buffer(view.buf, w, dx, dy, hit.w, hit.h, crop_buf);
+        blit_buf = crop_buf;
+    }
+    if (clipped_canvas_bind(self) < 0) {
+        PyBuffer_Release(&view);
+        return NULL;
+    }
+    gfx_clipped_canvas_init(&self->clipped, &self->parent_slot.canvas, &self->clip);
+    gfx_area_t area = gfx_shapes_blit_transparent(&self->clipped.base, blit_buf, hit.x, hit.y, hit.w, hit.h, key, 2);
+    PyBuffer_Release(&view);
+    return area_from_gfx(&area);
+}
+
+static PyMethodDef clipped_canvas_methods[] = {
+    {"pixel", (PyCFunction)clipped_canvas_pixel, METH_VARARGS, NULL},
+    {"fill", (PyCFunction)clipped_canvas_fill, METH_VARARGS, NULL},
+    {"fill_rect", (PyCFunction)clipped_canvas_fill_rect, METH_VARARGS, NULL},
+    {"hline", (PyCFunction)clipped_canvas_hline, METH_VARARGS, NULL},
+    {"vline", (PyCFunction)clipped_canvas_vline, METH_VARARGS, NULL},
+    {"blit_rect", (PyCFunction)clipped_canvas_blit_rect, METH_VARARGS, NULL},
+    {"blit_transparent", (PyCFunction)clipped_canvas_blit_transparent, METH_VARARGS, NULL},
+    {NULL},
+};
+
+static PyTypeObject GfxClippedCanvasType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "graphics.ClippedCanvas",
+    .tp_basicsize = sizeof(GfxClippedCanvasObject),
+    .tp_dealloc = (destructor)clipped_canvas_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_methods = clipped_canvas_methods,
+    .tp_getset = clipped_canvas_getset,
+    .tp_getattro = clipped_canvas_getattro,
+    .tp_new = clipped_canvas_new,
+};
 
 /* Read-only framebuffer source for blit (native FrameBuffer or (buf,w,h,fmt[,stride])). */
 static int get_readonly_framebuffer(PyObject *arg, gfx_fb_t *fb_out, Py_buffer *view, int *have_view) {
@@ -825,13 +1078,12 @@ static PyObject *framebuffer_line(GfxFrameBufferObject *self, PyObject *args) {
 
 static PyObject *framebuffer_ellipse(GfxFrameBufferObject *self, PyObject *args, PyObject *kwds) {
     static char *kwlist[] = {"x", "y", "r1", "r2", "c", "f", "m", "fill", "w", "h", NULL};
-    int cx, cy, rx, ry, col, f = 0, m = 0x0f, fill = 0;
-    PyObject *w_ignored = NULL, *h_ignored = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "iiiii|pipOO", kwlist,
-            &cx, &cy, &rx, &ry, &col, &f, &m, &fill, &w_ignored, &h_ignored)) {
+    int cx, cy, rx, ry, col, f = 0, m = 0x0f, fill = 0, ew = 0, eh = 0;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "iiiii|pipii", kwlist,
+            &cx, &cy, &rx, &ry, &col, &f, &m, &fill, &ew, &eh)) {
         return NULL;
     }
-    gfx_area_t result = gfx_shapes_ellipse(&self->canvas, cx, cy, rx, ry, col, f || fill, m);
+    gfx_area_t result = gfx_shapes_ellipse(&self->canvas, cx, cy, rx, ry, col, f || fill, m, ew, eh);
     return area_from_gfx(&result);
 }
 
@@ -1304,17 +1556,16 @@ static PyObject *mod_ellipse(PyObject *self, PyObject *args, PyObject *kwds) {
     (void)self;
     static char *kwlist[] = {"canvas", "x", "y", "r1", "r2", "c", "f", "m", "fill", "w", "h", NULL};
     PyObject *target;
-    int cx, cy, rx, ry, col, f = 0, m = 0x0f, fill = 0;
-    PyObject *w_ignored = NULL, *h_ignored = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Oiiiii|pipOO", kwlist,
-            &target, &cx, &cy, &rx, &ry, &col, &f, &m, &fill, &w_ignored, &h_ignored)) {
+    int cx, cy, rx, ry, col, f = 0, m = 0x0f, fill = 0, ew = 0, eh = 0;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Oiiiii|pipii", kwlist,
+            &target, &cx, &cy, &rx, &ry, &col, &f, &m, &fill, &ew, &eh)) {
         return NULL;
     }
     cpy_canvas_slot_t slot;
     if (cpy_canvas_resolve(target, &slot) < 0) {
         return NULL;
     }
-    gfx_area_t area = gfx_shapes_ellipse(&slot.canvas, cx, cy, rx, ry, col, f || fill, m);
+    gfx_area_t area = gfx_shapes_ellipse(&slot.canvas, cx, cy, rx, ry, col, f || fill, m, ew, eh);
     RETURN_AREA(area);
 }
 
@@ -1636,9 +1887,37 @@ typedef struct {
 typedef struct {
     PyObject_HEAD
     PyObject *draw_obj;
+    gfx_area_t area;
 } GfxClipCtxObject;
 
-static PyTypeObject GfxClipCtxType;
+static PyObject *clipctx_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    (void)kwds;
+    PyObject *draw;
+    PyObject *area_obj;
+    if (!PyArg_ParseTuple(args, "OO", &draw, &area_obj)) {
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(area_obj, &GfxAreaType)) {
+        PyErr_SetString(PyExc_TypeError, "Area required");
+        return NULL;
+    }
+    GfxClipCtxObject *o = (GfxClipCtxObject *)type->tp_alloc(type, 0);
+    if (!o) {
+        return NULL;
+    }
+    o->draw_obj = draw;
+    Py_INCREF(draw);
+    o->area = ((GfxAreaObject *)area_obj)->area;
+    return (PyObject *)o;
+}
+
+static PyObject *clipctx_enter(GfxClipCtxObject *self, PyObject *noargs) {
+    (void)noargs;
+    GfxDrawObject *d = (GfxDrawObject *)self->draw_obj;
+    gfx_draw_push_clip(&d->draw, &self->area);
+    gfx_area_t eff = gfx_draw_effective_clip(&d->draw);
+    return area_from_gfx(&eff);
+}
 
 static PyObject *draw_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     (void)kwds;
@@ -1797,17 +2076,16 @@ static PyObject *draw_circle(GfxDrawObject *self, PyObject *args, PyObject *kwds
 
 static PyObject *draw_ellipse(GfxDrawObject *self, PyObject *args, PyObject *kwds) {
     static char *kwlist[] = {"x", "y", "r1", "r2", "c", "f", "m", "fill", "w", "h", NULL};
-    int cx, cy, rx, ry, col, f = 0, m = 0x0f, fill = 0;
-    PyObject *w_ignored = NULL, *h_ignored = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "iiiii|pipOO", kwlist,
-            &cx, &cy, &rx, &ry, &col, &f, &m, &fill, &w_ignored, &h_ignored)) {
+    int cx, cy, rx, ry, col, f = 0, m = 0x0f, fill = 0, ew = 0, eh = 0;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "iiiii|pipii", kwlist,
+            &cx, &cy, &rx, &ry, &col, &f, &m, &fill, &ew, &eh)) {
         return NULL;
     }
     const gfx_canvas_t *t = draw_target(self);
     if (!t) {
         return NULL;
     }
-    gfx_area_t area = gfx_shapes_ellipse(t, cx, cy, rx, ry, col, f || fill, m);
+    gfx_area_t area = gfx_shapes_ellipse(t, cx, cy, rx, ry, col, f || fill, m, ew, eh);
     RETURN_AREA(area);
 }
 
@@ -2042,13 +2320,12 @@ static PyObject *draw_clip(GfxDrawObject *self, PyObject *args) {
         PyErr_SetString(PyExc_ValueError, "clip() requires x, y, w, h or an Area");
         return NULL;
     }
-    gfx_draw_push_clip(&self->draw, &area);
     GfxClipCtxObject *ctx = PyObject_New(GfxClipCtxObject, &GfxClipCtxType);
     if (!ctx) {
-        gfx_draw_pop_clip(&self->draw);
         return NULL;
     }
     ctx->draw_obj = (PyObject *)self;
+    ctx->area = area;
     Py_INCREF(self);
     return (PyObject *)ctx;
 }
@@ -2091,12 +2368,6 @@ static PyTypeObject GfxDrawType = {
 };
 
 /* ClipContext returned by Draw.clip() */
-static PyObject *clipctx_enter(GfxClipCtxObject *self, PyObject *noargs) {
-    (void)noargs;
-    Py_INCREF(self);
-    return (PyObject *)self;
-}
-
 static PyObject *clipctx_exit(GfxClipCtxObject *self, PyObject *args) {
     (void)args;
     GfxDrawObject *d = (GfxDrawObject *)self->draw_obj;
@@ -2122,6 +2393,7 @@ static PyTypeObject GfxClipCtxType = {
     .tp_dealloc = (destructor)clipctx_dealloc,
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_methods = clipctx_methods,
+    .tp_new = clipctx_new,
 };
 
 /* ------------------------------------------------------------------------- */
@@ -2698,6 +2970,7 @@ PyMODINIT_FUNC PyInit_graphics(void) {
     }
     if (PyType_Ready(&GfxAreaType) < 0 || PyType_Ready(&GfxFrameBufferType) < 0
         || PyType_Ready(&GfxDrawType) < 0 || PyType_Ready(&GfxClipCtxType) < 0
+        || PyType_Ready(&GfxClippedCanvasType) < 0
         || PyType_Ready(&GfxFontType) < 0 || PyType_Ready(&GfxBmp565Type) < 0) {
         Py_DECREF(m);
         return NULL;
@@ -2705,11 +2978,15 @@ PyMODINIT_FUNC PyInit_graphics(void) {
     Py_INCREF(&GfxAreaType);
     Py_INCREF(&GfxFrameBufferType);
     Py_INCREF(&GfxDrawType);
+    Py_INCREF(&GfxClipCtxType);
+    Py_INCREF(&GfxClippedCanvasType);
     Py_INCREF(&GfxFontType);
     Py_INCREF(&GfxBmp565Type);
     if (PyModule_AddObject(m, "Area", (PyObject *)&GfxAreaType) < 0
         || PyModule_AddObject(m, "FrameBuffer", (PyObject *)&GfxFrameBufferType) < 0
         || PyModule_AddObject(m, "Draw", (PyObject *)&GfxDrawType) < 0
+        || PyModule_AddObject(m, "ClipContext", (PyObject *)&GfxClipCtxType) < 0
+        || PyModule_AddObject(m, "ClippedCanvas", (PyObject *)&GfxClippedCanvasType) < 0
         || PyModule_AddObject(m, "Font", (PyObject *)&GfxFontType) < 0
         || PyModule_AddObject(m, "BMP565", (PyObject *)&GfxBmp565Type) < 0) {
         Py_DECREF(m);

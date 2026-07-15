@@ -12,6 +12,7 @@ SRC_USERMOD_C += \
     $(GRAPHICS_MOD_DIR)/gfx_module_mp.c \
     $(GRAPHICS_MOD_DIR)/gfx_bindings_mp.c \
     $(GRAPHICS_MOD_DIR)/gfx_canvas_mp.c \
+    $(GRAPHICS_MOD_DIR)/gfx_clip_mp.c \
     $(GRAPHICS_MOD_DIR)/gfx_framebuffer.c \
     $(GRAPHICS_MOD_DIR)/gfx_shapes.c \
     $(GRAPHICS_MOD_DIR)/gfx_draw.c \

@@ -14,13 +14,6 @@
 
 #include "gfx_shapes.h"
 
-#define ELLIPSE_MASK_FILL (0x10)
-#define ELLIPSE_MASK_ALL (0x0f)
-#define ELLIPSE_MASK_Q1 (0x01)
-#define ELLIPSE_MASK_Q2 (0x02)
-#define ELLIPSE_MASK_Q3 (0x04)
-#define ELLIPSE_MASK_Q4 (0x08)
-
 static int clipped_pixel(void *ctx, int x, int y, int c, int set) {
     gfx_clipped_canvas_t *cc = (gfx_clipped_canvas_t *)ctx;
     if (!gfx_area_contains_point(&cc->clip, x, y)) {
@@ -163,88 +156,120 @@ gfx_area_t gfx_shapes_line(const gfx_canvas_t *canvas, int ox0, int oy0, int ox1
     return gfx_area_from_rect(x_min, y_min, x_max - x_min + 1, y_max - y_min + 1);
 }
 
-static void draw_ellipse_points(const gfx_canvas_t *canvas, int cx, int cy, int x, int y, int col, int mask) {
-    if (mask & ELLIPSE_MASK_FILL) {
-        if (mask & ELLIPSE_MASK_Q1) {
-            canvas->fill_rect(canvas->ctx, cx, cy - y, x + 1, 1, col);
+int gfx_intersect_rect(int x, int y, int w, int h, const gfx_area_t *clip, gfx_area_t *out) {
+    if (w <= 0 || h <= 0) {
+        return 0;
+    }
+    gfx_area_t rect = gfx_area_from_rect(x, y, w, h);
+    *out = gfx_area_clip(&rect, clip);
+    if (out->w <= 0 || out->h <= 0) {
+        return 0;
+    }
+    return 1;
+}
+
+void gfx_crop_rgb565_buffer(const void *src, int src_w, int src_x, int src_y, int crop_w, int crop_h, void *dst) {
+    const uint8_t *src_bytes = (const uint8_t *)src;
+    uint8_t *dst_bytes = (uint8_t *)dst;
+    int row_bytes = crop_w * 2;
+    for (int row = 0; row < crop_h; row++) {
+        int src_start = ((src_y + row) * src_w + src_x) * 2;
+        int dst_start = row * row_bytes;
+        memcpy(dst_bytes + dst_start, src_bytes + src_start, (size_t)row_bytes);
+    }
+}
+
+static void ellipse_plot(const gfx_canvas_t *canvas, int x0, int y0, int x1, int y1, int x_offset, int y_offset, int c, int fill, int m) {
+    if (fill) {
+        if (m & 0x01) {
+            gfx_shapes_hline(canvas, x0 + x_offset, y0 - y1 - y_offset, x1, c);
         }
-        if (mask & ELLIPSE_MASK_Q2) {
-            canvas->fill_rect(canvas->ctx, cx - x, cy - y, x + 1, 1, col);
+        if (m & 0x02) {
+            gfx_shapes_hline(canvas, x0 - x1 - x_offset, y0 - y1 - y_offset, x1, c);
         }
-        if (mask & ELLIPSE_MASK_Q3) {
-            canvas->fill_rect(canvas->ctx, cx - x, cy + y, x + 1, 1, col);
+        if (m & 0x04) {
+            gfx_shapes_hline(canvas, x0 - x1 - x_offset, y0 + y1 + y_offset, x1, c);
         }
-        if (mask & ELLIPSE_MASK_Q4) {
-            canvas->fill_rect(canvas->ctx, cx, cy + y, x + 1, 1, col);
+        if (m & 0x08) {
+            gfx_shapes_hline(canvas, x0 + x_offset, y0 + y1 + y_offset, x1, c);
         }
     } else {
-        if (mask & ELLIPSE_MASK_Q1) {
-            canvas->pixel(canvas->ctx, cx + x, cy - y, col, 1);
+        if (m & 0x01) {
+            gfx_shapes_pixel(canvas, x0 + x1 + x_offset, y0 - y1 - y_offset, c);
         }
-        if (mask & ELLIPSE_MASK_Q2) {
-            canvas->pixel(canvas->ctx, cx - x, cy - y, col, 1);
+        if (m & 0x02) {
+            gfx_shapes_pixel(canvas, x0 - x1 - x_offset, y0 - y1 - y_offset, c);
         }
-        if (mask & ELLIPSE_MASK_Q3) {
-            canvas->pixel(canvas->ctx, cx - x, cy + y, col, 1);
+        if (m & 0x04) {
+            gfx_shapes_pixel(canvas, x0 - x1 - x_offset, y0 + y1 + y_offset, c);
         }
-        if (mask & ELLIPSE_MASK_Q4) {
-            canvas->pixel(canvas->ctx, cx + x, cy + y, col, 1);
+        if (m & 0x08) {
+            gfx_shapes_pixel(canvas, x0 + x1 + x_offset, y0 + y1 + y_offset, c);
         }
     }
 }
 
-gfx_area_t gfx_shapes_ellipse(const gfx_canvas_t *canvas, int cx, int cy, int xradius, int yradius, int col, int fill, int mask_part) {
-    int mask = fill ? ELLIPSE_MASK_FILL : 0;
-    mask |= mask_part & ELLIPSE_MASK_ALL;
-
-    if (xradius == 0 && yradius == 0) {
-        canvas->pixel(canvas->ctx, cx, cy, col, 1);
-        return gfx_area_from_rect(cx, cy, 1, 1);
+gfx_area_t gfx_shapes_ellipse(const gfx_canvas_t *canvas, int x0, int y0, int r1, int r2, int c, int fill, int mask_part, int w, int h) {
+    if (r1 < 1 || r2 < 1) {
+        return gfx_area_from_rect(0, 0, 0, 0);
     }
 
-    int two_asquare = 2 * xradius * xradius;
-    int two_bsquare = 2 * yradius * yradius;
-    int x = xradius;
-    int y = 0;
-    int xchange = yradius * yradius * (1 - 2 * xradius);
-    int ychange = xradius * xradius;
-    int ellipse_error = 0;
-    int stoppingx = two_bsquare * xradius;
-    int stoppingy = 0;
-    while (stoppingx >= stoppingy) {
-        draw_ellipse_points(canvas, cx, cy, x, y, col, mask);
-        y += 1;
-        stoppingy += two_asquare;
-        ellipse_error += ychange;
-        ychange += two_asquare;
-        if ((2 * ellipse_error + xchange) > 0) {
-            x -= 1;
-            stoppingx -= two_bsquare;
-            ellipse_error += xchange;
-            xchange += two_bsquare;
+    int x_side = w ? (w - 2 * r1) : 0;
+    int y_side = h ? (h - 2 * r2) : 0;
+    int x_offset = w ? (x_side / 2) : 0;
+    int y_offset = h ? (y_side / 2) : 0;
+
+    if (fill) {
+        if (y_offset > 0) {
+            gfx_shapes_fill_rect(canvas, x0 - w / 2, y0 - y_offset, w, y_side, c);
+        }
+        if (x_offset > 0) {
+            gfx_shapes_fill_rect(canvas, x0 - x_offset, y0 - h / 2, x_side, r1, c);
+            gfx_shapes_fill_rect(canvas, x0 - x_offset, y0 + h / 2 - r1, x_side, r1, c);
         }
     }
-    x = 0;
-    y = yradius;
-    xchange = yradius * yradius;
-    ychange = xradius * xradius * (1 - 2 * yradius);
-    ellipse_error = 0;
-    stoppingx = 0;
-    stoppingy = two_asquare * yradius;
-    while (stoppingx <= stoppingy) {
-        draw_ellipse_points(canvas, cx, cy, x, y, col, mask);
-        x += 1;
-        stoppingx += two_bsquare;
-        ellipse_error += xchange;
-        xchange += two_bsquare;
-        if ((2 * ellipse_error + ychange) > 0) {
-            y -= 1;
-            stoppingy -= two_asquare;
-            ellipse_error += ychange;
-            ychange += two_asquare;
-        }
+
+    if (x_offset > 0) {
+        gfx_shapes_hline(canvas, x0 - x_offset, y0 - h / 2, x_side, c);
+        gfx_shapes_hline(canvas, x0 - x_offset, y0 + h / 2, x_side, c);
     }
-    return gfx_area_from_rect(cx - xradius, cy - yradius, 2 * xradius + 1, 2 * yradius + 1);
+    if (y_offset > 0) {
+        gfx_shapes_vline(canvas, x0 - w / 2, y0 - y_offset, y_side, c);
+        gfx_shapes_vline(canvas, x0 + w / 2, y0 - y_offset, y_side, c);
+    }
+
+    int a2 = r1 * r1;
+    int b2 = r2 * r2;
+    int fa2 = 4 * a2;
+    int fb2 = 4 * b2;
+
+    int x1 = r1;
+    int y1 = 0;
+    int sigma = 2 * a2 + b2 * (1 - 2 * r1);
+    while (a2 * y1 <= b2 * x1) {
+        ellipse_plot(canvas, x0, y0, x1, y1, x_offset, y_offset, c, fill, mask_part);
+        if (sigma >= 0) {
+            sigma += fb2 * (1 - x1);
+            x1 -= 1;
+        }
+        sigma += a2 * ((4 * y1) + 6);
+        y1 += 1;
+    }
+
+    x1 = 0;
+    y1 = r2;
+    sigma = 2 * b2 + a2 * (1 - 2 * r2);
+    while (b2 * x1 <= a2 * y1) {
+        ellipse_plot(canvas, x0, y0, x1, y1, x_offset, y_offset, c, fill, mask_part);
+        if (sigma >= 0) {
+            sigma += fa2 * (1 - y1);
+            y1 -= 1;
+        }
+        sigma += b2 * ((4 * x1) + 6);
+        x1 += 1;
+    }
+
+    return gfx_area_from_rect(x0 - r1 - x_offset, y0 - r2 - y_offset, 2 * (r1 + x_offset), 2 * (r2 + y_offset));
 }
 
 int gfx_shapes_poly_int_from_buffer(const void *buf, size_t len, size_t itemsize, const char *fmt, size_t index, int *out) {

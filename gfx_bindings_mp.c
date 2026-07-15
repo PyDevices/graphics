@@ -15,12 +15,13 @@
 #include "gfx_shapes.h"
 #include "gfx_draw.h"
 #include "gfx_font.h"
-#include "gfx_bmp565.h"
 #include "gfx_files.h"
 #include "gfx_capabilities.h"
 #include "gfx_area_mp.h"
 #include "gfx_bindings_mp.h"
 #include "gfx_canvas_mp.h"
+#include "gfx_clip_mp.h"
+#include "gfx_bmp565.h"
 
 extern const mp_obj_type_t mp_type_framebuf;
 extern const mp_obj_type_t mp_type_area;
@@ -33,13 +34,6 @@ static bool mp_get_framebuf(mp_obj_t obj, mp_obj_framebuf_t *out) {
     *out = *(mp_obj_framebuf_t *)MP_OBJ_TO_PTR(native);
     return true;
 }
-
-typedef struct _mp_obj_draw_t {
-    mp_obj_base_t base;
-    mp_obj_t canvas_obj;
-    gfx_draw_t draw;
-    mp_py_canvas_ctx_t py_ctx;
-} mp_obj_draw_t;
 
 const mp_obj_type_t mp_type_draw;
 
@@ -191,7 +185,7 @@ static mp_obj_t draw_circle(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
 static MP_DEFINE_CONST_FUN_OBJ_KW(draw_circle_obj, 5, draw_circle);
 
 static mp_obj_t draw_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_r1, ARG_r2, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m };
+    enum { ARG_self, ARG_x, ARG_y, ARG_r1, ARG_r2, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m, ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
@@ -204,6 +198,8 @@ static mp_obj_t draw_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_a
         { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_m, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0x0f} },
+        { MP_QSTR_w, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_h, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
     };
     mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
@@ -211,7 +207,8 @@ static mp_obj_t draw_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_a
     bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
     mp_int_t mask = (n_args > 7) ? parsed[ARG_mask_pos].u_int : parsed[ARG_m].u_int;
     gfx_area_t area = gfx_shapes_ellipse(draw_target(self), parsed[ARG_x].u_int, parsed[ARG_y].u_int,
-        parsed[ARG_r1].u_int, parsed[ARG_r2].u_int, parsed[ARG_c].u_int, fill, mask);
+        parsed[ARG_r1].u_int, parsed[ARG_r2].u_int, parsed[ARG_c].u_int, fill, mask,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int);
     return gfx_area_mp_from_gfx(&area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(draw_ellipse_obj, 6, draw_ellipse);
@@ -501,41 +498,7 @@ static mp_obj_t draw_text16(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(draw_text16_obj, 4, draw_text16);
 
-/* ClipContext: with draw.clip(x,y,w,h) / draw.clip(Area) */
-typedef struct _mp_obj_clip_ctx_t {
-    mp_obj_base_t base;
-    mp_obj_t draw_obj;
-} mp_obj_clip_ctx_t;
-
-const mp_obj_type_t mp_type_clip_ctx;
-
-static mp_obj_t clip_ctx_enter(mp_obj_t self_in) {
-    return self_in;
-}
-static MP_DEFINE_CONST_FUN_OBJ_1(clip_ctx_enter_obj, clip_ctx_enter);
-
-static mp_obj_t clip_ctx_exit(size_t n_args, const mp_obj_t *args) {
-    (void)n_args;
-    mp_obj_clip_ctx_t *self = MP_OBJ_TO_PTR(args[0]);
-    mp_obj_draw_t *draw = MP_OBJ_TO_PTR(self->draw_obj);
-    gfx_draw_pop_clip(&draw->draw);
-    return mp_const_false;
-}
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(clip_ctx_exit_obj, 4, 4, clip_ctx_exit);
-
-static const mp_rom_map_elem_t clip_ctx_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___enter__), MP_ROM_PTR(&clip_ctx_enter_obj) },
-    { MP_ROM_QSTR(MP_QSTR___exit__), MP_ROM_PTR(&clip_ctx_exit_obj) },
-};
-static MP_DEFINE_CONST_DICT(clip_ctx_locals_dict, clip_ctx_locals_dict_table);
-
-MP_DEFINE_CONST_OBJ_TYPE(
-    mp_type_clip_ctx,
-    MP_QSTR_clip,
-    MP_TYPE_FLAG_NONE,
-    locals_dict, &clip_ctx_locals_dict
-);
-
+/* ClipContext is defined in gfx_clip_mp.c */
 static mp_obj_t draw_clip(size_t n_args, const mp_obj_t *args) {
     mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
     gfx_area_t area;
@@ -544,7 +507,6 @@ static mp_obj_t draw_clip(size_t n_args, const mp_obj_t *args) {
         if (native == MP_OBJ_NULL) {
             mp_raise_ValueError(MP_ERROR_TEXT("clip() requires x, y, w, h or an Area"));
         }
-        /* Area layout: base + gfx_area_t */
         typedef struct { mp_obj_base_t base; gfx_area_t area; } mp_obj_area_t;
         area = ((mp_obj_area_t *)MP_OBJ_TO_PTR(native))->area;
     } else if (n_args == 5) {
@@ -553,10 +515,7 @@ static mp_obj_t draw_clip(size_t n_args, const mp_obj_t *args) {
     } else {
         mp_raise_ValueError(MP_ERROR_TEXT("clip() requires x, y, w, h or an Area"));
     }
-    gfx_draw_push_clip(&self->draw, &area);
-    mp_obj_clip_ctx_t *ctx = mp_obj_malloc(mp_obj_clip_ctx_t, &mp_type_clip_ctx);
-    ctx->draw_obj = args[0];
-    return MP_OBJ_FROM_PTR(ctx);
+    return gfx_mp_draw_clip(args[0], &area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(draw_clip_obj, 2, 5, draw_clip);
 
@@ -1063,7 +1022,7 @@ static void get_readonly_framebuffer(mp_obj_t arg, mp_obj_framebuf_t *rofb) {
 }
 
 static mp_obj_t mod_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
-    enum { ARG_canvas, ARG_x, ARG_y, ARG_rx, ARG_ry, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m };
+    enum { ARG_canvas, ARG_x, ARG_y, ARG_rx, ARG_ry, ARG_c, ARG_fill_pos, ARG_mask_pos, ARG_f, ARG_fill, ARG_m, ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
@@ -1076,6 +1035,8 @@ static mp_obj_t mod_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
         { MP_QSTR_f, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_fill, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_m, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0x0f} },
+        { MP_QSTR_w, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_h, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
     };
     mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
@@ -1086,7 +1047,8 @@ static mp_obj_t mod_ellipse(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
     bool fill = parsed[ARG_fill_pos].u_int || parsed[ARG_f].u_bool || parsed[ARG_fill].u_bool;
     mp_int_t mask = (n_args > 7) ? parsed[ARG_mask_pos].u_int : parsed[ARG_m].u_int;
     gfx_area_t area = gfx_shapes_ellipse(&slot.canvas, parsed[ARG_x].u_int, parsed[ARG_y].u_int,
-        parsed[ARG_rx].u_int, parsed[ARG_ry].u_int, parsed[ARG_c].u_int, fill, mask);
+        parsed[ARG_rx].u_int, parsed[ARG_ry].u_int, parsed[ARG_c].u_int, fill, mask,
+        parsed[ARG_w].u_int, parsed[ARG_h].u_int);
     return gfx_area_mp_from_gfx(&area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(mod_ellipse_obj, 6, mod_ellipse);
@@ -1591,6 +1553,8 @@ static const mp_rom_map_elem_t graphics_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_FrameBuffer), MP_ROM_PTR(&mp_type_framebuf) },
     { MP_ROM_QSTR(MP_QSTR_Area), MP_ROM_PTR(&mp_type_area) },
     { MP_ROM_QSTR(MP_QSTR_Draw), MP_ROM_PTR(&mp_type_draw) },
+    { MP_ROM_QSTR(MP_QSTR_ClipContext), MP_ROM_PTR(&mp_type_clip_ctx) },
+    { MP_ROM_QSTR(MP_QSTR_ClippedCanvas), MP_ROM_PTR(&mp_type_clipped_canvas) },
     { MP_ROM_QSTR(MP_QSTR_Font), MP_ROM_PTR(&mp_type_font) },
     { MP_ROM_QSTR(MP_QSTR_BMP565), MP_ROM_PTR(&mp_type_bmp565) },
     { MP_ROM_QSTR(MP_QSTR_MONO_VLSB), MP_ROM_INT(GFX_MVLSB) },

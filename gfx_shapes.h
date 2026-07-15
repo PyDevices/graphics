@@ -25,7 +25,9 @@ gfx_area_t gfx_shapes_vline(const gfx_canvas_t *canvas, int x, int y, int h, int
 gfx_area_t gfx_shapes_fill_rect(const gfx_canvas_t *canvas, int x, int y, int w, int h, int c);
 gfx_area_t gfx_shapes_rect(const gfx_canvas_t *canvas, int x, int y, int w, int h, int c, int fill);
 gfx_area_t gfx_shapes_line(const gfx_canvas_t *canvas, int x1, int y1, int x2, int y2, int c);
-gfx_area_t gfx_shapes_ellipse(const gfx_canvas_t *canvas, int cx, int cy, int xradius, int yradius, int col, int fill, int mask_part);
+gfx_area_t gfx_shapes_ellipse(const gfx_canvas_t *canvas, int cx, int cy, int xradius, int yradius, int col, int fill, int mask_part, int w, int h);
+int gfx_intersect_rect(int x, int y, int w, int h, const gfx_area_t *clip, gfx_area_t *out);
+void gfx_crop_rgb565_buffer(const void *src, int src_w, int src_x, int src_y, int crop_w, int crop_h, void *dst);
 gfx_area_t gfx_shapes_fill(const gfx_canvas_t *canvas, int c);
 
 int gfx_shapes_poly_int_from_buffer(const void *buf, size_t len, size_t itemsize, const char *fmt, size_t index, int *out);
