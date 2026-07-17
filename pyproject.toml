@@ -5,9 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "graphics-cmod"
 dynamic = ["version"]
-description = "Native graphics cmod for CPython (FrameBuffer, Area)"
+description = "Native graphics cmod for CPython (FrameBuffer, Area); import as graphics"
+readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
+urls = { Homepage = "https://github.com/PyDevices/graphics", Issues = "https://github.com/PyDevices/graphics/issues" }
 
 [tool.setuptools]
 packages = []
