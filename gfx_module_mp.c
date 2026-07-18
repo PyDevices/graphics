@@ -464,9 +464,10 @@ static mp_obj_t framebuf_text_height(size_t n_args, const mp_obj_t *args, mp_map
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_c, MP_ARG_INT, {.u_int = 1} },
-        { MP_QSTR_scale, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 1} },
-        { MP_QSTR_inverted, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_font_data, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        /* Positional scale/inverted/font_data match Python FrameBuffer.textN */
+        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_font_data, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
     mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
@@ -496,10 +497,11 @@ static mp_obj_t framebuf_text(size_t n_args, const mp_obj_t *args, mp_map_t *kw_
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_c, MP_ARG_INT, {.u_int = 1} },
-        { MP_QSTR_scale, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 1} },
-        { MP_QSTR_inverted, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_font_data, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 8} },
+        /* Positional optional args match Python FrameBuffer.text */
+        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_inverted, MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_font_data, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_height, MP_ARG_INT, {.u_int = 8} },
     };
     mp_arg_val_t parsed[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed);
