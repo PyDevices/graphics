@@ -22,7 +22,9 @@ typedef struct gfx_font {
 void gfx_font_init_default(gfx_font_t *font, int height);
 void gfx_font_init_from_data(gfx_font_t *font, const uint8_t *data, size_t len, int height);
 void gfx_font_deinit(gfx_font_t *font);
+#if GFX_ENABLE_HOST_STDIO
 int gfx_font_export(const gfx_font_t *font, const char *filename);
+#endif
 
 gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, const char *str, int x0, int y0, int col, int scale, int inverted);
 gfx_area_t gfx_font_draw_char(const gfx_canvas_t *canvas, const gfx_font_t *font, unsigned char ch, int x, int y, int color, int scale, int inverted);

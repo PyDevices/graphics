@@ -8,10 +8,13 @@
 #include <stdlib.h>
 
 #include "gfx_bmp565.h"
+#include "gfx_core.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if GFX_ENABLE_HOST_STDIO
 
 static int read_u16_le(FILE *f, uint16_t *out) {
     uint8_t b[2];
@@ -133,6 +136,20 @@ int gfx_bmp565_load_from_file(const char *path, gfx_bmp565_t *out) {
     return 0;
 }
 
+#else /* !GFX_ENABLE_HOST_STDIO: no host filesystem on this port */
+
+int gfx_bmp565_read_header_from_file(const char *path, int *width, int *height, unsigned int *data_offset) {
+    (void)path; (void)width; (void)height; (void)data_offset;
+    return -1;
+}
+
+int gfx_bmp565_load_from_file(const char *path, gfx_bmp565_t *out) {
+    (void)path; (void)out;
+    return -1;
+}
+
+#endif /* GFX_ENABLE_HOST_STDIO */
+
 int gfx_bmp565_init_from_buffer(gfx_bmp565_t *out, const uint8_t *buf, size_t len, int width, int height) {
     out->buffer = (uint8_t *)buf;
     out->buffer_len = len;
@@ -147,6 +164,7 @@ int gfx_bmp565_init_from_buffer(gfx_bmp565_t *out, const uint8_t *buf, size_t le
 }
 
 void gfx_bmp565_deinit(gfx_bmp565_t *bmp) {
+#if GFX_ENABLE_HOST_STDIO
     if (bmp->file) {
         fclose(bmp->file);
         bmp->file = NULL;
@@ -154,6 +172,7 @@ void gfx_bmp565_deinit(gfx_bmp565_t *bmp) {
     if (bmp->owns_buffer && bmp->buffer) {
         free(bmp->buffer);
     }
+#endif
     bmp->buffer = NULL;
     bmp->buffer_len = 0;
     bmp->owns_buffer = 0;
@@ -162,6 +181,7 @@ void gfx_bmp565_deinit(gfx_bmp565_t *bmp) {
     bmp->data_offset = 0;
 }
 
+#if GFX_ENABLE_HOST_STDIO
 static int bmp565_read_range_stream(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out) {
     int length = stop - start;
     int start_row = start / bmp->width;
@@ -182,6 +202,12 @@ static int bmp565_read_range_stream(const gfx_bmp565_t *bmp, int start, int stop
     }
     return 0;
 }
+#else
+static int bmp565_read_range_stream(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out) {
+    (void)bmp; (void)start; (void)stop; (void)out;
+    return -1;
+}
+#endif /* GFX_ENABLE_HOST_STDIO */
 
 int gfx_bmp565_read_bytes(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out, size_t out_cap, size_t *out_len) {
     size_t need = (size_t)(stop - start) * GFX_BMP565_BYTES_PER_PIXEL;
@@ -217,6 +243,8 @@ int gfx_bmp565_read_region(const gfx_bmp565_t *bmp, int x0, int x1, int y0, int 
     *out_len = total;
     return 0;
 }
+
+#if GFX_ENABLE_HOST_STDIO
 
 int gfx_bmp565_open_stream(const char *path, gfx_bmp565_t *out) {
     memset(out, 0, sizeof(*out));
@@ -323,3 +351,22 @@ int gfx_bmp565_save_versioned(const gfx_bmp565_t *bmp, const char *path, char *o
 
     return gfx_bmp565_save(bmp, out_path);
 }
+
+#else /* !GFX_ENABLE_HOST_STDIO: no host filesystem on this port */
+
+int gfx_bmp565_open_stream(const char *path, gfx_bmp565_t *out) {
+    (void)path; (void)out;
+    return -1;
+}
+
+int gfx_bmp565_save(const gfx_bmp565_t *bmp, const char *path) {
+    (void)bmp; (void)path;
+    return -1;
+}
+
+int gfx_bmp565_save_versioned(const gfx_bmp565_t *bmp, const char *path, char *out_path, size_t out_path_len) {
+    (void)bmp; (void)path; (void)out_path; (void)out_path_len;
+    return -1;
+}
+
+#endif /* GFX_ENABLE_HOST_STDIO */

@@ -219,7 +219,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(draw_ellipse_obj, 6, draw_ellipse);
 static mp_obj_t draw_arc(size_t n_args, const mp_obj_t *args) {
     mp_obj_draw_t *self = MP_OBJ_TO_PTR(args[0]);
     gfx_area_t area = gfx_shapes_arc(draw_target(self), mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), (float)mp_obj_get_float(args[4]), (float)mp_obj_get_float(args[5]),
+        mp_obj_get_int(args[3]), GFX_OBJ_GET_FLOAT(args[4]), GFX_OBJ_GET_FLOAT(args[5]),
         mp_obj_get_int(args[6]));
     return gfx_area_mp_from_gfx(&area);
 }
@@ -344,7 +344,7 @@ static mp_obj_t draw_polygon(size_t n_args, const mp_obj_t *args, mp_map_t *kw_a
         points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
     }
     mp_obj_t angle_obj = (n_args > 5) ? parsed[ARG_angle_pos].u_obj : parsed[ARG_angle].u_obj;
-    float angle = (float)mp_obj_get_float(angle_obj);
+    float angle = GFX_OBJ_GET_FLOAT(angle_obj);
     int cx = (n_args > 6) ? parsed[ARG_cx_pos].u_int : parsed[ARG_center_x].u_int;
     int cy = (n_args > 7) ? parsed[ARG_cy_pos].u_int : parsed[ARG_center_y].u_int;
     gfx_area_t area = gfx_shapes_polygon(draw_target(self), points, len, parsed[ARG_x].u_int,
@@ -854,14 +854,30 @@ typedef struct _mp_obj_font_t {
 
 const mp_obj_type_t mp_type_font;
 
+/* Derive glyph height from a trailing "<w>x<h>" in the basename, e.g.
+ * "fonts/terminal8x16.bin" -> 16. Hand-rolled (no strrchr/atoi) so it links on
+ * bare-metal ports that don't pull in those libc symbols. */
 static int parse_font_height_from_name(const char *path, int *height) {
-    const char *base = strrchr(path, '/');
-    base = base ? base + 1 : path;
-    const char *x = strrchr(base, 'x');
-    if (!x) {
+    const char *base = path;
+    for (const char *p = path; *p; p++) {
+        if (*p == '/') {
+            base = p + 1;
+        }
+    }
+    const char *x = NULL;
+    for (const char *p = base; *p; p++) {
+        if (*p == 'x') {
+            x = p;
+        }
+    }
+    if (!x || x[1] < '0' || x[1] > '9') {
         return -1;
     }
-    *height = atoi(x + 1);
+    int v = 0;
+    for (const char *d = x + 1; *d >= '0' && *d <= '9'; d++) {
+        v = v * 10 + (*d - '0');
+    }
+    *height = v;
     return 0;
 }
 
@@ -889,26 +905,14 @@ static mp_obj_t font_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
             if (height == 0) {
                 height = 8;
             }
-            FILE *f = fopen(path, "rb");
-            if (!f) {
-                mp_raise_ValueError(MP_ERROR_TEXT("Font not found"));
-            }
-            fseek(f, 0, SEEK_END);
-            long flen = ftell(f);
-            fseek(f, 0, SEEK_SET);
-            uint8_t *data = m_new(uint8_t, (size_t)flen);
-            if (fread(data, 1, (size_t)flen, f) != (size_t)flen) {
-                fclose(f);
-                m_del(uint8_t, data, (size_t)flen);
-                mp_raise_ValueError(MP_ERROR_TEXT("Font read failed"));
-            }
-            fclose(f);
-            o->font.data = data;
-            o->font.data_len = (size_t)flen;
-            o->font.height = height;
-            o->font.width = 8;
-            o->font.owns_data = 1;
+            /* Read the glyph file through the active file backend and keep the
+             * bytes alive in data_obj; the font borrows the buffer. */
+            mp_obj_t data = gfxmp_slurp(path);
+            mp_buffer_info_t bufinfo;
+            mp_get_buffer_raise(data, &bufinfo, MP_BUFFER_READ);
+            o->data_obj = data;
             o->path_obj = font_arg;
+            gfx_font_init_from_data(&o->font, bufinfo.buf, bufinfo.len, height);
         } else {
             mp_buffer_info_t bufinfo;
             mp_get_buffer_raise(font_arg, &bufinfo, MP_BUFFER_READ);
@@ -1010,10 +1014,29 @@ static mp_obj_t font_deinit(mp_obj_t self_in) {
 static MP_DEFINE_CONST_FUN_OBJ_1(font_deinit_obj, font_deinit);
 
 static mp_obj_t font_export(mp_obj_t self_in, mp_obj_t filename_in) {
+    /* Mirror Python Font.export: emit a .py file with a `_FONT` bytes literal
+     * (256 glyphs, one per line) and a `FONT = memoryview(_FONT)` alias. The
+     * text is built in memory and written through the active file backend. */
     mp_obj_font_t *self = MP_OBJ_TO_PTR(self_in);
-    if (gfx_font_export(&self->font, mp_obj_str_get_str(filename_in)) < 0) {
+    if (!self->font.data) {
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Font data not cached, cannot export"));
     }
+    vstr_t v;
+    vstr_init(&v, 256 * (2 + self->font.height * 4 + 3) + 32);
+    vstr_add_str(&v, "_FONT =\\\n");
+    for (int i = 0; i < 256; i++) {
+        vstr_add_str(&v, "b'");
+        for (int j = 0; j < self->font.height; j++) {
+            size_t off = (size_t)i * (size_t)self->font.height + (size_t)j;
+            uint8_t b = off < self->font.data_len ? self->font.data[off] : 0;
+            vstr_printf(&v, "\\x%02x", b);
+        }
+        vstr_add_str(&v, "'\\\n");
+    }
+    vstr_add_str(&v, "\nFONT = memoryview(_FONT)\n");
+    mp_obj_t data = mp_obj_new_bytes((const byte *)v.buf, v.len);
+    vstr_clear(&v);
+    gfxmp_spew(mp_obj_str_get_str(filename_in), data);
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(font_export_obj, font_export);
@@ -1154,9 +1177,24 @@ static mp_obj_t bmp565_save(size_t n_args, const mp_obj_t *args) {
         path = mp_obj_str_get_str(self->filename_obj);
     }
     char out_path[512];
+#if GFX_ENABLE_HOST_STDIO
+    /* Host build keeps auto-versioning and can save a streamed source. */
     if (gfx_bmp565_save_versioned(&self->bmp, path, out_path, sizeof(out_path)) < 0) {
         mp_raise_ValueError(MP_ERROR_TEXT("BMP save failed"));
     }
+#else
+    if (!self->bmp.buffer) {
+        mp_raise_ValueError(MP_ERROR_TEXT("BMP save failed"));
+    }
+    gfx_fb_t fb = {
+        .buf = (void *)self->bmp.buffer,
+        .width = self->bmp.width,
+        .height = self->bmp.height,
+        .format = GFX_RGB565,
+        .stride = self->bmp.width,
+    };
+    gfxmp_save_framebuffer(&fb, path ? path : "image.bmp", out_path, sizeof(out_path));
+#endif
     return mp_obj_new_str(out_path, strlen(out_path));
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(bmp565_save_obj, 1, 2, bmp565_save);
@@ -1200,17 +1238,31 @@ static mp_obj_t bmp565_make_new(const mp_obj_type_t *type, size_t n_args, size_t
         gfx_bmp565_init_from_buffer(&o->bmp, bufinfo.buf, bufinfo.len, width, height);
     } else if (filename != mp_const_none) {
         const char *path = mp_obj_str_get_str(filename);
+#if GFX_ENABLE_HOST_STDIO
+        /* Row-by-row streaming from disk is only available on the host stdio
+         * backend; other ports fall through to a full in-RAM load below. */
         if (parsed[ARG_streamed].u_bool) {
             if (gfx_bmp565_open_stream(path, &o->bmp) < 0) {
                 mp_raise_ValueError(MP_ERROR_TEXT("BMP load failed"));
             }
             o->bmp.mirrored = parsed[ARG_mirrored].u_bool;
-        } else {
-            if (gfx_bmp565_load_from_file(path, &o->bmp) < 0) {
-                mp_raise_ValueError(MP_ERROR_TEXT("BMP load failed"));
-            }
-            o->buf_obj = mp_obj_new_bytearray(o->bmp.buffer_len, o->bmp.buffer);
+            return MP_OBJ_FROM_PTR(o);
         }
+#endif
+        mp_obj_t data = gfxmp_slurp(path);
+        mp_buffer_info_t src;
+        mp_get_buffer_raise(data, &src, MP_BUFFER_READ);
+        gfx_image_info_t info;
+        if (gfx_image_probe(src.buf, src.len, &info) < 0 || info.format != GFX_RGB565) {
+            mp_raise_ValueError(MP_ERROR_TEXT("BMP load failed"));
+        }
+        uint8_t *dst = m_new(uint8_t, info.buffer_len);
+        if (gfx_image_decode(src.buf, src.len, &info, dst, info.buffer_len) < 0) {
+            m_del(uint8_t, dst, info.buffer_len);
+            mp_raise_ValueError(MP_ERROR_TEXT("BMP load failed"));
+        }
+        o->buf_obj = mp_obj_new_bytearray_by_ref(info.buffer_len, dst);
+        gfx_bmp565_init_from_buffer(&o->bmp, dst, info.buffer_len, info.width, info.height);
     } else {
         mp_raise_ValueError(MP_ERROR_TEXT("Invalid arguments"));
     }
@@ -1346,7 +1398,7 @@ static mp_obj_t mod_arc(size_t n_args, const mp_obj_t *args) {
     }
     const gfx_canvas_t *canvas = &slot.canvas;
     gfx_area_t area = gfx_shapes_arc(canvas, mp_obj_get_int(args[1]), mp_obj_get_int(args[2]),
-        mp_obj_get_int(args[3]), (float)mp_obj_get_float(args[4]), (float)mp_obj_get_float(args[5]), mp_obj_get_int(args[6]));
+        mp_obj_get_int(args[3]), GFX_OBJ_GET_FLOAT(args[4]), GFX_OBJ_GET_FLOAT(args[5]), mp_obj_get_int(args[6]));
     return gfx_area_mp_from_gfx(&area);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_arc_obj, 7, 7, mod_arc);
@@ -1544,7 +1596,7 @@ static mp_obj_t mod_polygon(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
         points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
     }
     mp_obj_t angle_obj = (n_args > 5) ? parsed[ARG_angle_pos].u_obj : parsed[ARG_angle].u_obj;
-    float angle = (float)mp_obj_get_float(angle_obj);
+    float angle = GFX_OBJ_GET_FLOAT(angle_obj);
     int cx = (n_args > 6) ? parsed[ARG_cx_pos].u_int : parsed[ARG_center_x].u_int;
     int cy = (n_args > 7) ? parsed[ARG_cy_pos].u_int : parsed[ARG_center_y].u_int;
     gfx_area_t area = gfx_shapes_polygon(&slot.canvas, points, len, parsed[ARG_x].u_int,
@@ -1745,56 +1797,22 @@ static mp_obj_t mod_text(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args)
 static MP_DEFINE_CONST_FUN_OBJ_KW(mod_text_obj, 4, mod_text);
 
 static mp_obj_t mod_load_image(mp_obj_t path_in) {
-    gfx_image_fb_t img;
-    if (gfx_files_load_image(mp_obj_str_get_str(path_in), &img) < 0) {
-        mp_raise_ValueError(MP_ERROR_TEXT("Unsupported image"));
-    }
-    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
-    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(img.format) };
-    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
-    if (img.owns_buffer) {
-        free(img.buffer);
-    }
-    return fb;
+    return gfxmp_load_framebuffer(mp_obj_str_get_str(path_in), GFXMP_ANY);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(mod_load_image_obj, mod_load_image);
 
 static mp_obj_t mod_bmp_to_framebuffer(mp_obj_t path_in) {
-    gfx_image_fb_t img;
-    if (gfx_files_bmp_to_framebuffer(mp_obj_str_get_str(path_in), &img) < 0) {
-        mp_raise_ValueError(NULL);
-    }
-    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
-    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(GFX_RGB565) };
-    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
-    free(img.buffer);
-    return fb;
+    return gfxmp_load_framebuffer(mp_obj_str_get_str(path_in), GFXMP_BMP);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(mod_bmp_to_framebuffer_obj, mod_bmp_to_framebuffer);
 
 static mp_obj_t mod_pbm_to_framebuffer(mp_obj_t path_in) {
-    gfx_image_fb_t img;
-    if (gfx_files_pbm_to_framebuffer(mp_obj_str_get_str(path_in), &img) < 0) {
-        mp_raise_ValueError(NULL);
-    }
-    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
-    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(GFX_MHLSB) };
-    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
-    free(img.buffer);
-    return fb;
+    return gfxmp_load_framebuffer(mp_obj_str_get_str(path_in), GFXMP_PBM);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(mod_pbm_to_framebuffer_obj, mod_pbm_to_framebuffer);
 
 static mp_obj_t mod_pgm_to_framebuffer(mp_obj_t path_in) {
-    gfx_image_fb_t img;
-    if (gfx_files_pgm_to_framebuffer(mp_obj_str_get_str(path_in), &img) < 0) {
-        mp_raise_ValueError(NULL);
-    }
-    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
-    mp_obj_t tuple[4] = { buf, mp_obj_new_int(img.width), mp_obj_new_int(img.height), mp_obj_new_int(img.format) };
-    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
-    free(img.buffer);
-    return fb;
+    return gfxmp_load_framebuffer(mp_obj_str_get_str(path_in), GFXMP_PGM);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(mod_pgm_to_framebuffer_obj, mod_pgm_to_framebuffer);
 
@@ -1805,9 +1823,7 @@ static mp_obj_t mod_save_image(size_t n_args, const mp_obj_t *args) {
     }
     const char *path = n_args >= 2 ? mp_obj_str_get_str(args[1]) : "screenshot";
     char out_path[256];
-    if (gfx_files_save_image(&fb.fb, path, out_path, sizeof(out_path)) < 0) {
-        mp_raise_ValueError(NULL);
-    }
+    gfxmp_save_framebuffer(&fb.fb, path, out_path, sizeof(out_path));
     return mp_obj_new_str(out_path, strlen(out_path));
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_save_image_obj, 1, 2, mod_save_image);

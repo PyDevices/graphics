@@ -8,6 +8,32 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* File I/O backends.
+ *
+ * The graphics image/font codecs are pure and always compiled; only the code
+ * that actually touches a filesystem is gated by these flags:
+ *
+ *   GFX_ENABLE_HOST_STDIO — read/write through the host C library (fopen /
+ *     fread / fwrite). Only meaningful where those hit a real filesystem:
+ *     desktop and emscripten. Bare-metal cross toolchains (arm-none-eabi,
+ *     xtensa, riscv, ...) either lack these symbols or they don't reach the
+ *     board's flash, so this defaults off there.
+ *
+ *   GFX_ENABLE_MP_VFS — read/write through MicroPython's VFS (the same
+ *     filesystem that Python `open()` sees). This is what lets image/font
+ *     loaders reach on-device storage on esp32, rp2, etc. It is defined by the
+ *     MicroPython binding layer (see gfx_bindings_mp.h), keyed off MICROPY_VFS,
+ *     so it is not set here.
+ *
+ * Define GFX_ENABLE_HOST_STDIO before including this header to force it. */
+#ifndef GFX_ENABLE_HOST_STDIO
+#if defined(__unix__) || defined(__APPLE__) || defined(_WIN32) || defined(__EMSCRIPTEN__)
+#define GFX_ENABLE_HOST_STDIO 1
+#else
+#define GFX_ENABLE_HOST_STDIO 0
+#endif
+#endif
+
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif

@@ -19,7 +19,173 @@
 #include "gfx_bindings_mp.h"
 #include "gfx_files.h"
 
+#if GFX_ENABLE_MP_VFS
+#include "extmod/vfs.h"
+#include "py/stream.h"
+#endif
+#if GFX_ENABLE_HOST_STDIO
+#include <stdio.h>
+#endif
+#if GFX_MP_HAS_FILE_IO
+#include "py/mperrno.h"
+#endif
+
 const mp_obj_type_t mp_type_framebuf;
+
+/* ------------------------------------------------------------------ */
+/* File I/O backends: VFS (MicroPython filesystem) preferred, host C   */
+/* stdio as a fallback for non-MicroPython/host builds. All raise on   */
+/* error. These are the only places graphics touches a filesystem.     */
+/* ------------------------------------------------------------------ */
+
+#if GFX_ENABLE_MP_VFS
+/* Build the mode string at runtime rather than via MP_QSTR_rb/MP_QSTR_wb, so
+ * we don't mint qstrs that can collide with the frozen-manifest qstr pool. */
+static mp_obj_t gfxmp_vfs_open(const char *path, const char *mode) {
+    mp_obj_t args[2] = { mp_obj_new_str(path, strlen(path)), mp_obj_new_str(mode, strlen(mode)) };
+    return mp_vfs_open(MP_ARRAY_SIZE(args), args, (mp_map_t *)&mp_const_empty_map);
+}
+#endif
+
+mp_obj_t gfxmp_slurp(const char *path) {
+#if GFX_ENABLE_MP_VFS
+    mp_obj_t f = gfxmp_vfs_open(path, "rb");
+    mp_obj_t dest[2];
+    mp_load_method(f, MP_QSTR_read, dest);
+    mp_obj_t data = mp_call_method_n_kw(0, 0, dest);
+    mp_stream_close(f);
+    return data;
+#elif GFX_ENABLE_HOST_STDIO
+    FILE *fp = fopen(path, "rb");
+    if (!fp) {
+        mp_raise_OSError(MP_ENOENT);
+    }
+    fseek(fp, 0, SEEK_END);
+    long n = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (n < 0) {
+        fclose(fp);
+        mp_raise_OSError(MP_EIO);
+    }
+    vstr_t v;
+    vstr_init_len(&v, (size_t)n);
+    if (n > 0 && fread(v.buf, 1, (size_t)n, fp) != (size_t)n) {
+        fclose(fp);
+        vstr_clear(&v);
+        mp_raise_OSError(MP_EIO);
+    }
+    fclose(fp);
+    mp_obj_t data = mp_obj_new_bytes((const byte *)v.buf, v.len);
+    vstr_clear(&v);
+    return data;
+#else
+    (void)path;
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("file I/O is not supported on this build"));
+#endif
+}
+
+void gfxmp_spew(const char *path, mp_obj_t data) {
+#if GFX_ENABLE_MP_VFS
+    mp_obj_t f = gfxmp_vfs_open(path, "wb");
+    mp_obj_t dest[3];
+    mp_load_method(f, MP_QSTR_write, dest);
+    dest[2] = data;
+    mp_call_method_n_kw(1, 0, dest);
+    mp_stream_close(f);
+#elif GFX_ENABLE_HOST_STDIO
+    mp_buffer_info_t bi;
+    mp_get_buffer_raise(data, &bi, MP_BUFFER_READ);
+    FILE *fp = fopen(path, "wb");
+    if (!fp) {
+        mp_raise_OSError(MP_ENOENT);
+    }
+    if (bi.len) {
+        fwrite(bi.buf, 1, bi.len, fp);
+    }
+    fclose(fp);
+#else
+    (void)path;
+    (void)data;
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("file I/O is not supported on this build"));
+#endif
+}
+
+mp_obj_t gfxmp_load_framebuffer(const char *path, int expect_kind) {
+    mp_obj_t data = gfxmp_slurp(path);
+    mp_buffer_info_t bi;
+    mp_get_buffer_raise(data, &bi, MP_BUFFER_READ);
+    const uint8_t *bytes = (const uint8_t *)bi.buf;
+    if (expect_kind != GFXMP_ANY && bi.len >= 2) {
+        int ok = 1;
+        if (expect_kind == GFXMP_PBM) {
+            ok = (bytes[0] == 'P' && bytes[1] == '4');
+        } else if (expect_kind == GFXMP_PGM) {
+            ok = (bytes[0] == 'P' && bytes[1] == '5');
+        } else if (expect_kind == GFXMP_BMP) {
+            ok = (bytes[0] == 'B' && bytes[1] == 'M');
+        }
+        if (!ok) {
+            mp_raise_ValueError(MP_ERROR_TEXT("Unexpected image format"));
+        }
+    }
+    gfx_image_info_t info;
+    if (gfx_image_probe(bytes, bi.len, &info) < 0) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Unsupported image"));
+    }
+    uint8_t *dst = m_new(uint8_t, info.buffer_len);
+    if (gfx_image_decode(bytes, bi.len, &info, dst, info.buffer_len) < 0) {
+        m_del(uint8_t, dst, info.buffer_len);
+        mp_raise_ValueError(MP_ERROR_TEXT("Image decode failed"));
+    }
+    mp_obj_t buf = mp_obj_new_bytearray_by_ref(info.buffer_len, dst);
+    mp_obj_t tuple[4] = {
+        buf,
+        mp_obj_new_int(info.width),
+        mp_obj_new_int(info.height),
+        mp_obj_new_int(info.format),
+    };
+    return framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
+}
+
+/* Append the codec's file extension to `path` (into out_path) unless already
+ * present, then encode `fb` and write it. Raises on unsupported format. */
+void gfxmp_save_framebuffer(const gfx_fb_t *fb, const char *path, char *out_path, size_t out_path_len) {
+    size_t enc_len;
+    const char *ext;
+    if (gfx_image_encoded_size(fb, &enc_len, &ext) < 0) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Cannot encode this framebuffer format"));
+    }
+
+    /* Build out_path = path, appending ".<ext>" unless it already ends with it. */
+    size_t plen = strlen(path);
+    size_t elen = strlen(ext);
+    int has_ext = 0;
+    if (plen > elen + 1 && path[plen - elen - 1] == '.'
+        && memcmp(path + plen - elen, ext, elen) == 0) {
+        has_ext = 1;
+    }
+    size_t need = has_ext ? plen : plen + 1 + elen;
+    if (need + 1 > out_path_len) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Path too long"));
+    }
+    memcpy(out_path, path, plen);
+    if (has_ext) {
+        out_path[plen] = '\0';
+    } else {
+        out_path[plen] = '.';
+        memcpy(out_path + plen + 1, ext, elen);
+        out_path[plen + 1 + elen] = '\0';
+    }
+
+    uint8_t *enc = m_new(uint8_t, enc_len);
+    size_t written = 0;
+    if (gfx_image_encode(fb, enc, enc_len, &written) < 0) {
+        m_del(uint8_t, enc, enc_len);
+        mp_raise_ValueError(MP_ERROR_TEXT("Image encode failed"));
+    }
+    mp_obj_t buf = mp_obj_new_bytearray_by_ref(written, enc);
+    gfxmp_spew(out_path, buf);
+}
 
 static mp_obj_framebuf_t *framebuf_from_obj(mp_obj_t obj) {
     mp_obj_t native = mp_obj_cast_to_native_base(obj, MP_OBJ_FROM_PTR(&mp_type_framebuf));
@@ -62,22 +228,7 @@ static mp_obj_t framebuf_make_new(const mp_obj_type_t *type, size_t n_args, size
 }
 
 static mp_obj_t framebuf_from_file_fun(mp_obj_t path_in) {
-    gfx_image_fb_t img;
-    if (gfx_files_load_image(mp_obj_str_get_str(path_in), &img) < 0) {
-        mp_raise_ValueError(MP_ERROR_TEXT("Unsupported image"));
-    }
-    mp_obj_t buf = mp_obj_new_bytearray(img.buffer_len, img.buffer);
-    mp_obj_t tuple[4] = {
-        buf,
-        mp_obj_new_int(img.width),
-        mp_obj_new_int(img.height),
-        mp_obj_new_int(img.format),
-    };
-    mp_obj_t fb = framebuf_make_new_helper(4, tuple, MP_BUFFER_WRITE, NULL);
-    if (img.owns_buffer) {
-        free(img.buffer);
-    }
-    return fb;
+    return gfxmp_load_framebuffer(mp_obj_str_get_str(path_in), GFXMP_ANY);
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(framebuf_from_file_fun_obj, framebuf_from_file_fun);
 static MP_DEFINE_CONST_STATICMETHOD_OBJ(framebuf_from_file_obj, MP_ROM_PTR(&framebuf_from_file_fun_obj));
@@ -349,7 +500,7 @@ static mp_obj_t framebuf_arc(size_t n_args, const mp_obj_t *args_in) {
     (void)n_args;
     mp_obj_framebuf_t *self = framebuf_from_obj(args_in[0]);
     gfx_area_t area = gfx_shapes_arc(&self->canvas, mp_obj_get_int(args_in[1]), mp_obj_get_int(args_in[2]),
-        mp_obj_get_int(args_in[3]), (float)mp_obj_get_float(args_in[4]), (float)mp_obj_get_float(args_in[5]),
+        mp_obj_get_int(args_in[3]), GFX_OBJ_GET_FLOAT(args_in[4]), GFX_OBJ_GET_FLOAT(args_in[5]),
         mp_obj_get_int(args_in[6]));
     return gfx_area_mp_from_gfx(&area);
 }
@@ -446,7 +597,7 @@ static mp_obj_t framebuf_polygon(size_t n_args, const mp_obj_t *args, mp_map_t *
         points[i * 2 + 1] = mp_obj_get_int(pitems[1]);
     }
     mp_obj_t angle_obj = (n_args > 5) ? parsed[ARG_angle_pos].u_obj : parsed[ARG_angle].u_obj;
-    float angle = (float)mp_obj_get_float(angle_obj);
+    float angle = GFX_OBJ_GET_FLOAT(angle_obj);
     int cx = (n_args > 6) ? parsed[ARG_cx_pos].u_int : parsed[ARG_center_x].u_int;
     int cy = (n_args > 7) ? parsed[ARG_cy_pos].u_int : parsed[ARG_center_y].u_int;
     gfx_area_t area = gfx_shapes_polygon(&self->canvas, points, len, parsed[ARG_x].u_int,
@@ -552,9 +703,7 @@ static mp_obj_t framebuf_save(size_t n_args, const mp_obj_t *args) {
     mp_obj_framebuf_t *self = framebuf_from_obj(args[0]);
     const char *path = n_args >= 2 ? mp_obj_str_get_str(args[1]) : "screenshot";
     char out_path[256];
-    if (gfx_files_save_image(&self->fb, path, out_path, sizeof(out_path)) < 0) {
-        mp_raise_ValueError(NULL);
-    }
+    gfxmp_save_framebuffer(&self->fb, path, out_path, sizeof(out_path));
     return mp_obj_new_str(out_path, strlen(out_path));
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(framebuf_save_obj, 1, 2, framebuf_save);

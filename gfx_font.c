@@ -5,9 +5,11 @@
 
 #include "gfx_font.h"
 
+#include <string.h>
+#if GFX_ENABLE_HOST_STDIO
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#endif
 
 #include "font_8x8.h"
 #include "font_8x14.h"
@@ -48,9 +50,14 @@ void gfx_font_init_from_data(gfx_font_t *font, const uint8_t *data, size_t len, 
 }
 
 void gfx_font_deinit(gfx_font_t *font) {
+#if GFX_ENABLE_HOST_STDIO
+    /* The host/CPython binding may load glyph data into a malloc'd buffer it
+     * owns; free it. MicroPython builds always borrow a GC-managed buffer
+     * (owns_data == 0), so this compiles out and pulls in no libc free(). */
     if (font->owns_data && font->data) {
         free((void *)font->data);
     }
+#endif
     font->data = NULL;
     font->data_len = 0;
     font->owns_data = 0;
@@ -131,6 +138,7 @@ gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, con
     return gfx_area_from_rect(start_x, y0, largest_x - start_x, char_y + font->height * scale - y0);
 }
 
+#if GFX_ENABLE_HOST_STDIO
 int gfx_font_export(const gfx_font_t *font, const char *filename) {
     /* Mirror Python Font.export: dump font->data to a .py file with a single
      * bytes object named _FONT (256 lines, one per character) and a trailing
@@ -156,6 +164,7 @@ int gfx_font_export(const gfx_font_t *font, const char *filename) {
     fclose(f);
     return 0;
 }
+#endif /* GFX_ENABLE_HOST_STDIO */
 
 gfx_area_t gfx_font_text8(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col) {
     ensure_defaults();
