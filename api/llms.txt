@@ -1,0 +1,14 @@
+# graphics
+
+> Source-linked Python and native C reference for the PyDevices graphics module.
+
+## API Reference
+
+- [graphics API reference](/graphics/api/generated/introduction.html): Source-linked Python and native C reference for the PyDevices graphics module.
+- [Area and clipping](/graphics/api/generated/area-clipping.html): Rectangle geometry, scoped clip contexts, and clipped canvas operations.
+- [FrameBuffer](/graphics/api/generated/framebuffer.html): Native framebuffer construction, drawing, text, blitting, scrolling, and file output.
+- [Drawing operations](/graphics/api/generated/drawing.html): Object-oriented and module-level shape, text, polygon, and blit operations.
+- [Fonts and images](/graphics/api/generated/fonts-images.html): Bitmap font rendering, RGB565 bitmap access, and image conversion helpers.
+- [Runtime and pixel formats](/graphics/api/generated/module-formats.html): Runtime capability probes and the exported framebuffer format constants.
+- [Native drawing and framebuffer API](/graphics/api/generated/native-drawing.html): Public C declarations for geometry, framebuffer operations, shapes, and clipping.
+- [Native fonts, images, and runtime API](/graphics/api/generated/native-assets-runtime.html): Public C declarations for fonts, BMP565 data, image conversion, and capability reporting.
