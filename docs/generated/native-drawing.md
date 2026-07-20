@@ -3,7 +3,7 @@ title: Native drawing and framebuffer API
 description: Public C declarations for geometry, framebuffer operations, shapes, and clipping.
 ---
 
-Source snapshot: [`68194959ad5bc5540aceb6b40807a8c4228af60a`](https://github.com/PyDevices/graphics/tree/68194959ad5bc5540aceb6b40807a8c4228af60a).
+Source snapshot: [`aa6041e9226bdf5172a656eef722b852ec02f270`](https://github.com/PyDevices/graphics/tree/aa6041e9226bdf5172a656eef722b852ec02f270).
 
 Public C declarations for geometry, framebuffer operations, shapes, and clipping.
 
@@ -17,7 +17,7 @@ int gfx_fb_validate_buffer(size_t buf_len, int width, int height, int format, in
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L21)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L21)
 
 ## `gfx_fb_color_depth`
 
@@ -27,7 +27,7 @@ int gfx_fb_color_depth(int format);
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L22)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L22)
 
 ## `gfx_fb_setpixel`
 
@@ -37,7 +37,7 @@ void gfx_fb_setpixel(const gfx_fb_t *fb, unsigned int x, unsigned int y, uint32_
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L24)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L24)
 
 ## `gfx_fb_getpixel`
 
@@ -47,7 +47,7 @@ uint32_t gfx_fb_getpixel(const gfx_fb_t *fb, unsigned int x, unsigned int y);
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L25)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L25)
 
 ## `gfx_fb_setpixel_checked`
 
@@ -57,7 +57,7 @@ void gfx_fb_setpixel_checked(const gfx_fb_t *fb, int x, int y, int col, int mask
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L26)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L26)
 
 ## `gfx_fb_fill_rect_raw`
 
@@ -67,7 +67,7 @@ void gfx_fb_fill_rect_raw(const gfx_fb_t *fb, int x, int y, int w, int h, uint32
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L27)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L27)
 
 ## `gfx_fb_fill_rect`
 
@@ -77,7 +77,7 @@ gfx_area_t gfx_fb_fill_rect(const gfx_fb_t *fb, int x, int y, int w, int h, uint
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L28)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L28)
 
 ## `gfx_fb_fill`
 
@@ -87,7 +87,7 @@ gfx_area_t gfx_fb_fill(const gfx_fb_t *fb, uint32_t col);
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L29)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L29)
 
 ## `gfx_fb_canvas_init`
 
@@ -97,7 +97,7 @@ void gfx_fb_canvas_init(gfx_canvas_t *canvas, const gfx_fb_t *fb);
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L31)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L31)
 
 ## `gfx_fb_scroll`
 
@@ -107,7 +107,7 @@ void gfx_fb_scroll(gfx_fb_t *fb, int xstep, int ystep);
 
 Native fb entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L32)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L32)
 
 ## `gfx_clipped_canvas_init`
 
@@ -117,7 +117,7 @@ void gfx_clipped_canvas_init(gfx_clipped_canvas_t *cc, const gfx_canvas_t *paren
 
 Native clipped entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L20)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L20)
 
 ## `gfx_shapes_pixel`
 
@@ -127,7 +127,7 @@ gfx_area_t gfx_shapes_pixel(const gfx_canvas_t *canvas, int x, int y, int c);
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L22)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L22)
 
 ## `gfx_shapes_hline`
 
@@ -137,7 +137,7 @@ gfx_area_t gfx_shapes_hline(const gfx_canvas_t *canvas, int x, int y, int w, int
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L23)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L23)
 
 ## `gfx_shapes_vline`
 
@@ -147,7 +147,7 @@ gfx_area_t gfx_shapes_vline(const gfx_canvas_t *canvas, int x, int y, int h, int
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L24)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L24)
 
 ## `gfx_shapes_fill_rect`
 
@@ -157,7 +157,7 @@ gfx_area_t gfx_shapes_fill_rect(const gfx_canvas_t *canvas, int x, int y, int w,
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L25)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L25)
 
 ## `gfx_shapes_rect`
 
@@ -167,7 +167,7 @@ gfx_area_t gfx_shapes_rect(const gfx_canvas_t *canvas, int x, int y, int w, int 
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L26)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L26)
 
 ## `gfx_shapes_line`
 
@@ -177,7 +177,7 @@ gfx_area_t gfx_shapes_line(const gfx_canvas_t *canvas, int x1, int y1, int x2, i
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L27)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L27)
 
 ## `gfx_shapes_ellipse`
 
@@ -187,7 +187,7 @@ gfx_area_t gfx_shapes_ellipse(const gfx_canvas_t *canvas, int cx, int cy, int xr
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L28)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L28)
 
 ## `gfx_shapes_fill`
 
@@ -197,7 +197,7 @@ gfx_area_t gfx_shapes_fill(const gfx_canvas_t *canvas, int c);
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L29)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L29)
 
 ## `gfx_shapes_poly_int_from_buffer`
 
@@ -207,7 +207,7 @@ int gfx_shapes_poly_int_from_buffer(const void *buf, size_t len, size_t itemsize
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L31)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L31)
 
 ## `gfx_shapes_poly`
 
@@ -217,7 +217,7 @@ gfx_area_t gfx_shapes_poly(const gfx_canvas_t *canvas, int x, int y, const void 
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L32)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L32)
 
 ## `gfx_shapes_blit`
 
@@ -227,7 +227,7 @@ gfx_area_t gfx_shapes_blit(const gfx_canvas_t *canvas, const gfx_fb_t *source, i
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L33)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L33)
 
 ## `gfx_shapes_circle`
 
@@ -237,7 +237,7 @@ gfx_area_t gfx_shapes_circle(const gfx_canvas_t *canvas, int x0, int y0, int r, 
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L34)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L34)
 
 ## `gfx_shapes_round_rect`
 
@@ -247,7 +247,7 @@ gfx_area_t gfx_shapes_round_rect(const gfx_canvas_t *canvas, int x0, int y0, int
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L35)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L35)
 
 ## `gfx_shapes_triangle`
 
@@ -257,7 +257,7 @@ gfx_area_t gfx_shapes_triangle(const gfx_canvas_t *canvas, int x0, int y0, int x
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L36)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L36)
 
 ## `gfx_shapes_arc`
 
@@ -267,7 +267,7 @@ gfx_area_t gfx_shapes_arc(const gfx_canvas_t *canvas, int x, int y, int r, float
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L37)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L37)
 
 ## `gfx_shapes_gradient_rect`
 
@@ -277,7 +277,7 @@ gfx_area_t gfx_shapes_gradient_rect(const gfx_canvas_t *canvas, int x, int y, in
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L38)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L38)
 
 ## `gfx_shapes_blit_rect`
 
@@ -287,7 +287,7 @@ gfx_area_t gfx_shapes_blit_rect(const gfx_canvas_t *canvas, const void *buf, int
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L39)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L39)
 
 ## `gfx_shapes_blit_transparent`
 
@@ -297,7 +297,7 @@ gfx_area_t gfx_shapes_blit_transparent(const gfx_canvas_t *canvas, const void *b
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L40)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L40)
 
 ## `gfx_shapes_polygon`
 
@@ -307,7 +307,7 @@ gfx_area_t gfx_shapes_polygon(const gfx_canvas_t *canvas, const int *points, siz
 
 Native shapes entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L41)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L41)
 
 ## `gfx_draw_init`
 
@@ -317,7 +317,7 @@ void gfx_draw_init(gfx_draw_t *draw, const gfx_canvas_t *canvas);
 
 Native draw entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L21)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L21)
 
 ## `gfx_draw_effective_clip`
 
@@ -327,7 +327,7 @@ gfx_area_t gfx_draw_effective_clip(const gfx_draw_t *draw);
 
 Native draw entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L23)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L23)
 
 ## `gfx_draw_push_clip`
 
@@ -337,7 +337,7 @@ void gfx_draw_push_clip(gfx_draw_t *draw, const gfx_area_t *clip);
 
 Native draw entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L24)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L24)
 
 ## `gfx_draw_pop_clip`
 
@@ -347,4 +347,4 @@ void gfx_draw_pop_clip(gfx_draw_t *draw);
 
 Native draw entry point declared for firmware and extension integration.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L25)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L25)

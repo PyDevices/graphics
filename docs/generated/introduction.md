@@ -19,11 +19,11 @@ assert changed == Area(10, 10, 40, 24)
 ## Reference snapshot
 
 - Release line: **v0.0.8**
-- Source commit: [`68194959ad5bc5540aceb6b40807a8c4228af60a`](https://github.com/PyDevices/graphics/tree/68194959ad5bc5540aceb6b40807a8c4228af60a)
+- Source commit: [`aa6041e9226bdf5172a656eef722b852ec02f270`](https://github.com/PyDevices/graphics/tree/aa6041e9226bdf5172a656eef722b852ec02f270)
 - License: **MIT**
 - Adapter: **CPython binding tables plus public C headers**
 - Python API entries indexed: **136**
-- Native C functions indexed: **59**
+- Native C functions indexed: **61**
 - Source files represented: **7**
 - Tracked C and header files in the repository: **31**
 
@@ -37,4 +37,4 @@ The generated pages expose the user-facing Python names and the lower-level C en
 - [Fonts and images](https://pydevices.github.io/graphics/api/generated/fonts-images.html) — 22 entries
 - [Runtime and pixel formats](https://pydevices.github.io/graphics/api/generated/module-formats.html) — 11 entries
 - [Native drawing and framebuffer API](https://pydevices.github.io/graphics/api/generated/native-drawing.html) — 34 entries
-- [Native fonts, images, and runtime API](https://pydevices.github.io/graphics/api/generated/native-assets-runtime.html) — 25 entries
+- [Native fonts, images, and runtime API](https://pydevices.github.io/graphics/api/generated/native-assets-runtime.html) — 27 entries

@@ -3,7 +3,7 @@ title: Fonts and images
 description: Bitmap font rendering, RGB565 bitmap access, and image conversion helpers.
 ---
 
-Source snapshot: [`68194959ad5bc5540aceb6b40807a8c4228af60a`](https://github.com/PyDevices/graphics/tree/68194959ad5bc5540aceb6b40807a8c4228af60a).
+Source snapshot: [`aa6041e9226bdf5172a656eef722b852ec02f270`](https://github.com/PyDevices/graphics/tree/aa6041e9226bdf5172a656eef722b852ec02f270).
 
 Bitmap font rendering, RGB565 bitmap access, and image conversion helpers.
 
@@ -17,7 +17,7 @@ class Font(font_data=None, height=0, cached=True)
 
 Bitmap font loader and renderer for built-in, file, or buffer-backed glyph data.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2643)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2643)
 
 ## `graphics.Font.text`
 
@@ -27,7 +27,7 @@ Font.text(canvas, text, x, y, color, scale=1, inverted=False)
 
 Render bitmap text with selectable height, scale, and inversion.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2633)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2633)
 
 ## `graphics.Font.draw_char`
 
@@ -37,7 +37,7 @@ Font.draw_char(char, x, y, canvas, color, scale=1, inverted=False)
 
 Render one glyph through this Font onto a canvas.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2634)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2634)
 
 ## `graphics.Font.text_width`
 
@@ -47,7 +47,7 @@ Font.text_width(text, scale=1)
 
 Measure rendered text width at the selected scale.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2635)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2635)
 
 ## `graphics.Font.deinit`
 
@@ -57,7 +57,7 @@ Font.deinit()
 
 Release resources owned by the object.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2636)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2636)
 
 ## `graphics.Font.export`
 
@@ -67,7 +67,7 @@ Font.export(filename)
 
 Write cached font bytes to a file.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2637)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2637)
 
 ## `graphics.Font.width`
 
@@ -77,7 +77,7 @@ Font.width
 
 Width in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2626)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2626)
 
 ## `graphics.Font.height`
 
@@ -87,7 +87,7 @@ Font.height
 
 Height in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2627)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2627)
 
 ## `graphics.Font.font_name`
 
@@ -97,7 +97,7 @@ Font.font_name
 
 Font source name or the in-memory/default identifier.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2628)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2628)
 
 ## `graphics.BMP565`
 
@@ -107,7 +107,7 @@ class BMP565(filename=None, source=None, streamed=False, mirrored=False, width=N
 
 RGB565 bitmap reader supporting buffered and streamed access.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2934)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2934)
 
 ## `graphics.BMP565.save`
 
@@ -117,7 +117,7 @@ BMP565.save(filename=None)
 
 Write the current image or bitmap to a versioned output path.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2923)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2923)
 
 ## `graphics.BMP565.deinit`
 
@@ -127,7 +127,7 @@ BMP565.deinit()
 
 Release resources owned by the object.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2924)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2924)
 
 ## `graphics.BMP565.width`
 
@@ -137,7 +137,7 @@ BMP565.width
 
 Width in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2914)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2914)
 
 ## `graphics.BMP565.height`
 
@@ -147,7 +147,7 @@ BMP565.height
 
 Height in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2915)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2915)
 
 ## `graphics.BMP565.buffer`
 
@@ -157,7 +157,7 @@ BMP565.buffer
 
 Backing pixel buffer when the object owns or exposes one.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2916)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2916)
 
 ## `graphics.BMP565.bpp`
 
@@ -167,7 +167,7 @@ BMP565.bpp
 
 Bitmap color depth in bits per pixel.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2917)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2917)
 
 ## `graphics.BMP565.BPP`
 
@@ -177,7 +177,7 @@ BMP565.BPP
 
 Bitmap storage width in bytes per pixel.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2918)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2918)
 
 ## `graphics.load_image`
 
@@ -187,7 +187,7 @@ graphics.load_image(path)
 
 Load a supported image file as a FrameBuffer.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2971)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2971)
 
 ## `graphics.save_image`
 
@@ -197,7 +197,7 @@ graphics.save_image(framebuffer, path='screenshot')
 
 Save a FrameBuffer to a versioned image path.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2972)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2972)
 
 ## `graphics.bmp_to_framebuffer`
 
@@ -207,7 +207,7 @@ graphics.bmp_to_framebuffer(path)
 
 Decode a BMP file into a FrameBuffer.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2973)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2973)
 
 ## `graphics.pbm_to_framebuffer`
 
@@ -217,7 +217,7 @@ graphics.pbm_to_framebuffer(path)
 
 Decode a PBM file into a FrameBuffer.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2974)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2974)
 
 ## `graphics.pgm_to_framebuffer`
 
@@ -227,4 +227,4 @@ graphics.pgm_to_framebuffer(path)
 
 Decode a PGM file into a FrameBuffer.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2975)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2975)
