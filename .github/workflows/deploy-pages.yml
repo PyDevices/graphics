@@ -1,11 +1,21 @@
 name: Deploy Pages site
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'web/**'
+      - 'README.md'
+      - '.github/workflows/deploy-pages.yml'
   push:
     branches:
       - main
     paths:
+      - 'docs/**'
       - 'web/**'
+      - 'README.md'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -18,13 +28,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install documentation dependencies
+        run: npm ci --prefix docs
+
+      - name: Build and verify Sourcey reference
+        run: npm run check --prefix docs
+
       - name: Assemble GitHub Pages site
         run: |
           mkdir -p _site
           cp -r web/* _site/
+          mkdir -p _site/api
+          cp -r docs/dist/* _site/api/
           touch _site/.nojekyll
 
       - name: Deploy to gh-pages
+        if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

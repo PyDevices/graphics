@@ -8,6 +8,8 @@ dist/
 wheelhouse/
 VERSION
 graphics_cmod.egg-info/
+docs/node_modules/
+docs/dist/
 
 # Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
 .cursor/debug*

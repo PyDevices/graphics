@@ -41,6 +41,7 @@ Firmware / editable builds: see **Build from source** below.
 
 ## Links
 
+- [Source-linked API reference](https://pydevices.github.io/graphics/api/)
 - [Source](https://github.com/PyDevices/graphics)
 - [Issues](https://github.com/PyDevices/graphics/issues)
 - Related: [pydisplay-graphics](https://test.pypi.org/project/pydisplay-graphics/), [pydisplay](https://github.com/PyDevices/pydisplay)
