@@ -129,6 +129,8 @@ for (const required of [
   "npm ci --prefix docs",
   "npm run check --prefix docs",
   "cp -r docs/dist/* _site/api/",
+  "fetch-depth: 0",
+  "fetch-tags: true",
 ]) {
   if (!workflow.includes(required)) {
     failures.push(`Pages workflow is missing: ${required}`);

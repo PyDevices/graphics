@@ -242,14 +242,32 @@ def git_commit() -> str:
 
 
 def release_tag() -> str:
+    """Resolve the nearest release label for the reference snapshot.
+
+    Prefer an explicit override, then ``git describe``. Actions checkouts are
+    shallow and omit tags by default, so fall back to the newest local tag or
+    ``unreleased`` instead of failing the Pages build.
+    """
     override = os.environ.get("SOURCE_RELEASE", "").strip()
     if override:
         return override
-    return subprocess.check_output(
-        ["git", "describe", "--tags", "--abbrev=0"],
+    try:
+        return subprocess.check_output(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            cwd=REPO_ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except subprocess.CalledProcessError:
+        pass
+    tags = subprocess.check_output(
+        ["git", "tag", "-l", "--sort=-v:refname"],
         cwd=REPO_ROOT,
         text=True,
-    ).strip()
+    ).splitlines()
+    if tags:
+        return tags[0].strip()
+    return "unreleased"
 
 
 def tracked_native_source_count() -> int:

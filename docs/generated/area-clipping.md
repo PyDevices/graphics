@@ -3,7 +3,7 @@ title: Area and clipping
 description: Rectangle geometry, scoped clip contexts, and clipped canvas operations.
 ---
 
-Source snapshot: [`68194959ad5bc5540aceb6b40807a8c4228af60a`](https://github.com/PyDevices/graphics/tree/68194959ad5bc5540aceb6b40807a8c4228af60a).
+Source snapshot: [`aa6041e9226bdf5172a656eef722b852ec02f270`](https://github.com/PyDevices/graphics/tree/aa6041e9226bdf5172a656eef722b852ec02f270).
 
 Rectangle geometry, scoped clip contexts, and clipped canvas operations.
 
@@ -17,7 +17,7 @@ class Area(x=0, y=0, w=0, h=0)
 
 Immutable rectangle geometry used for bounds, clipping, and draw results.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L395)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L395)
 
 ## `graphics.Area.contains`
 
@@ -27,7 +27,7 @@ Area.contains(point_or_x, y=None)
 
 Test whether the area contains a point.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L377)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L377)
 
 ## `graphics.Area.contains_area`
 
@@ -37,7 +37,7 @@ Area.contains_area(other)
 
 Test whether another Area is fully contained.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L378)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L378)
 
 ## `graphics.Area.intersects`
 
@@ -47,7 +47,7 @@ Area.intersects(other)
 
 Test whether two areas overlap.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L379)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L379)
 
 ## `graphics.Area.touches_or_intersects`
 
@@ -57,7 +57,7 @@ Area.touches_or_intersects(other)
 
 Test whether two areas overlap or share an edge.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L380)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L380)
 
 ## `graphics.Area.shift`
 
@@ -67,7 +67,7 @@ Area.shift(dx=0, dy=0)
 
 Return a copy translated by the requested offset.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L381)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L381)
 
 ## `graphics.Area.clip`
 
@@ -77,7 +77,7 @@ Area.clip(other)
 
 Return the intersection with another Area.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L382)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L382)
 
 ## `graphics.Area.offset`
 
@@ -87,7 +87,7 @@ Area.offset(left, top=None, right=None, bottom=None)
 
 Return an Area expanded independently on each edge.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L383)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L383)
 
 ## `graphics.Area.inset`
 
@@ -97,7 +97,7 @@ Area.inset(left, top=None, right=None, bottom=None)
 
 Return an Area reduced independently on each edge.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L384)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L384)
 
 ## `graphics.Area.x`
 
@@ -107,7 +107,7 @@ Area.x
 
 Left coordinate.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L229)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L229)
 
 ## `graphics.Area.y`
 
@@ -117,7 +117,7 @@ Area.y
 
 Top coordinate.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L230)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L230)
 
 ## `graphics.Area.w`
 
@@ -127,7 +127,7 @@ Area.w
 
 Width in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L231)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L231)
 
 ## `graphics.Area.h`
 
@@ -137,7 +137,7 @@ Area.h
 
 Height in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L232)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L232)
 
 ## `graphics.ClipContext`
 
@@ -147,7 +147,7 @@ class ClipContext(draw, area)
 
 Context manager returned by Draw.clip() for scoped clipping.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2147)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2147)
 
 ## `graphics.ClipContext.__enter__`
 
@@ -157,7 +157,7 @@ ClipContext.__enter__()
 
 Push the requested clipping area and return the effective clip.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2140)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2140)
 
 ## `graphics.ClipContext.__exit__`
 
@@ -167,7 +167,7 @@ ClipContext.__exit__(exc_type, exc_value, traceback)
 
 Pop the clipping area when leaving the context.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2141)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2141)
 
 ## `graphics.ClippedCanvas`
 
@@ -177,7 +177,7 @@ class ClippedCanvas(canvas, clip)
 
 Canvas proxy that intersects writes with a fixed Area.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2414)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2414)
 
 ## `graphics.ClippedCanvas.pixel`
 
@@ -187,7 +187,7 @@ ClippedCanvas.pixel(x, y, color=None)
 
 Read or write one pixel, depending on whether a color is supplied.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2402)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2402)
 
 ## `graphics.ClippedCanvas.fill`
 
@@ -197,7 +197,7 @@ ClippedCanvas.fill(color)
 
 Fill the target canvas with one color and return the affected Area.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2403)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2403)
 
 ## `graphics.ClippedCanvas.fill_rect`
 
@@ -207,7 +207,7 @@ ClippedCanvas.fill_rect(x, y, width, height, color)
 
 Fill a rectangular region and return the clipped affected Area.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2404)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2404)
 
 ## `graphics.ClippedCanvas.hline`
 
@@ -217,7 +217,7 @@ ClippedCanvas.hline(x, y, width, color)
 
 Draw a horizontal line.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2405)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2405)
 
 ## `graphics.ClippedCanvas.vline`
 
@@ -227,7 +227,7 @@ ClippedCanvas.vline(x, y, height, color)
 
 Draw a vertical line.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2406)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2406)
 
 ## `graphics.ClippedCanvas.blit_rect`
 
@@ -237,7 +237,7 @@ ClippedCanvas.blit_rect(buffer, x, y, width, height)
 
 Copy a packed RGB565 rectangle onto the target.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2407)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2407)
 
 ## `graphics.ClippedCanvas.blit_transparent`
 
@@ -247,7 +247,7 @@ ClippedCanvas.blit_transparent(buffer, x, y, width, height, key)
 
 Copy a packed RGB565 rectangle while skipping the transparent key.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2408)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2408)
 
 ## `graphics.ClippedCanvas.width`
 
@@ -257,7 +257,7 @@ ClippedCanvas.width
 
 Width in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2223)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2223)
 
 ## `graphics.ClippedCanvas.height`
 
@@ -267,4 +267,4 @@ ClippedCanvas.height
 
 Height in pixels.
 
-[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2224)
+[View the pinned source declaration](https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2224)

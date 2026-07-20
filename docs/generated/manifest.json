@@ -1,9 +1,9 @@
 {
   "adapter": "cpython-binding-tables+public-c-headers",
-  "commit": "68194959ad5bc5540aceb6b40807a8c4228af60a",
+  "commit": "aa6041e9226bdf5172a656eef722b852ec02f270",
   "generated_with": "sourcey@3.6.5",
   "license": "MIT",
-  "native_c_symbol_count": 59,
+  "native_c_symbol_count": 61,
   "pages": [
     {
       "slug": "area-clipping",
@@ -62,7 +62,7 @@
         "gfx_files.h",
         "gfx_font.h"
       ],
-      "symbol_count": 25,
+      "symbol_count": 27,
       "title": "Native fonts, images, and runtime API"
     }
   ],
@@ -81,7 +81,7 @@
     "gfx_module_cpy.c",
     "gfx_shapes.h"
   ],
-  "symbol_count": 195,
+  "symbol_count": 197,
   "symbols": [
     {
       "kind": "class",
@@ -90,7 +90,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area",
       "signature": "class Area(x=0, y=0, w=0, h=0)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L395",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L395",
       "summary": "Immutable rectangle geometry used for bounds, clipping, and draw results."
     },
     {
@@ -101,7 +101,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.contains",
       "signature": "Area.contains(point_or_x, y=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L377",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L377",
       "summary": "Test whether the area contains a point."
     },
     {
@@ -112,7 +112,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.contains_area",
       "signature": "Area.contains_area(other)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L378",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L378",
       "summary": "Test whether another Area is fully contained."
     },
     {
@@ -123,7 +123,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.intersects",
       "signature": "Area.intersects(other)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L379",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L379",
       "summary": "Test whether two areas overlap."
     },
     {
@@ -134,7 +134,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.touches_or_intersects",
       "signature": "Area.touches_or_intersects(other)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L380",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L380",
       "summary": "Test whether two areas overlap or share an edge."
     },
     {
@@ -145,7 +145,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.shift",
       "signature": "Area.shift(dx=0, dy=0)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L381",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L381",
       "summary": "Return a copy translated by the requested offset."
     },
     {
@@ -156,7 +156,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.clip",
       "signature": "Area.clip(other)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L382",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L382",
       "summary": "Return the intersection with another Area."
     },
     {
@@ -167,7 +167,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.offset",
       "signature": "Area.offset(left, top=None, right=None, bottom=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L383",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L383",
       "summary": "Return an Area expanded independently on each edge."
     },
     {
@@ -178,7 +178,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.inset",
       "signature": "Area.inset(left, top=None, right=None, bottom=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L384",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L384",
       "summary": "Return an Area reduced independently on each edge."
     },
     {
@@ -189,7 +189,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.x",
       "signature": "Area.x",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L229",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L229",
       "summary": "Left coordinate."
     },
     {
@@ -200,7 +200,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.y",
       "signature": "Area.y",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L230",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L230",
       "summary": "Top coordinate."
     },
     {
@@ -211,7 +211,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.w",
       "signature": "Area.w",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L231",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L231",
       "summary": "Width in pixels."
     },
     {
@@ -222,7 +222,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Area.h",
       "signature": "Area.h",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L232",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L232",
       "summary": "Height in pixels."
     },
     {
@@ -232,7 +232,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClipContext",
       "signature": "class ClipContext(draw, area)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2147",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2147",
       "summary": "Context manager returned by Draw.clip() for scoped clipping."
     },
     {
@@ -243,7 +243,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClipContext.__enter__",
       "signature": "ClipContext.__enter__()",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2140",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2140",
       "summary": "Push the requested clipping area and return the effective clip."
     },
     {
@@ -254,7 +254,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClipContext.__exit__",
       "signature": "ClipContext.__exit__(exc_type, exc_value, traceback)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2141",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2141",
       "summary": "Pop the clipping area when leaving the context."
     },
     {
@@ -264,7 +264,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas",
       "signature": "class ClippedCanvas(canvas, clip)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2414",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2414",
       "summary": "Canvas proxy that intersects writes with a fixed Area."
     },
     {
@@ -275,7 +275,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.pixel",
       "signature": "ClippedCanvas.pixel(x, y, color=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2402",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2402",
       "summary": "Read or write one pixel, depending on whether a color is supplied."
     },
     {
@@ -286,7 +286,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.fill",
       "signature": "ClippedCanvas.fill(color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2403",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2403",
       "summary": "Fill the target canvas with one color and return the affected Area."
     },
     {
@@ -297,7 +297,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.fill_rect",
       "signature": "ClippedCanvas.fill_rect(x, y, width, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2404",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2404",
       "summary": "Fill a rectangular region and return the clipped affected Area."
     },
     {
@@ -308,7 +308,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.hline",
       "signature": "ClippedCanvas.hline(x, y, width, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2405",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2405",
       "summary": "Draw a horizontal line."
     },
     {
@@ -319,7 +319,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.vline",
       "signature": "ClippedCanvas.vline(x, y, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2406",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2406",
       "summary": "Draw a vertical line."
     },
     {
@@ -330,7 +330,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.blit_rect",
       "signature": "ClippedCanvas.blit_rect(buffer, x, y, width, height)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2407",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2407",
       "summary": "Copy a packed RGB565 rectangle onto the target."
     },
     {
@@ -341,7 +341,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.blit_transparent",
       "signature": "ClippedCanvas.blit_transparent(buffer, x, y, width, height, key)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2408",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2408",
       "summary": "Copy a packed RGB565 rectangle while skipping the transparent key."
     },
     {
@@ -352,7 +352,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.width",
       "signature": "ClippedCanvas.width",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2223",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2223",
       "summary": "Width in pixels."
     },
     {
@@ -363,7 +363,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ClippedCanvas.height",
       "signature": "ClippedCanvas.height",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2224",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2224",
       "summary": "Height in pixels."
     },
     {
@@ -373,7 +373,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer",
       "signature": "class FrameBuffer(buffer, width, height, format, stride=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1112",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1112",
       "summary": "A framebuf-compatible native drawing surface backed by a writable buffer."
     },
     {
@@ -384,7 +384,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.from_file",
       "signature": "FrameBuffer.from_file(path)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1082",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1082",
       "summary": "Load a supported image file into a new FrameBuffer."
     },
     {
@@ -395,7 +395,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.fill",
       "signature": "FrameBuffer.fill(color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1083",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1083",
       "summary": "Fill the target canvas with one color and return the affected Area."
     },
     {
@@ -406,7 +406,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.fill_rect",
       "signature": "FrameBuffer.fill_rect(x, y, width, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1084",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1084",
       "summary": "Fill a rectangular region and return the clipped affected Area."
     },
     {
@@ -417,7 +417,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.pixel",
       "signature": "FrameBuffer.pixel(x, y, color=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1085",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1085",
       "summary": "Read or write one pixel, depending on whether a color is supplied."
     },
     {
@@ -428,7 +428,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.hline",
       "signature": "FrameBuffer.hline(x, y, width, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1086",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1086",
       "summary": "Draw a horizontal line."
     },
     {
@@ -439,7 +439,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.vline",
       "signature": "FrameBuffer.vline(x, y, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1087",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1087",
       "summary": "Draw a vertical line."
     },
     {
@@ -450,7 +450,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.rect",
       "signature": "FrameBuffer.rect(x, y, width, height, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1088",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1088",
       "summary": "Draw an outlined or filled rectangle."
     },
     {
@@ -461,7 +461,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.round_rect",
       "signature": "FrameBuffer.round_rect(x, y, width, height, radius, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1089",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1089",
       "summary": "Draw an outlined or filled rounded rectangle."
     },
     {
@@ -472,7 +472,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.circle",
       "signature": "FrameBuffer.circle(x, y, radius, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1090",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1090",
       "summary": "Draw an outlined or filled circle."
     },
     {
@@ -483,7 +483,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.line",
       "signature": "FrameBuffer.line(x1, y1, x2, y2, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1091",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1091",
       "summary": "Draw a line between two points."
     },
     {
@@ -494,7 +494,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.ellipse",
       "signature": "FrameBuffer.ellipse(x, y, x_radius, y_radius, color, fill=False, mask=0x0F)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1092",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1092",
       "summary": "Draw selected quadrants of an outlined or filled ellipse."
     },
     {
@@ -505,7 +505,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.poly",
       "signature": "FrameBuffer.poly(x, y, coordinates, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1093",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1093",
       "summary": "Draw a polygon from a packed coordinate buffer."
     },
     {
@@ -516,7 +516,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.arc",
       "signature": "FrameBuffer.arc(x, y, radius, start_angle, end_angle, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1094",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1094",
       "summary": "Draw a circular arc between two angles."
     },
     {
@@ -527,7 +527,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.triangle",
       "signature": "FrameBuffer.triangle(x0, y0, x1, y1, x2, y2, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1095",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1095",
       "summary": "Draw an outlined or filled triangle."
     },
     {
@@ -538,7 +538,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.gradient_rect",
       "signature": "FrameBuffer.gradient_rect(x, y, width, height, color1, color2=None, vertical=True)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1096",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1096",
       "summary": "Fill a rectangle with a horizontal or vertical color gradient."
     },
     {
@@ -549,7 +549,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.polygon",
       "signature": "FrameBuffer.polygon(points, x, y, color, angle=0, center_x=0, center_y=0)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1097",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1097",
       "summary": "Draw a translated and optionally rotated sequence of points."
     },
     {
@@ -560,7 +560,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.blit",
       "signature": "FrameBuffer.blit(source, x, y, key=-1, palette=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1098",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1098",
       "summary": "Copy another framebuffer onto the target with optional keying and palette lookup."
     },
     {
@@ -571,7 +571,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.blit_rect",
       "signature": "FrameBuffer.blit_rect(buffer, x, y, width, height)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1099",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1099",
       "summary": "Copy a packed RGB565 rectangle onto the target."
     },
     {
@@ -582,7 +582,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.blit_transparent",
       "signature": "FrameBuffer.blit_transparent(buffer, x, y, width, height, key)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1100",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1100",
       "summary": "Copy a packed RGB565 rectangle while skipping the transparent key."
     },
     {
@@ -593,7 +593,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.text",
       "signature": "FrameBuffer.text(text, x, y, color=1, scale=1, inverted=False, font_data=None, height=8)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1101",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1101",
       "summary": "Render bitmap text with selectable height, scale, and inversion."
     },
     {
@@ -604,7 +604,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.text8",
       "signature": "FrameBuffer.text8(text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1102",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1102",
       "summary": "Render text with the built-in 8-pixel-high font path."
     },
     {
@@ -615,7 +615,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.text14",
       "signature": "FrameBuffer.text14(text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1103",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1103",
       "summary": "Render text with the built-in 14-pixel-high font path."
     },
     {
@@ -626,7 +626,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.text16",
       "signature": "FrameBuffer.text16(text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1104",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1104",
       "summary": "Render text with the built-in 16-pixel-high font path."
     },
     {
@@ -637,7 +637,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.scroll",
       "signature": "FrameBuffer.scroll(x_step, y_step)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1105",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1105",
       "summary": "Move framebuffer contents by the requested x and y offsets."
     },
     {
@@ -648,7 +648,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.save",
       "signature": "FrameBuffer.save(path='screenshot')",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1106",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1106",
       "summary": "Write the current image or bitmap to a versioned output path."
     },
     {
@@ -659,7 +659,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.width",
       "signature": "FrameBuffer.width",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1073",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1073",
       "summary": "Width in pixels."
     },
     {
@@ -670,7 +670,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.height",
       "signature": "FrameBuffer.height",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1074",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1074",
       "summary": "Height in pixels."
     },
     {
@@ -681,7 +681,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.buffer",
       "signature": "FrameBuffer.buffer",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1075",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1075",
       "summary": "Backing pixel buffer when the object owns or exposes one."
     },
     {
@@ -692,7 +692,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.format",
       "signature": "FrameBuffer.format",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1076",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1076",
       "summary": "Framebuffer pixel-format identifier."
     },
     {
@@ -703,7 +703,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.FrameBuffer.color_depth",
       "signature": "FrameBuffer.color_depth",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L1077",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L1077",
       "summary": "Bits per pixel for the framebuffer format."
     },
     {
@@ -713,7 +713,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw",
       "signature": "class Draw(canvas)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2085",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2085",
       "summary": "Drawing facade that adds a bounded clip stack to any compatible canvas."
     },
     {
@@ -724,7 +724,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.fill",
       "signature": "Draw.fill(color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2057",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2057",
       "summary": "Fill the target canvas with one color and return the affected Area."
     },
     {
@@ -735,7 +735,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.fill_rect",
       "signature": "Draw.fill_rect(x, y, width, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2058",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2058",
       "summary": "Fill a rectangular region and return the clipped affected Area."
     },
     {
@@ -746,7 +746,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.pixel",
       "signature": "Draw.pixel(x, y, color=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2059",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2059",
       "summary": "Read or write one pixel, depending on whether a color is supplied."
     },
     {
@@ -757,7 +757,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.hline",
       "signature": "Draw.hline(x, y, width, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2060",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2060",
       "summary": "Draw a horizontal line."
     },
     {
@@ -768,7 +768,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.vline",
       "signature": "Draw.vline(x, y, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2061",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2061",
       "summary": "Draw a vertical line."
     },
     {
@@ -779,7 +779,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.line",
       "signature": "Draw.line(x1, y1, x2, y2, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2062",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2062",
       "summary": "Draw a line between two points."
     },
     {
@@ -790,7 +790,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.rect",
       "signature": "Draw.rect(x, y, width, height, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2063",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2063",
       "summary": "Draw an outlined or filled rectangle."
     },
     {
@@ -801,7 +801,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.round_rect",
       "signature": "Draw.round_rect(x, y, width, height, radius, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2064",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2064",
       "summary": "Draw an outlined or filled rounded rectangle."
     },
     {
@@ -812,7 +812,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.circle",
       "signature": "Draw.circle(x, y, radius, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2065",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2065",
       "summary": "Draw an outlined or filled circle."
     },
     {
@@ -823,7 +823,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.ellipse",
       "signature": "Draw.ellipse(x, y, x_radius, y_radius, color, fill=False, mask=0x0F)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2066",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2066",
       "summary": "Draw selected quadrants of an outlined or filled ellipse."
     },
     {
@@ -834,7 +834,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.arc",
       "signature": "Draw.arc(x, y, radius, start_angle, end_angle, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2067",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2067",
       "summary": "Draw a circular arc between two angles."
     },
     {
@@ -845,7 +845,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.triangle",
       "signature": "Draw.triangle(x0, y0, x1, y1, x2, y2, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2068",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2068",
       "summary": "Draw an outlined or filled triangle."
     },
     {
@@ -856,7 +856,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.gradient_rect",
       "signature": "Draw.gradient_rect(x, y, width, height, color1, color2=None, vertical=True)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2069",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2069",
       "summary": "Fill a rectangle with a horizontal or vertical color gradient."
     },
     {
@@ -867,7 +867,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.poly",
       "signature": "Draw.poly(x, y, coordinates, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2070",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2070",
       "summary": "Draw a polygon from a packed coordinate buffer."
     },
     {
@@ -878,7 +878,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.polygon",
       "signature": "Draw.polygon(points, x, y, color, angle=0, center_x=0, center_y=0)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2071",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2071",
       "summary": "Draw a translated and optionally rotated sequence of points."
     },
     {
@@ -889,7 +889,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.blit",
       "signature": "Draw.blit(source, x, y, key=-1, palette=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2072",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2072",
       "summary": "Copy another framebuffer onto the target with optional keying and palette lookup."
     },
     {
@@ -900,7 +900,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.blit_rect",
       "signature": "Draw.blit_rect(buffer, x, y, width, height)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2073",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2073",
       "summary": "Copy a packed RGB565 rectangle onto the target."
     },
     {
@@ -911,7 +911,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.blit_transparent",
       "signature": "Draw.blit_transparent(buffer, x, y, width, height, key)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2074",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2074",
       "summary": "Copy a packed RGB565 rectangle while skipping the transparent key."
     },
     {
@@ -922,7 +922,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.text",
       "signature": "Draw.text(text, x, y, color=1, scale=1, inverted=False, font_data=None, height=8)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2075",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2075",
       "summary": "Render bitmap text with selectable height, scale, and inversion."
     },
     {
@@ -933,7 +933,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.text8",
       "signature": "Draw.text8(text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2076",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2076",
       "summary": "Render text with the built-in 8-pixel-high font path."
     },
     {
@@ -944,7 +944,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.text14",
       "signature": "Draw.text14(text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2077",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2077",
       "summary": "Render text with the built-in 14-pixel-high font path."
     },
     {
@@ -955,7 +955,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.text16",
       "signature": "Draw.text16(text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2078",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2078",
       "summary": "Render text with the built-in 16-pixel-high font path."
     },
     {
@@ -966,7 +966,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Draw.clip",
       "signature": "Draw.clip(area_or_x, y=None, width=None, height=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2079",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2079",
       "summary": "Return the intersection with another Area."
     },
     {
@@ -977,7 +977,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.fill",
       "signature": "graphics.fill(canvas, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2953",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2953",
       "summary": "Fill the target canvas with one color and return the affected Area."
     },
     {
@@ -988,7 +988,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.fill_rect",
       "signature": "graphics.fill_rect(canvas, x, y, width, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2954",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2954",
       "summary": "Fill a rectangular region and return the clipped affected Area."
     },
     {
@@ -999,7 +999,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.pixel",
       "signature": "graphics.pixel(canvas, x, y, color=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2955",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2955",
       "summary": "Read or write one pixel, depending on whether a color is supplied."
     },
     {
@@ -1010,7 +1010,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.hline",
       "signature": "graphics.hline(canvas, x, y, width, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2956",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2956",
       "summary": "Draw a horizontal line."
     },
     {
@@ -1021,7 +1021,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.vline",
       "signature": "graphics.vline(canvas, x, y, height, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2957",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2957",
       "summary": "Draw a vertical line."
     },
     {
@@ -1032,7 +1032,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.line",
       "signature": "graphics.line(canvas, x1, y1, x2, y2, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2958",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2958",
       "summary": "Draw a line between two points."
     },
     {
@@ -1043,7 +1043,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.rect",
       "signature": "graphics.rect(canvas, x, y, width, height, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2959",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2959",
       "summary": "Draw an outlined or filled rectangle."
     },
     {
@@ -1054,7 +1054,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.round_rect",
       "signature": "graphics.round_rect(canvas, x, y, width, height, radius, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2960",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2960",
       "summary": "Draw an outlined or filled rounded rectangle."
     },
     {
@@ -1065,7 +1065,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.circle",
       "signature": "graphics.circle(canvas, x, y, radius, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2961",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2961",
       "summary": "Draw an outlined or filled circle."
     },
     {
@@ -1076,7 +1076,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.ellipse",
       "signature": "graphics.ellipse(canvas, x, y, x_radius, y_radius, color, fill=False, mask=0x0F)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2962",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2962",
       "summary": "Draw selected quadrants of an outlined or filled ellipse."
     },
     {
@@ -1087,7 +1087,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.arc",
       "signature": "graphics.arc(canvas, x, y, radius, start_angle, end_angle, color)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2963",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2963",
       "summary": "Draw a circular arc between two angles."
     },
     {
@@ -1098,7 +1098,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.triangle",
       "signature": "graphics.triangle(canvas, x0, y0, x1, y1, x2, y2, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2964",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2964",
       "summary": "Draw an outlined or filled triangle."
     },
     {
@@ -1109,7 +1109,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.gradient_rect",
       "signature": "graphics.gradient_rect(canvas, x, y, width, height, color1, color2=None, vertical=True)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2965",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2965",
       "summary": "Fill a rectangle with a horizontal or vertical color gradient."
     },
     {
@@ -1120,7 +1120,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.poly",
       "signature": "graphics.poly(canvas, x, y, coordinates, color, fill=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2966",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2966",
       "summary": "Draw a polygon from a packed coordinate buffer."
     },
     {
@@ -1131,7 +1131,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.blit",
       "signature": "graphics.blit(canvas, source, x, y, key=-1, palette=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2967",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2967",
       "summary": "Copy another framebuffer onto the target with optional keying and palette lookup."
     },
     {
@@ -1142,7 +1142,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.blit_rect",
       "signature": "graphics.blit_rect(canvas, buffer, x, y, width, height)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2968",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2968",
       "summary": "Copy a packed RGB565 rectangle onto the target."
     },
     {
@@ -1153,7 +1153,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.blit_transparent",
       "signature": "graphics.blit_transparent(canvas, buffer, x, y, width, height, key)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2969",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2969",
       "summary": "Copy a packed RGB565 rectangle while skipping the transparent key."
     },
     {
@@ -1164,7 +1164,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.polygon",
       "signature": "graphics.polygon(canvas, points, x, y, color, angle=0, center_x=0, center_y=0)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2970",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2970",
       "summary": "Draw a translated and optionally rotated sequence of points."
     },
     {
@@ -1175,7 +1175,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.text",
       "signature": "graphics.text(canvas, text, x, y, color=1, scale=1, inverted=False, font_data=None, height=8)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2976",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2976",
       "summary": "Render bitmap text with selectable height, scale, and inversion."
     },
     {
@@ -1186,7 +1186,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.text8",
       "signature": "graphics.text8(canvas, text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2977",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2977",
       "summary": "Render text with the built-in 8-pixel-high font path."
     },
     {
@@ -1197,7 +1197,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.text14",
       "signature": "graphics.text14(canvas, text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2978",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2978",
       "summary": "Render text with the built-in 14-pixel-high font path."
     },
     {
@@ -1208,7 +1208,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.text16",
       "signature": "graphics.text16(canvas, text, x, y, color=1, scale=1, inverted=False, font_data=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2979",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2979",
       "summary": "Render text with the built-in 16-pixel-high font path."
     },
     {
@@ -1218,7 +1218,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font",
       "signature": "class Font(font_data=None, height=0, cached=True)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2643",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2643",
       "summary": "Bitmap font loader and renderer for built-in, file, or buffer-backed glyph data."
     },
     {
@@ -1229,7 +1229,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.text",
       "signature": "Font.text(canvas, text, x, y, color, scale=1, inverted=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2633",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2633",
       "summary": "Render bitmap text with selectable height, scale, and inversion."
     },
     {
@@ -1240,7 +1240,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.draw_char",
       "signature": "Font.draw_char(char, x, y, canvas, color, scale=1, inverted=False)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2634",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2634",
       "summary": "Render one glyph through this Font onto a canvas."
     },
     {
@@ -1251,7 +1251,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.text_width",
       "signature": "Font.text_width(text, scale=1)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2635",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2635",
       "summary": "Measure rendered text width at the selected scale."
     },
     {
@@ -1262,7 +1262,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.deinit",
       "signature": "Font.deinit()",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2636",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2636",
       "summary": "Release resources owned by the object."
     },
     {
@@ -1273,7 +1273,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.export",
       "signature": "Font.export(filename)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2637",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2637",
       "summary": "Write cached font bytes to a file."
     },
     {
@@ -1284,7 +1284,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.width",
       "signature": "Font.width",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2626",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2626",
       "summary": "Width in pixels."
     },
     {
@@ -1295,7 +1295,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.height",
       "signature": "Font.height",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2627",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2627",
       "summary": "Height in pixels."
     },
     {
@@ -1306,7 +1306,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.Font.font_name",
       "signature": "Font.font_name",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2628",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2628",
       "summary": "Font source name or the in-memory/default identifier."
     },
     {
@@ -1316,7 +1316,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565",
       "signature": "class BMP565(filename=None, source=None, streamed=False, mirrored=False, width=None, height=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2934",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2934",
       "summary": "RGB565 bitmap reader supporting buffered and streamed access."
     },
     {
@@ -1327,7 +1327,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.save",
       "signature": "BMP565.save(filename=None)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2923",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2923",
       "summary": "Write the current image or bitmap to a versioned output path."
     },
     {
@@ -1338,7 +1338,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.deinit",
       "signature": "BMP565.deinit()",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2924",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2924",
       "summary": "Release resources owned by the object."
     },
     {
@@ -1349,7 +1349,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.width",
       "signature": "BMP565.width",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2914",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2914",
       "summary": "Width in pixels."
     },
     {
@@ -1360,7 +1360,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.height",
       "signature": "BMP565.height",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2915",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2915",
       "summary": "Height in pixels."
     },
     {
@@ -1371,7 +1371,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.buffer",
       "signature": "BMP565.buffer",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2916",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2916",
       "summary": "Backing pixel buffer when the object owns or exposes one."
     },
     {
@@ -1382,7 +1382,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.bpp",
       "signature": "BMP565.bpp",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2917",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2917",
       "summary": "Bitmap color depth in bits per pixel."
     },
     {
@@ -1393,7 +1393,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.BMP565.BPP",
       "signature": "BMP565.BPP",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2918",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2918",
       "summary": "Bitmap storage width in bytes per pixel."
     },
     {
@@ -1404,7 +1404,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.load_image",
       "signature": "graphics.load_image(path)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2971",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2971",
       "summary": "Load a supported image file as a FrameBuffer."
     },
     {
@@ -1415,7 +1415,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.save_image",
       "signature": "graphics.save_image(framebuffer, path='screenshot')",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2972",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2972",
       "summary": "Save a FrameBuffer to a versioned image path."
     },
     {
@@ -1426,7 +1426,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.bmp_to_framebuffer",
       "signature": "graphics.bmp_to_framebuffer(path)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2973",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2973",
       "summary": "Decode a BMP file into a FrameBuffer."
     },
     {
@@ -1437,7 +1437,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.pbm_to_framebuffer",
       "signature": "graphics.pbm_to_framebuffer(path)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2974",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2974",
       "summary": "Decode a PBM file into a FrameBuffer."
     },
     {
@@ -1448,7 +1448,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.pgm_to_framebuffer",
       "signature": "graphics.pgm_to_framebuffer(path)",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2975",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2975",
       "summary": "Decode a PGM file into a FrameBuffer."
     },
     {
@@ -1459,7 +1459,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.framebuf_backend",
       "signature": "graphics.framebuf_backend()",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2950",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2950",
       "summary": "Return the active framebuffer backend identifier."
     },
     {
@@ -1470,7 +1470,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.implementation",
       "signature": "graphics.implementation()",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2951",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2951",
       "summary": "Return the implementation identifier for this graphics module."
     },
     {
@@ -1481,7 +1481,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.capabilities",
       "signature": "graphics.capabilities()",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L2952",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L2952",
       "summary": "Return structured runtime feature and pixel-format capabilities."
     },
     {
@@ -1492,7 +1492,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.MONO_VLSB",
       "signature": "graphics.MONO_VLSB",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3027",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3027",
       "summary": "Monochrome vertical least-significant-bit layout."
     },
     {
@@ -1503,7 +1503,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.MONO_HLSB",
       "signature": "graphics.MONO_HLSB",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3028",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3028",
       "summary": "Monochrome horizontal least-significant-bit layout."
     },
     {
@@ -1514,7 +1514,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.MONO_HMSB",
       "signature": "graphics.MONO_HMSB",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3029",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3029",
       "summary": "Monochrome horizontal most-significant-bit layout."
     },
     {
@@ -1525,7 +1525,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.RGB565",
       "signature": "graphics.RGB565",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3030",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3030",
       "summary": "16-bit RGB565 pixel layout."
     },
     {
@@ -1536,7 +1536,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.GS2_HMSB",
       "signature": "graphics.GS2_HMSB",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3031",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3031",
       "summary": "2-bit grayscale horizontal most-significant-bit layout."
     },
     {
@@ -1547,7 +1547,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.GS4_HMSB",
       "signature": "graphics.GS4_HMSB",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3032",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3032",
       "summary": "4-bit grayscale horizontal most-significant-bit layout."
     },
     {
@@ -1558,7 +1558,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.GS8",
       "signature": "graphics.GS8",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3033",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3033",
       "summary": "8-bit grayscale layout."
     },
     {
@@ -1569,7 +1569,7 @@
       "path": "gfx_module_cpy.c",
       "qualified_name": "graphics.RGB888",
       "signature": "graphics.RGB888",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_module_cpy.c#L3034",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_module_cpy.c#L3034",
       "summary": "24-bit RGB888 pixel layout."
     },
     {
@@ -1579,7 +1579,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_validate_buffer",
       "signature": "int gfx_fb_validate_buffer(size_t buf_len, int width, int height, int format, int stride);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L21",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L21",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1589,7 +1589,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_color_depth",
       "signature": "int gfx_fb_color_depth(int format);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L22",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L22",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1599,7 +1599,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_setpixel",
       "signature": "void gfx_fb_setpixel(const gfx_fb_t *fb, unsigned int x, unsigned int y, uint32_t col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L24",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L24",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1609,7 +1609,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_getpixel",
       "signature": "uint32_t gfx_fb_getpixel(const gfx_fb_t *fb, unsigned int x, unsigned int y);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L25",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L25",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1619,7 +1619,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_setpixel_checked",
       "signature": "void gfx_fb_setpixel_checked(const gfx_fb_t *fb, int x, int y, int col, int mask);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L26",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L26",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1629,7 +1629,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_fill_rect_raw",
       "signature": "void gfx_fb_fill_rect_raw(const gfx_fb_t *fb, int x, int y, int w, int h, uint32_t col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L27",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L27",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1639,7 +1639,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_fill_rect",
       "signature": "gfx_area_t gfx_fb_fill_rect(const gfx_fb_t *fb, int x, int y, int w, int h, uint32_t col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L28",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L28",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1649,7 +1649,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_fill",
       "signature": "gfx_area_t gfx_fb_fill(const gfx_fb_t *fb, uint32_t col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L29",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L29",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1659,7 +1659,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_canvas_init",
       "signature": "void gfx_fb_canvas_init(gfx_canvas_t *canvas, const gfx_fb_t *fb);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L31",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L31",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1669,7 +1669,7 @@
       "path": "gfx_framebuffer.h",
       "qualified_name": "gfx_fb_scroll",
       "signature": "void gfx_fb_scroll(gfx_fb_t *fb, int xstep, int ystep);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_framebuffer.h#L32",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_framebuffer.h#L32",
       "summary": "Native fb entry point declared for firmware and extension integration."
     },
     {
@@ -1679,7 +1679,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_clipped_canvas_init",
       "signature": "void gfx_clipped_canvas_init(gfx_clipped_canvas_t *cc, const gfx_canvas_t *parent, const gfx_area_t *clip);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L20",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L20",
       "summary": "Native clipped entry point declared for firmware and extension integration."
     },
     {
@@ -1689,7 +1689,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_pixel",
       "signature": "gfx_area_t gfx_shapes_pixel(const gfx_canvas_t *canvas, int x, int y, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L22",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L22",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1699,7 +1699,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_hline",
       "signature": "gfx_area_t gfx_shapes_hline(const gfx_canvas_t *canvas, int x, int y, int w, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L23",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L23",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1709,7 +1709,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_vline",
       "signature": "gfx_area_t gfx_shapes_vline(const gfx_canvas_t *canvas, int x, int y, int h, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L24",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L24",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1719,7 +1719,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_fill_rect",
       "signature": "gfx_area_t gfx_shapes_fill_rect(const gfx_canvas_t *canvas, int x, int y, int w, int h, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L25",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L25",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1729,7 +1729,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_rect",
       "signature": "gfx_area_t gfx_shapes_rect(const gfx_canvas_t *canvas, int x, int y, int w, int h, int c, int fill);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L26",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L26",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1739,7 +1739,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_line",
       "signature": "gfx_area_t gfx_shapes_line(const gfx_canvas_t *canvas, int x1, int y1, int x2, int y2, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L27",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L27",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1749,7 +1749,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_ellipse",
       "signature": "gfx_area_t gfx_shapes_ellipse(const gfx_canvas_t *canvas, int cx, int cy, int xradius, int yradius, int col, int fill, int mask_part);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L28",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L28",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1759,7 +1759,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_fill",
       "signature": "gfx_area_t gfx_shapes_fill(const gfx_canvas_t *canvas, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L29",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L29",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1769,7 +1769,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_poly_int_from_buffer",
       "signature": "int gfx_shapes_poly_int_from_buffer(const void *buf, size_t len, size_t itemsize, const char *fmt, size_t index, int *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L31",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L31",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1779,7 +1779,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_poly",
       "signature": "gfx_area_t gfx_shapes_poly(const gfx_canvas_t *canvas, int x, int y, const void *coords, size_t coords_len, size_t itemsize, const char *fmt, int col, int fill);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L32",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L32",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1789,7 +1789,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_blit",
       "signature": "gfx_area_t gfx_shapes_blit(const gfx_canvas_t *canvas, const gfx_fb_t *source, int x, int y, int key, const gfx_fb_t *palette);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L33",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L33",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1799,7 +1799,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_circle",
       "signature": "gfx_area_t gfx_shapes_circle(const gfx_canvas_t *canvas, int x0, int y0, int r, int c, int fill);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L34",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L34",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1809,7 +1809,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_round_rect",
       "signature": "gfx_area_t gfx_shapes_round_rect(const gfx_canvas_t *canvas, int x0, int y0, int w, int h, int r, int c, int fill);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L35",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L35",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1819,7 +1819,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_triangle",
       "signature": "gfx_area_t gfx_shapes_triangle(const gfx_canvas_t *canvas, int x0, int y0, int x1, int y1, int x2, int y2, int c, int fill);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L36",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L36",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1829,7 +1829,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_arc",
       "signature": "gfx_area_t gfx_shapes_arc(const gfx_canvas_t *canvas, int x, int y, int r, float a0, float a1, int c);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L37",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L37",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1839,7 +1839,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_gradient_rect",
       "signature": "gfx_area_t gfx_shapes_gradient_rect(const gfx_canvas_t *canvas, int x, int y, int w, int h, int c1, int c2, int vertical);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L38",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L38",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1849,7 +1849,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_blit_rect",
       "signature": "gfx_area_t gfx_shapes_blit_rect(const gfx_canvas_t *canvas, const void *buf, int x, int y, int w, int h, int bpp);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L39",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L39",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1859,7 +1859,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_blit_transparent",
       "signature": "gfx_area_t gfx_shapes_blit_transparent(const gfx_canvas_t *canvas, const void *buf, int x, int y, int w, int h, int key, int bpp);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L40",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L40",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1869,7 +1869,7 @@
       "path": "gfx_shapes.h",
       "qualified_name": "gfx_shapes_polygon",
       "signature": "gfx_area_t gfx_shapes_polygon(const gfx_canvas_t *canvas, const int *points, size_t n_points, int x, int y, int color, float angle, int center_x, int center_y);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_shapes.h#L41",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_shapes.h#L41",
       "summary": "Native shapes entry point declared for firmware and extension integration."
     },
     {
@@ -1879,7 +1879,7 @@
       "path": "gfx_draw.h",
       "qualified_name": "gfx_draw_init",
       "signature": "void gfx_draw_init(gfx_draw_t *draw, const gfx_canvas_t *canvas);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L21",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L21",
       "summary": "Native draw entry point declared for firmware and extension integration."
     },
     {
@@ -1889,7 +1889,7 @@
       "path": "gfx_draw.h",
       "qualified_name": "gfx_draw_effective_clip",
       "signature": "gfx_area_t gfx_draw_effective_clip(const gfx_draw_t *draw);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L23",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L23",
       "summary": "Native draw entry point declared for firmware and extension integration."
     },
     {
@@ -1899,7 +1899,7 @@
       "path": "gfx_draw.h",
       "qualified_name": "gfx_draw_push_clip",
       "signature": "void gfx_draw_push_clip(gfx_draw_t *draw, const gfx_area_t *clip);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L24",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L24",
       "summary": "Native draw entry point declared for firmware and extension integration."
     },
     {
@@ -1909,7 +1909,7 @@
       "path": "gfx_draw.h",
       "qualified_name": "gfx_draw_pop_clip",
       "signature": "void gfx_draw_pop_clip(gfx_draw_t *draw);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_draw.h#L25",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_draw.h#L25",
       "summary": "Native draw entry point declared for firmware and extension integration."
     },
     {
@@ -1919,7 +1919,7 @@
       "path": "gfx_font.h",
       "qualified_name": "gfx_font_init_default",
       "signature": "void gfx_font_init_default(gfx_font_t *font, int height);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L22",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L22",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
@@ -1929,7 +1929,7 @@
       "path": "gfx_font.h",
       "qualified_name": "gfx_font_init_from_data",
       "signature": "void gfx_font_init_from_data(gfx_font_t *font, const uint8_t *data, size_t len, int height);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L23",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L23",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
@@ -1939,77 +1939,77 @@
       "path": "gfx_font.h",
       "qualified_name": "gfx_font_deinit",
       "signature": "void gfx_font_deinit(gfx_font_t *font);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L24",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L24",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 25,
+      "line": 26,
       "name": "gfx_font_export",
       "path": "gfx_font.h",
       "qualified_name": "gfx_font_export",
       "signature": "int gfx_font_export(const gfx_font_t *font, const char *filename);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L25",
-      "summary": "Native font entry point declared for firmware and extension integration."
-    },
-    {
-      "kind": "c_function",
-      "line": 27,
-      "name": "gfx_font_text",
-      "path": "gfx_font.h",
-      "qualified_name": "gfx_font_text",
-      "signature": "gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, const char *str, int x0, int y0, int col, int scale, int inverted);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L27",
-      "summary": "Native font entry point declared for firmware and extension integration."
-    },
-    {
-      "kind": "c_function",
-      "line": 28,
-      "name": "gfx_font_draw_char",
-      "path": "gfx_font.h",
-      "qualified_name": "gfx_font_draw_char",
-      "signature": "gfx_area_t gfx_font_draw_char(const gfx_canvas_t *canvas, const gfx_font_t *font, unsigned char ch, int x, int y, int color, int scale, int inverted);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L28",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L26",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
       "line": 29,
-      "name": "gfx_font_text_width",
+      "name": "gfx_font_text",
       "path": "gfx_font.h",
-      "qualified_name": "gfx_font_text_width",
-      "signature": "int gfx_font_text_width(const gfx_font_t *font, const char *str, int scale);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L29",
+      "qualified_name": "gfx_font_text",
+      "signature": "gfx_area_t gfx_font_text(const gfx_canvas_t *canvas, const gfx_font_t *font, const char *str, int x0, int y0, int col, int scale, int inverted);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L29",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
       "line": 30,
-      "name": "gfx_font_text8",
+      "name": "gfx_font_draw_char",
       "path": "gfx_font.h",
-      "qualified_name": "gfx_font_text8",
-      "signature": "gfx_area_t gfx_font_text8(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L30",
+      "qualified_name": "gfx_font_draw_char",
+      "signature": "gfx_area_t gfx_font_draw_char(const gfx_canvas_t *canvas, const gfx_font_t *font, unsigned char ch, int x, int y, int color, int scale, int inverted);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L30",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
       "line": 31,
-      "name": "gfx_font_text14",
+      "name": "gfx_font_text_width",
       "path": "gfx_font.h",
-      "qualified_name": "gfx_font_text14",
-      "signature": "gfx_area_t gfx_font_text14(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L31",
+      "qualified_name": "gfx_font_text_width",
+      "signature": "int gfx_font_text_width(const gfx_font_t *font, const char *str, int scale);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L31",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
       "line": 32,
+      "name": "gfx_font_text8",
+      "path": "gfx_font.h",
+      "qualified_name": "gfx_font_text8",
+      "signature": "gfx_area_t gfx_font_text8(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L32",
+      "summary": "Native font entry point declared for firmware and extension integration."
+    },
+    {
+      "kind": "c_function",
+      "line": 33,
+      "name": "gfx_font_text14",
+      "path": "gfx_font.h",
+      "qualified_name": "gfx_font_text14",
+      "signature": "gfx_area_t gfx_font_text14(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L33",
+      "summary": "Native font entry point declared for firmware and extension integration."
+    },
+    {
+      "kind": "c_function",
+      "line": 34,
       "name": "gfx_font_text16",
       "path": "gfx_font.h",
       "qualified_name": "gfx_font_text16",
       "signature": "gfx_area_t gfx_font_text16(const gfx_canvas_t *canvas, const char *str, int x0, int y0, int col);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_font.h#L32",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_font.h#L34",
       "summary": "Native font entry point declared for firmware and extension integration."
     },
     {
@@ -2019,7 +2019,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_read_header_from_file",
       "signature": "int gfx_bmp565_read_header_from_file(const char *path, int *width, int *height, unsigned int *data_offset);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L27",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L27",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2029,7 +2029,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_open_stream",
       "signature": "int gfx_bmp565_open_stream(const char *path, gfx_bmp565_t *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L28",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L28",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2039,7 +2039,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_load_from_file",
       "signature": "int gfx_bmp565_load_from_file(const char *path, gfx_bmp565_t *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L29",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L29",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2049,7 +2049,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_init_from_buffer",
       "signature": "int gfx_bmp565_init_from_buffer(gfx_bmp565_t *out, const uint8_t *buf, size_t len, int width, int height);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L30",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L30",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2059,7 +2059,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_deinit",
       "signature": "void gfx_bmp565_deinit(gfx_bmp565_t *bmp);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L31",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L31",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2069,7 +2069,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_save",
       "signature": "int gfx_bmp565_save(const gfx_bmp565_t *bmp, const char *path);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L32",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L32",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2079,7 +2079,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_save_versioned",
       "signature": "int gfx_bmp565_save_versioned(const gfx_bmp565_t *bmp, const char *path, char *out_path, size_t out_path_len);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L33",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L33",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2089,7 +2089,7 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_read_bytes",
       "signature": "int gfx_bmp565_read_bytes(const gfx_bmp565_t *bmp, int start, int stop, uint8_t *out, size_t out_cap, size_t *out_len);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L34",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L34",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
@@ -2099,67 +2099,87 @@
       "path": "gfx_bmp565.h",
       "qualified_name": "gfx_bmp565_read_region",
       "signature": "int gfx_bmp565_read_region(const gfx_bmp565_t *bmp, int x0, int x1, int y0, int y1, uint8_t *out, size_t out_cap, size_t *out_len);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_bmp565.h#L35",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_bmp565.h#L35",
       "summary": "Native bmp565 entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 22,
-      "name": "gfx_image_fb_free",
+      "line": 43,
+      "name": "gfx_image_probe",
       "path": "gfx_files.h",
-      "qualified_name": "gfx_image_fb_free",
-      "signature": "void gfx_image_fb_free(gfx_image_fb_t *img);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_files.h#L22",
+      "qualified_name": "gfx_image_probe",
+      "signature": "int gfx_image_probe(const uint8_t *data, size_t len, gfx_image_info_t *info);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L43",
       "summary": "Native image entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 23,
+      "line": 47,
+      "name": "gfx_image_decode",
+      "path": "gfx_files.h",
+      "qualified_name": "gfx_image_decode",
+      "signature": "int gfx_image_decode(const uint8_t *data, size_t len, const gfx_image_info_t *info, uint8_t *dst, size_t dst_len);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L47",
+      "summary": "Native image entry point declared for firmware and extension integration."
+    },
+    {
+      "kind": "c_function",
+      "line": 64,
+      "name": "gfx_image_fb_free",
+      "path": "gfx_files.h",
+      "qualified_name": "gfx_image_fb_free",
+      "signature": "void gfx_image_fb_free(gfx_image_fb_t *img);",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L64",
+      "summary": "Native image entry point declared for firmware and extension integration."
+    },
+    {
+      "kind": "c_function",
+      "line": 65,
       "name": "gfx_files_load_image",
       "path": "gfx_files.h",
       "qualified_name": "gfx_files_load_image",
       "signature": "int gfx_files_load_image(const char *path, gfx_image_fb_t *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_files.h#L23",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L65",
       "summary": "Native files entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 24,
+      "line": 66,
       "name": "gfx_files_save_image",
       "path": "gfx_files.h",
       "qualified_name": "gfx_files_save_image",
       "signature": "int gfx_files_save_image(const gfx_fb_t *fb, const char *path, char *out_path, size_t out_path_len);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_files.h#L24",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L66",
       "summary": "Native files entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 25,
+      "line": 67,
       "name": "gfx_files_pbm_to_framebuffer",
       "path": "gfx_files.h",
       "qualified_name": "gfx_files_pbm_to_framebuffer",
       "signature": "int gfx_files_pbm_to_framebuffer(const char *path, gfx_image_fb_t *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_files.h#L25",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L67",
       "summary": "Native files entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 26,
+      "line": 68,
       "name": "gfx_files_pgm_to_framebuffer",
       "path": "gfx_files.h",
       "qualified_name": "gfx_files_pgm_to_framebuffer",
       "signature": "int gfx_files_pgm_to_framebuffer(const char *path, gfx_image_fb_t *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_files.h#L26",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L68",
       "summary": "Native files entry point declared for firmware and extension integration."
     },
     {
       "kind": "c_function",
-      "line": 27,
+      "line": 69,
       "name": "gfx_files_bmp_to_framebuffer",
       "path": "gfx_files.h",
       "qualified_name": "gfx_files_bmp_to_framebuffer",
       "signature": "int gfx_files_bmp_to_framebuffer(const char *path, gfx_image_fb_t *out);",
-      "source_url": "https://github.com/PyDevices/graphics/blob/68194959ad5bc5540aceb6b40807a8c4228af60a/gfx_files.h#L27",
+      "source_url": "https://github.com/PyDevices/graphics/blob/aa6041e9226bdf5172a656eef722b852ec02f270/gfx_files.h#L69",
       "summary": "Native files entry point declared for firmware and extension integration."
     }
   ]
