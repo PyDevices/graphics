@@ -6,7 +6,18 @@
 GRAPHICS_MOD_DIR := $(USERMOD_DIR)
 
 CFLAGS_USERMOD += -I$(GRAPHICS_MOD_DIR) -Wno-unused-function -Wno-sign-compare -Wno-unused-const-variable
+# math: cosf/sinf etc.
+# - mimxrt/samd: bare `ld` — absolute libm.a in LDFLAGS
+# - stm32: CROSS_COMPILE is set *after* py.mk, so $(CC) here is the host
+#   compiler; use double trig via bundled libm_dbl instead of newlib libm
+# - else: -lm
+ifneq ($(findstring /ports/mimxrt,$(CURDIR))$(findstring /ports/samd,$(CURDIR)),)
+LDFLAGS_USERMOD += $(shell $(CC) $(CFLAGS) -print-file-name=libm.a)
+else ifneq ($(findstring /ports/stm32,$(CURDIR)),)
+CFLAGS_USERMOD += -DGFX_USE_DOUBLE_TRIG=1
+else
 LDFLAGS_USERMOD += -lm
+endif
 
 SRC_USERMOD_C += \
     $(GRAPHICS_MOD_DIR)/gfx_module_mp.c \

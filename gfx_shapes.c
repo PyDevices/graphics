@@ -14,6 +14,13 @@
 
 #include "gfx_shapes.h"
 
+/* stm32 usermod parse runs before CROSS_COMPILE is set, so we cannot locate
+ * newlib's hard-float libm.a; map float trig onto bundled libm_dbl instead. */
+#if defined(GFX_USE_DOUBLE_TRIG)
+#define cosf(x) ((float)cos((double)(x)))
+#define sinf(x) ((float)sin((double)(x)))
+#endif
+
 #define ELLIPSE_MASK_FILL (0x10)
 #define ELLIPSE_MASK_ALL (0x0f)
 #define ELLIPSE_MASK_Q1 (0x01)
