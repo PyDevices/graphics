@@ -85,6 +85,8 @@ MARKER_BEGIN="# >>> $MARKER_TAG"
 MARKER_END="# >>> pygraphics-cmod end"
 
 DRY_RUN=0
+# Nonzero if any dry-run check finds something --apply could not do.
+DRY_RC=0
 APPLY=0
 case "$MODE" in
     --dry-run) DRY_RUN=1 ;;
@@ -199,7 +201,16 @@ insert_raw_after_line() {
         return 0
     fi
     if [ "$DRY_RUN" = 1 ]; then
-        log "  [dry-run] insert after needle in $file: $already"
+        if grep -qF "$needle" "$file" 2>/dev/null; then
+            log "  [dry-run] insert after needle in $file: $already"
+        else
+            # The apply path fails here when the needle is gone. The dry run
+            # used to print the same line either way, so a moved upstream
+            # anchor - the one thing a pin move must stop on - was invisible
+            # until the apply.
+            log "  [dry-run] ERROR: needle not found in $file: $needle"
+            DRY_RC=1
+        fi
         return 0
     fi
     python3 - "$file" "$needle" "$raw" <<'PY'
@@ -239,7 +250,16 @@ insert_block_before_needle() {
         return 0
     fi
     if [ "$DRY_RUN" = 1 ]; then
-        log "  [dry-run] insert block before needle in $file"
+        if grep -qF "$needle" "$file" 2>/dev/null; then
+            log "  [dry-run] insert block before needle in $file"
+        else
+            # The apply path fails here when the needle is gone. The dry run
+            # used to print the same line either way, so a moved upstream
+            # anchor - the one thing a pin move must stop on - was invisible
+            # until the apply.
+            log "  [dry-run] ERROR: needle not found in $file: $needle"
+            DRY_RC=1
+        fi
         return 0
     fi
     python3 - "$file" "$needle" "$block" <<'PY'
@@ -422,6 +442,11 @@ fi
 
 if [ "$APPLY" = 1 ] || [ "$DRY_RUN" = 1 ]; then
     log "pygraphics CP patches applied"
+fi
+
+if [ "$DRY_RUN" = 1 ] && [ "$DRY_RC" != 0 ]; then
+    log "Dry run reported at least one ERROR above."
+    exit "$DRY_RC"
 fi
 
 if [ "$DRY_RUN" = 0 ]; then
