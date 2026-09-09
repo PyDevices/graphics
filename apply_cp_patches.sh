@@ -274,10 +274,20 @@ copy_spike() {
     log "  copied pygraphics spike into $CP_DIR"
 }
 
+# Sets STATUS_RC=1 if anything is not in the state --apply would leave behind:
+# a pygraphics tree missing, or a legacy graphics tree still STALE. It used to
+# report the defect and exit 0, so a caller that checked $? read a broken tree
+# as a good one - found by planting a fault in the pin move's step-0 rehearsal,
+# 2026-09-09.
+STATUS_RC=0
 status_report() {
     echo "CP_DIR=$CP_DIR"
     echo "VARIANT=$VARIANT"
     echo
+    [[ -f $CP_DIR/shared-bindings/pygraphics/__init__.c ]] || STATUS_RC=1
+    [[ -f $CP_DIR/shared-module/pygraphics/__init__.c ]] || STATUS_RC=1
+    [[ -f $CP_DIR/shared-bindings/graphics/__init__.c ]] && STATUS_RC=1
+    [[ -f $CP_DIR/shared-module/graphics/__init__.c ]] && STATUS_RC=1
     printf '  %-40s %s\n' "shared-bindings/pygraphics" \
         "$( [[ -f $CP_DIR/shared-bindings/pygraphics/__init__.c ]] && echo present || echo MISSING )"
     printf '  %-40s %s\n' "shared-module/pygraphics" \
@@ -293,7 +303,7 @@ status_report() {
 
 if [ "$MODE" = --status ]; then
     status_report
-    exit 0
+    exit $STATUS_RC
 fi
 
 log "Applying pygraphics CP patches (mode=$MODE)…"
