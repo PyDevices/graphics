@@ -1,0 +1,30 @@
+# Placeholder, not a documentation builder. ReadTheDocs builds these docs
+# (.readthedocs.yaml); fc1d29b retired the MkDocs workflow that used to live at
+# this path and made that explicit.
+#
+# Why this file is back: retiring the workflow orphaned a run it had already
+# queued (32219727413, 2026-08-19). Its workflow reports `state: deleted`, and
+# every cancel path refuses a run in that state -- `gh run cancel` answers
+# "Cannot cancel a workflow run that is completed", force-cancel answers
+# "Cannot cancel a workflow run that has not been queued yet", and delete answers
+# 403 because deletion requires a completed run. The run therefore sat queued
+# indefinitely, which is a real cost: it read as a permanently active run and
+# hung the workspace's own workflow_watch.sh until that script learned to treat
+# an over-age run as wedged.
+#
+# Restoring the path returns the workflow to `active` so the orphan can be
+# cancelled. Manual trigger only, so pushing this does not start anything.
+#
+# An earlier attempt (f2d12d7) did exactly this and was reverted the next day in
+# 44281e6 -- before the run was actually gone, which is why it is still here.
+# Remove this file only after confirming the run is no longer queued.
+name: Documentation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Placeholder. ReadTheDocs builds the documentation."
